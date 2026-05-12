@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useEffect } from 'react'
+import { useLocalStorage } from './hooks/useLocalStorage'
 
 // --- Context API ---
 // Context lets you pass data through the component tree WITHOUT
@@ -19,10 +20,10 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 // --- Provider Component ---
-// Wraps part of the tree and provides the context value to all descendants.
+// Now uses useLocalStorage — dark mode preference survives page refreshes.
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [darkMode, setDarkMode] = useState(false)
+  const [darkMode, setDarkMode] = useLocalStorage('darkMode', false)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', darkMode)
