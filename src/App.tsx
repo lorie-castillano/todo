@@ -81,7 +81,7 @@ function App() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <main className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
           <Header />
-          <TodoForm onAdd={handleAdd} />
+          <TodoForm todos={todos} onAdd={handleAdd} />
           <TodoList
             todos={todos}
             onToggle={handleToggle}

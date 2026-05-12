@@ -25,6 +25,7 @@ export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
             <TodoItem
               key={todo.id}
               todo={todo}
+              todos={todos} // Pass all todos for duplicate checking
               onToggle={onToggle}
               onDelete={onDelete}
               onEdit={onEdit}

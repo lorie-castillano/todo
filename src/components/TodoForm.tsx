@@ -1,28 +1,52 @@
 import { useState } from 'react'
-
-// TodoForm owns its OWN input state — the parent doesn't need to know
-// about every keystroke. It only tells the parent when a todo is submitted.
-// This is called "lifting state up only when necessary."
+import type { Todo } from '../types'
 
 interface TodoFormProps {
+  todos: Todo[]
   onAdd: (text: string) => void
 }
 
-export function TodoForm({ onAdd }: TodoFormProps) {
-  // Input state is LOCAL to this component — not lifted to App
+const MAX_LENGTH = 100
+
+export function TodoForm({ todos, onAdd }: TodoFormProps) {
   const [inputValue, setInputValue] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const isDuplicate = (text: string): boolean => {
+    return todos.some(
+      (t) => t.text.toLowerCase() === text.toLowerCase()
+    )
+  }
+
+  const validate = (text: string): string | null => {
+    const trimmed = text.trim()
+    if (!trimmed) return 'Todo cannot be empty'
+    if (trimmed.length > MAX_LENGTH) return `Maximum ${MAX_LENGTH} characters`
+    if (isDuplicate(trimmed)) return 'This todo already exists'
+    return null
+  }
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     const trimmed = inputValue.trim()
-    if (!trimmed) return
+    const validationError = validate(trimmed)
 
-    // Call the parent's callback with just the text
-    onAdd(trimmed)
+    if (validationError) {
+      setError(validationError)
+      return
+    }
 
-    // Clear the local input
+    // OPTIMISTIC UI: Clear input immediately for snappy feel
+    // The todo will appear in the list after reducer processes
     setInputValue('')
+    setError(null)
+    onAdd(trimmed)
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+    if (error) setError(null) // Clear error on type
   }
 
   return (
@@ -31,18 +55,29 @@ export function TodoForm({ onAdd }: TodoFormProps) {
       className="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-200 dark:border-gray-700"
     >
       <form onSubmit={handleSubmit} className="flex gap-2">
-        <label htmlFor="todo-input" className="sr-only">
-          New todo
-        </label>
-        <input
-          id="todo-input"
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          placeholder="What needs to be done?"
-          className="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 sm:px-4 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200"
-          autoComplete="off"
-        />
+        <div className="flex-1 flex flex-col gap-1">
+          <input
+            id="todo-input"
+            type="text"
+            value={inputValue}
+            onChange={handleChange}
+            placeholder="What needs to be done?"
+            className={`w-full rounded-lg border bg-white dark:bg-gray-700 px-3 py-2 sm:px-4 text-sm text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 ${
+              error
+                ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
+                : 'border-gray-300 dark:border-gray-600'
+            }`}
+            autoComplete="off"
+            maxLength={MAX_LENGTH + 10}
+            aria-invalid={error ? 'true' : 'false'}
+            aria-describedby={error ? 'todo-error' : undefined}
+          />
+          {error && (
+            <span id="todo-error" className="text-xs text-red-500 dark:text-red-400">
+              {error}
+            </span>
+          )}
+        </div>
         <button
           type="submit"
           className="rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-200"

@@ -6,6 +6,7 @@ import type { Todo } from '../types'
 
 interface TodoItemProps {
   todo: Todo
+  todos: Todo[] // All todos for duplicate checking
   onToggle: (id: number) => void
   onDelete: (id: number) => void
   onEdit: (id: number, text: string) => void
@@ -14,7 +15,7 @@ interface TodoItemProps {
 // Validation constants
 const MAX_LENGTH = 100
 
-export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
+export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemProps) {
   // --- Local UI State ---
   // isEditing is LOCAL to this component — App doesn't need to know about it.
   // This is "ephemeral" state that resets when the component unmounts.
@@ -46,10 +47,17 @@ export function TodoItem({ todo, onToggle, onDelete, onEdit }: TodoItemProps) {
     }
   }
 
+  const isDuplicate = (text: string): boolean => {
+    return todos.some(
+      (t) => t.id !== todo.id && t.text.toLowerCase() === text.toLowerCase()
+    )
+  }
+
   const validate = (text: string): string | null => {
     const trimmed = text.trim()
     if (!trimmed) return 'Todo text cannot be empty'
     if (trimmed.length > MAX_LENGTH) return `Maximum ${MAX_LENGTH} characters`
+    if (isDuplicate(trimmed)) return 'This todo already exists'
     return null
   }
 
