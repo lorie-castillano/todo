@@ -9,9 +9,10 @@ interface TodoListProps {
   todos: Todo[]
   onToggle: (id: number) => void
   onDelete: (id: number) => void
+  onEdit: (id: number, text: string) => void
 }
 
-export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
+export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
   return (
     <section aria-label="Todo list" className="px-4 py-4 sm:px-6 sm:py-5">
       {todos.length === 0 ? (
@@ -26,6 +27,7 @@ export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
               todo={todo}
               onToggle={onToggle}
               onDelete={onDelete}
+              onEdit={onEdit}
             />
           ))}
         </ul>

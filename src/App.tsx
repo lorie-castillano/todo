@@ -66,6 +66,10 @@ function App() {
     dispatch({ type: 'CLEAR_COMPLETED' })
   }
 
+  const handleEdit = (id: number, text: string) => {
+    dispatch({ type: 'EDIT', id, text })
+  }
+
   // --- Derived State ---
   const remainingCount = todos.filter((todo) => !todo.completed).length
   const hasCompleted = todos.some((todo) => todo.completed)
@@ -82,6 +86,7 @@ function App() {
             todos={todos}
             onToggle={handleToggle}
             onDelete={handleDelete}
+            onEdit={handleEdit}
           />
           <TodoFooter
             remainingCount={remainingCount}

@@ -8,6 +8,7 @@ import type { Todo } from './types'
 
 type TodoAction =
   | { type: 'ADD'; text: string }
+  | { type: 'EDIT'; id: number; text: string }
   | { type: 'TOGGLE'; id: number }
   | { type: 'DELETE'; id: number }
   | { type: 'CLEAR_COMPLETED' }
@@ -27,6 +28,13 @@ export function todoReducer(state: Todo[], action: TodoAction): Todo[] {
           completed: false,
         },
       ]
+
+    case 'EDIT':
+      // Ignore empty text — this is handled in the UI, but defense in depth
+      if (!action.text.trim()) return state
+      return state.map((todo) =>
+        todo.id === action.id ? { ...todo, text: action.text.trim() } : todo,
+      )
 
     case 'TOGGLE':
       return state.map((todo) =>
