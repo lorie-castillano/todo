@@ -1,6 +1,9 @@
+import { memo } from 'react'
+
 // TodoFooter shows the remaining count and "Clear completed" button.
 // Notice it receives DERIVED data (remainingCount, hasCompleted)
 // rather than the full todos array — it only gets what it needs to render.
+// Memoized so it doesn't re-render when unrelated state (e.g., dark mode) changes.
 
 interface TodoFooterProps {
   remainingCount: number
@@ -8,7 +11,7 @@ interface TodoFooterProps {
   onClearCompleted: () => void
 }
 
-export function TodoFooter({
+function TodoFooterImpl({
   remainingCount,
   hasCompleted,
   onClearCompleted,
@@ -33,3 +36,5 @@ export function TodoFooter({
     </footer>
   )
 }
+
+export const TodoFooter = memo(TodoFooterImpl)

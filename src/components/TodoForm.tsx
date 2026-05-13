@@ -1,22 +1,17 @@
 import { useState } from 'react'
-import type { Todo } from '../types'
 
 interface TodoFormProps {
-  todos: Todo[]
+  // Stable callback from parent so this component doesn't depend on the
+  // todos array (which changes reference on every state update).
+  isDuplicate: (text: string, excludeId?: number) => boolean
   onAdd: (text: string) => void
 }
 
 const MAX_LENGTH = 100
 
-export function TodoForm({ todos, onAdd }: TodoFormProps) {
+export function TodoForm({ isDuplicate, onAdd }: TodoFormProps) {
   const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState<string | null>(null)
-
-  const isDuplicate = (text: string): boolean => {
-    return todos.some(
-      (t) => t.text.toLowerCase() === text.toLowerCase()
-    )
-  }
 
   const validate = (text: string): string | null => {
     const trimmed = text.trim()

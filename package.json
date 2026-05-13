@@ -12,7 +12,8 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "analyze": "ANALYZE=true vite build"
   },
   "dependencies": {
     "framer-motion": "^12.38.0",
@@ -38,6 +39,7 @@
     "globals": "^17.5.0",
     "jsdom": "^29.1.1",
     "prettier": "^3.8.3",
+    "rollup-plugin-visualizer": "^7.0.1",
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",

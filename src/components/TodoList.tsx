@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { Todo } from '../types'
 import { TodoItem } from './TodoItem'
@@ -8,12 +9,13 @@ import { TodoItem } from './TodoItem'
 
 interface TodoListProps {
   todos: Todo[]
+  isDuplicate: (text: string, excludeId?: number) => boolean
   onToggle: (id: number) => void
   onDelete: (id: number) => void
   onEdit: (id: number, text: string) => void
 }
 
-export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
+function TodoListImpl({ todos, isDuplicate, onToggle, onDelete, onEdit }: TodoListProps) {
   return (
     <section aria-label="Todo list" className="px-4 py-4 sm:px-6 sm:py-5">
       <AnimatePresence mode="wait">
@@ -43,7 +45,7 @@ export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
                 <TodoItem
                   key={todo.id}
                   todo={todo}
-                  todos={todos}
+                  isDuplicate={isDuplicate}
                   onToggle={onToggle}
                   onDelete={onDelete}
                   onEdit={onEdit}
@@ -56,3 +58,5 @@ export function TodoList({ todos, onToggle, onDelete, onEdit }: TodoListProps) {
     </section>
   )
 }
+
+export const TodoList = memo(TodoListImpl)

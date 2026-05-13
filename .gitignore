@@ -25,3 +25,6 @@ dist-ssr
 
 # ignore coverage folder
 coverage/
+
+# bundle analyzer output
+stats.html

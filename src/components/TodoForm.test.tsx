@@ -2,7 +2,6 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TodoForm } from './TodoForm'
-import type { Todo } from '../types'
 
 // --- Component Tests ---
 //
@@ -15,8 +14,11 @@ import type { Todo } from '../types'
 // were called with the right arguments.
 
 describe('TodoForm', () => {
+  // Default duplicate checker: never reports duplicates.
+  const noDup = () => false
+
   it('renders the input and submit button', () => {
-    render(<TodoForm todos={[]} onAdd={vi.fn()} />)
+    render(<TodoForm isDuplicate={noDup} onAdd={vi.fn()} />)
 
     expect(screen.getByPlaceholderText(/what needs to be done/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument()
@@ -26,7 +28,7 @@ describe('TodoForm', () => {
     const user = userEvent.setup()
     const handleAdd = vi.fn()
 
-    render(<TodoForm todos={[]} onAdd={handleAdd} />)
+    render(<TodoForm isDuplicate={noDup} onAdd={handleAdd} />)
 
     const input = screen.getByPlaceholderText(/what needs to be done/i)
     await user.type(input, '  Buy milk  ')
@@ -39,7 +41,7 @@ describe('TodoForm', () => {
   it('clears the input after successful submission (optimistic UI)', async () => {
     const user = userEvent.setup()
 
-    render(<TodoForm todos={[]} onAdd={vi.fn()} />)
+    render(<TodoForm isDuplicate={noDup} onAdd={vi.fn()} />)
 
     const input = screen.getByPlaceholderText(/what needs to be done/i) as HTMLInputElement
     await user.type(input, 'New todo')
@@ -52,7 +54,7 @@ describe('TodoForm', () => {
     const user = userEvent.setup()
     const handleAdd = vi.fn()
 
-    render(<TodoForm todos={[]} onAdd={handleAdd} />)
+    render(<TodoForm isDuplicate={noDup} onAdd={handleAdd} />)
 
     await user.click(screen.getByRole('button', { name: /add/i }))
 
@@ -63,9 +65,10 @@ describe('TodoForm', () => {
   it('shows error and does not call onAdd when todo is duplicate', async () => {
     const user = userEvent.setup()
     const handleAdd = vi.fn()
-    const todos: Todo[] = [{ id: 1, text: 'Buy milk', completed: false }]
+    // Simulate a duplicate by returning true for any text matching 'buy milk'
+    const isDuplicate = (text: string) => text.toLowerCase() === 'buy milk'
 
-    render(<TodoForm todos={todos} onAdd={handleAdd} />)
+    render(<TodoForm isDuplicate={isDuplicate} onAdd={handleAdd} />)
 
     await user.type(screen.getByPlaceholderText(/what needs to be done/i), 'buy milk')
     await user.click(screen.getByRole('button', { name: /add/i }))
@@ -77,7 +80,7 @@ describe('TodoForm', () => {
   it('clears error when user starts typing again', async () => {
     const user = userEvent.setup()
 
-    render(<TodoForm todos={[]} onAdd={vi.fn()} />)
+    render(<TodoForm isDuplicate={noDup} onAdd={vi.fn()} />)
 
     // Trigger error
     await user.click(screen.getByRole('button', { name: /add/i }))

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, memo } from 'react'
 import { motion } from 'framer-motion'
 import type { Todo } from '../types'
 
@@ -7,7 +7,8 @@ import type { Todo } from '../types'
 
 interface TodoItemProps {
   todo: Todo
-  todos: Todo[] // All todos for duplicate checking
+  // Stable callback so this component can be memoized.
+  isDuplicate: (text: string, excludeId?: number) => boolean
   onToggle: (id: number) => void
   onDelete: (id: number) => void
   onEdit: (id: number, text: string) => void
@@ -16,7 +17,10 @@ interface TodoItemProps {
 // Validation constants
 const MAX_LENGTH = 100
 
-export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemProps) {
+// React.memo skips re-renders when props are shallow-equal.
+// Combined with stable callbacks from App, completing/editing one
+// todo no longer re-renders unrelated todos.
+function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoItemProps) {
   // --- Local UI State ---
   // isEditing is LOCAL to this component — App doesn't need to know about it.
   // This is "ephemeral" state that resets when the component unmounts.
@@ -48,17 +52,11 @@ export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemPr
     }
   }
 
-  const isDuplicate = (text: string): boolean => {
-    return todos.some(
-      (t) => t.id !== todo.id && t.text.toLowerCase() === text.toLowerCase()
-    )
-  }
-
   const validate = (text: string): string | null => {
     const trimmed = text.trim()
     if (!trimmed) return 'Todo text cannot be empty'
     if (trimmed.length > MAX_LENGTH) return `Maximum ${MAX_LENGTH} characters`
-    if (isDuplicate(trimmed)) return 'This todo already exists'
+    if (isDuplicate(trimmed, todo.id)) return 'This todo already exists'
     return null
   }
 
@@ -170,3 +168,7 @@ export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemPr
     </motion.li>
   )
 }
+
+// Memoized export — props are shallow-compared on each render.
+// Re-renders only if `todo`, `isDuplicate`, `onToggle`, `onDelete`, or `onEdit` changes.
+export const TodoItem = memo(TodoItemImpl)
