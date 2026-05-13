@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import type { Todo } from '../types'
 
 // TodoItem with inline editing: double-click to edit, Enter to save, Escape to cancel.
@@ -93,8 +94,18 @@ export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemPr
   }
 
   return (
-    <li
-      className={`group flex items-center gap-3 rounded-lg border p-3 transition-all duration-200 ${
+    <motion.li
+      layout
+      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, x: -20, scale: 0.95 }}
+      transition={{
+        type: 'spring',
+        stiffness: 500,
+        damping: 30,
+        opacity: { duration: 0.2 },
+      }}
+      className={`group flex items-center gap-3 rounded-lg border p-3 ${
         todo.completed
           ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
           : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
@@ -156,6 +167,6 @@ export function TodoItem({ todo, todos, onToggle, onDelete, onEdit }: TodoItemPr
       >
         Delete
       </button>
-    </li>
+    </motion.li>
   )
 }
