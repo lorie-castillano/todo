@@ -1,126 +1,115 @@
-import {
-  useReducer,
-  useEffect,
-  useRef,
-  useCallback,
-  useMemo,
-  useState,
-  lazy,
-  Suspense,
-} from 'react'
-import type { Todo } from './types'
+import { useState, useCallback, useMemo, lazy, Suspense } from 'react'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { queryClient } from './lib/queryClient'
 import { Header } from './components/Header'
 import { TodoForm } from './components/TodoForm'
 import { TodoList } from './components/TodoList'
 import { TodoFooter } from './components/TodoFooter'
 import { ThemeProvider } from './ThemeContext'
-import { todoReducer } from './todoReducer'
+import { ErrorBoundary } from './components/ErrorBoundary'
+import {
+  useTodos,
+  useCreateTodo,
+  useToggleTodo,
+  useEditTodo,
+  useDeleteTodo,
+  useClearCompleted,
+} from './hooks/useTodos'
 
 // CODE SPLITTING: HelpModal is loaded ONLY when the user opens it.
-// Vite/Rollup creates a separate chunk that's fetched on demand.
-// This shrinks the initial bundle and speeds up first paint.
 const HelpModal = lazy(() => import('./components/HelpModal'))
 
-const STORAGE_KEY = 'todos'
-
-// Read initial todos from localStorage.
-// This is a plain function, not a hook — it runs once as a lazy initializer.
-function loadTodos(): Todo[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    return stored !== null ? (JSON.parse(stored) as Todo[]) : []
-  } catch {
-    return []
-  }
+// Start MSW in development mode (browser only, not in tests)
+// Tests use server.ts (Node.js), browser uses browser.ts (Service Worker)
+if (import.meta.env.DEV && !import.meta.env.VITEST) {
+  const { startMocking } = await import('./mocks/browser')
+  startMocking()
 }
 
-// App is the orchestrator. State transitions are now in todoReducer.ts —
-// App just dispatches actions and passes data down.
+// --- Loading Spinner Component ---
+function LoadingSpinner() {
+  return (
+    <div className="flex justify-center py-12" role="status" aria-label="Loading todos">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400" />
+    </div>
+  )
+}
+
+// --- Error Display Component ---
+function ErrorDisplay({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="p-6 text-center">
+      <p className="text-red-600 dark:text-red-400 mb-4">{message}</p>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors"
+      >
+        Retry
+      </button>
+    </div>
+  )
+}
+
+// --- Main App Component ---
+// Now using TanStack Query for server state management.
+// Benefits:
+// - Automatic caching with background refetching
+// - Optimistic updates for instant UI feedback
+// - Built-in loading and error states
+// - Request deduplication
 
 function App() {
-  // Help modal visibility — local UI state, kept in App for simplicity.
   const [showHelp, setShowHelp] = useState(false)
 
-  // useReducer's 3rd argument is a lazy initializer function.
-  // It receives the 2nd argument (undefined here) and returns the initial state.
-  // This is the same pattern as useState's lazy initializer — avoids
-  // parsing JSON on every render.
-  const [todos, dispatch] = useReducer(todoReducer, undefined, loadTodos)
+  // --- Data Fetching ---
+  const { data: todos = [], isLoading, isError, error, refetch } = useTodos()
 
-  // Persist todos to localStorage whenever they change.
-  // We skip the first render (same pattern as useLocalStorage)
-  // because we just loaded from storage — no need to write back.
-  const isFirstRender = useRef(true)
+  // --- Mutations (with optimistic updates) ---
+  const createTodo = useCreateTodo()
+  const toggleTodo = useToggleTodo()
+  const editTodo = useEditTodo()
+  const deleteTodo = useDeleteTodo()
+  const clearCompleted = useClearCompleted()
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false
-      return
-    }
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
-    } catch {
-      console.warn('Failed to save todos to localStorage')
-    }
-  }, [todos])
+  // --- Handlers ---
+  const handleAdd = useCallback(
+    (text: string) => {
+      createTodo.mutate(text)
+    },
+    [createTodo]
+  )
 
-  // --- Handlers (wrapped in useCallback for stable references) ---
-  //
-  // Why useCallback here?
-  // Without it, handleToggle is a NEW function on every render.
-  // That means TodoItem's `onToggle` prop changes every render,
-  // breaking React.memo's shallow comparison and causing re-renders
-  // of every TodoItem on every state change.
-  //
-  // `dispatch` from useReducer is GUARANTEED stable by React, so it's
-  // safe to use as the only dependency (or omit since React knows it's stable).
+  const handleToggle = useCallback(
+    (id: number) => {
+      const todo = todos.find((t) => t.id === id)
+      if (todo) {
+        toggleTodo.mutate({ id, completed: !todo.completed })
+      }
+    },
+    [toggleTodo, todos]
+  )
 
-  const handleAdd = useCallback((text: string) => {
-    dispatch({ type: 'ADD', text })
-  }, [])
+  const handleEdit = useCallback(
+    (id: number, text: string) => {
+      editTodo.mutate({ id, text })
+    },
+    [editTodo]
+  )
 
-  const handleToggle = useCallback((id: number) => {
-    dispatch({ type: 'TOGGLE', id })
-  }, [])
-
-  const handleDelete = useCallback((id: number) => {
-    dispatch({ type: 'DELETE', id })
-  }, [])
+  const handleDelete = useCallback(
+    (id: number) => {
+      deleteTodo.mutate(id)
+    },
+    [deleteTodo]
+  )
 
   const handleClearCompleted = useCallback(() => {
-    dispatch({ type: 'CLEAR_COMPLETED' })
-  }, [])
+    clearCompleted.mutate()
+  }, [clearCompleted])
 
-  const handleEdit = useCallback((id: number, text: string) => {
-    dispatch({ type: 'EDIT', id, text })
-  }, [])
-
-  // --- Stable duplicate-check callback via ref pattern ---
-  //
-  // Problem: if we passed `todos` to TodoItem for duplicate checking,
-  // EVERY TodoItem would re-render whenever ANY todo changes (because
-  // the todos array is a new reference). React.memo can't help.
-  //
-  // Solution: keep a ref that always points to the latest todos, and
-  // expose a STABLE callback that reads from it. The callback reference
-  // never changes, so React.memo works perfectly.
-  const todosRef = useRef(todos)
-  useEffect(() => {
-    todosRef.current = todos
-  })
-
-  const isDuplicate = useCallback((text: string, excludeId?: number) => {
-    const lower = text.toLowerCase()
-    return todosRef.current.some(
-      (t) => t.id !== excludeId && t.text.toLowerCase() === lower
-    )
-  }, [])
-
-  // --- Derived State (memoized) ---
-  //
-  // These computations are O(n) over todos. For small lists it doesn't matter,
-  // but useMemo also ensures TodoFooter's props are stable when todos hasn't
-  // changed — which matters once we memoize TodoFooter.
+  // --- Derived State ---
   const remainingCount = useMemo(
     () => todos.filter((todo) => !todo.completed).length,
     [todos]
@@ -130,26 +119,54 @@ function App() {
     [todos]
   )
 
+  // --- Duplicate Check (using cache data) ---
+  const isDuplicate = useCallback(
+    (text: string, excludeId?: number) => {
+      const lower = text.toLowerCase()
+      return todos.some(
+        (t) => t.id !== excludeId && t.text.toLowerCase() === lower
+      )
+    },
+    [todos]
+  )
+
   return (
-    // ThemeProvider wraps the tree — any descendant can call useTheme()
-    // without needing darkMode/onToggleDarkMode props passed down.
     <ThemeProvider>
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
         <main className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
           <Header />
+
           <TodoForm isDuplicate={isDuplicate} onAdd={handleAdd} />
-          <TodoList
-            todos={todos}
-            isDuplicate={isDuplicate}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-          />
-          <TodoFooter
-            remainingCount={remainingCount}
-            hasCompleted={hasCompleted}
-            onClearCompleted={handleClearCompleted}
-          />
+
+          {/* Loading State */}
+          {isLoading && <LoadingSpinner />}
+
+          {/* Error State */}
+          {isError && (
+            <ErrorDisplay
+              message={error?.message || 'Failed to load todos'}
+              onRetry={() => refetch()}
+            />
+          )}
+
+          {/* Success State */}
+          {!isLoading && !isError && (
+            <>
+              <TodoList
+                todos={todos}
+                isDuplicate={isDuplicate}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+              />
+              <TodoFooter
+                remainingCount={remainingCount}
+                hasCompleted={hasCompleted}
+                onClearCompleted={handleClearCompleted}
+              />
+            </>
+          )}
+
           <div className="px-4 pb-4 sm:px-6 sm:pb-5">
             <button
               type="button"
@@ -162,16 +179,26 @@ function App() {
         </main>
       </div>
 
-      {/*
-        Suspense renders `fallback` while the lazy chunk loads.
-        Since loading a small chunk on localhost is ~instant, the user
-        usually won't see the fallback — but it's required by React.
-      */}
       <Suspense fallback={null}>
         {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
       </Suspense>
+
+      {/* TanStack Query Devtools — press Shift+Alt+Q to toggle */}
+      <ReactQueryDevtools initialIsOpen={false} />
     </ThemeProvider>
   )
 }
 
-export default App
+// --- Root Component with Providers ---
+// ErrorBoundary catches React render errors.
+// QueryClientProvider gives the whole tree access to React Query.
+
+export default function AppWithProviders() {
+  return (
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </ErrorBoundary>
+  )
+}

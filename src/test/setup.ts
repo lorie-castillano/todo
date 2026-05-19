@@ -1,10 +1,23 @@
 import '@testing-library/jest-dom'
-import { afterEach } from 'vitest'
+import { beforeAll, afterAll, afterEach } from 'vitest'
 import { cleanup } from '@testing-library/react'
+import { server } from '../mocks/server'
+import { resetDatabase } from '../mocks/server'
 
-// Automatically unmount and clean up between tests.
-// Without this, leftover DOM nodes from previous tests can cause flaky failures.
+// Start MSW server before all tests
+beforeAll(() => {
+  server.listen({ onUnhandledRequest: 'warn' })
+})
+
+// Reset handlers and database after each test
+// This ensures test isolation — no state leaks between tests
 afterEach(() => {
+  server.resetHandlers()
+  resetDatabase()
   cleanup()
-  localStorage.clear() // Reset persistence between tests
+})
+
+// Clean up after all tests are done
+afterAll(() => {
+  server.close()
 })
