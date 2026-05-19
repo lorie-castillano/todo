@@ -4,9 +4,15 @@
 
 import { factory, primaryKey } from '@mswjs/data'
 
+// Counter ensures unique integer IDs even when created within the same millisecond.
+// We use integers (not floats) because URL params are parsed with parseInt(),
+// which would lose precision on floats like 1700000000123.456.
+let idCounter = 0
+const nextId = () => Date.now() * 1000 + idCounter++
+
 export const db = factory({
   todo: {
-    id: primaryKey(() => Date.now() + Math.random()),
+    id: primaryKey(nextId),
     text: String,
     completed: Boolean,
     createdAt: () => Date.now(),

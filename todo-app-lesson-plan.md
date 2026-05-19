@@ -116,14 +116,15 @@
 
 **Concepts**: Reconciliation, virtual DOM diffing, memoization tradeoffs, bundle size
 
-### Lesson 3.3 — API Integration & Async Patterns
-- [ ] Build or mock a REST API for todos
-- [ ] Fetch data with `useEffect` + loading/error states
-- [ ] Introduce TanStack Query (React Query) for server state
-- [ ] Optimistic updates with mutation callbacks
-- [ ] Error boundaries for graceful failure
+### Lesson 3.3 — API Integration & Async Patterns ✅
+- [x] Build or mock a REST API for todos (MSW)
+- [x] Fetch data with TanStack Query (React Query) for server state
+- [x] Optimistic updates with mutation callbacks
+- [x] Error boundaries for graceful failure
 
-**Concepts**: Client state vs server state, caching, cache invalidation, error handling
+**Concepts**: Client state vs server state, caching, cache invalidation, optimistic UI, error handling
+
+*Note: Skipped manual `useEffect` fetching in favor of TanStack Query, the modern standard for server state management.*
 
 ### Lesson 3.4 — Routing & Navigation
 - [ ] Add React Router: routes for all todos, active, completed
