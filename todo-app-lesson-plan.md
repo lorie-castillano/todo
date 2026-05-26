@@ -151,40 +151,32 @@
 
 ## Phase 4: Senior-Level & Production Mastery
 
-### Lesson 4.1 — State Management at Scale
+### Lesson 4.1 — State Management at Scale & Advanced TypeScript
 - [ ] Zustand or Jotai: lightweight global state (replace Context)
 - [ ] State normalization for complex data
 - [ ] Derived state with selectors
-- [ ] Undo/redo functionality
-
-**Concepts**: State libraries tradeoffs, normalized state shape, derived data, command pattern
-
-### Lesson 4.2 — Advanced TypeScript
+- [ ] Undo/redo functionality with command pattern
 - [ ] Discriminated unions for todo actions
 - [ ] Generic components (`List<T>`)
 - [ ] Utility types: `Pick`, `Omit`, `Partial`, `Record`
 - [ ] Type-safe event emitters and API responses
 - [ ] `satisfies` operator and `const` assertions
 
-**Concepts**: Advanced type patterns, type narrowing, conditional types, type-level programming
+**Concepts**: State libraries tradeoffs, normalized state shape, command pattern, advanced type patterns, type-level programming
 
-### Lesson 4.3 — CI/CD & DevOps for Frontend
+### Lesson 4.2 — CI/CD, Monitoring & Production DevOps
 - [ ] GitHub Actions: lint, test, build on every PR
 - [ ] Preview deployments (Vercel/Netlify)
 - [ ] Environment variables and configuration management
 - [ ] Automated accessibility audits in CI (axe-core)
-
-**Concepts**: Continuous integration, deployment pipelines, environment management
-
-### Lesson 4.4 — Monitoring & Error Tracking
 - [ ] Error boundaries with error reporting
 - [ ] Performance monitoring (Web Vitals: LCP, FID, CLS)
 - [ ] Logging strategies for production
 - [ ] Feature flags for gradual rollouts
 
-**Concepts**: Observability, performance metrics, production debugging, progressive delivery
+**Concepts**: Continuous integration, deployment pipelines, observability, performance metrics, progressive delivery
 
-### Lesson 4.5 — Architecture & Code Review
+### Lesson 4.3 — Architecture, Documentation & Code Review
 - [ ] Final refactor: clean architecture review
 - [ ] File/folder structure for scalability
 - [ ] Documentation: README, component docs, ADRs (Architecture Decision Records)
@@ -192,33 +184,6 @@
 - [ ] Final production-readiness audit (use the production-ready-checklist skill)
 
 **Concepts**: Software architecture, technical documentation, code review culture, engineering maturity
-
----
-
-## Graduation Criteria
-
-By the end of this plan, you will be able to:
-
-- [x] Build a React + TypeScript app from scratch with modern tooling
-- [x] Write clean, typed, accessible, and tested components
-- [x] Manage complex state with the right tool for the job
-- [x] Optimize performance with measurable results
-- [x] Integrate APIs with proper caching and error handling
-- [x] Set up CI/CD and monitor production apps
-- [x] Review code like a senior engineer
-- [x] Make and justify architectural decisions
-
----
-
-## How to Use This Plan
-
-1. We go **one lesson at a time**, in order
-2. I explain the concept, then we build together
-3. Each lesson ends with a **working app** you can see in the browser
-4. Ask questions at any point — that's how mastery happens
-5. Say **"next lesson"** when you're ready to move on
-
-**Ready to start with Lesson 1.1?**
 
 ---
 
@@ -585,4 +550,59 @@ By the end of all 9 phases, you will have:
 - **Cost Engineering**: Caching, model routing, budget management, observability
 - **Architecture Skills**: Ability to design, defend, and responsibly deploy multi-agent AI systems at scale
 
-**Total Scope**: 9 phases, 33 lessons, estimated 11-12 weeks at 2 hrs/day
+---
+
+## Graduation Criteria
+
+By the end of this plan, you will be able to:
+
+- [x] Build a production-grade React + TypeScript frontend with advanced patterns
+- [x] Write clean, typed, accessible, and tested components
+- [x] Manage complex state with Zustand/Jotai and implement undo/redo
+- [x] Apply advanced TypeScript: generics, discriminated unions, utility types, branded types
+- [x] Optimize performance with measurable results (Web Vitals, memoization, virtualization)
+- [x] Integrate APIs with TanStack Query, proper caching, and error handling
+- [x] Set up CI/CD pipelines and monitor production apps (GitHub Actions, error tracking)
+- [x] Review code like a senior engineer and document architectural decisions (ADRs)
+- [x] Build hardened Node.js backends with PostgreSQL, Prisma, and Zod validation
+- [x] Implement MCP protocol: define tools, schemas, resources for AI agent consumption
+- [x] Build A2A protocol servers with task lifecycle management and streaming updates
+- [x] Design and deploy multi-agent systems with capability routing and distributed tracing
+- [x] Apply system design principles: scalability, CAP theorem, microservices patterns
+- [x] Design AI system architecture: LLM serving, RAG, vector databases, agent orchestration
+- [x] Apply AI governance frameworks: NIST AI RMF, EU AI Act, system cards, risk assessment
+- [x] Understand LLM fundamentals: transformers, attention, tokenization, prompt engineering
+- [x] Harden AI systems against prompt injection, jailbreaking, and output safety risks
+- [x] Build production RAG: chunking, embeddings, hybrid search, evaluation metrics
+- [x] Optimize AI costs: caching, model routing, budget management, observability
+- [x] Design, defend, and responsibly deploy multi-agent AI systems at scale
+
+---
+
+## How to Use This Plan
+
+1. We go **one lesson at a time**, in order
+2. I explain the concept, then we build together
+3. Each lesson ends with a **working app** you can see in the browser
+4. Ask questions at any point — that's how mastery happens
+5. Say **"next lesson"** when you're ready to move on
+
+---
+
+## Progress Status
+
+| Phase | Status | Lessons |
+|-------|--------|---------|
+| Phase 1: Foundations | ✅ Complete | 5/5 |
+| Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
+| Phase 3: Advanced Practices | ✅ Complete | 5/5 |
+| Phase 4: Senior-Level & Production | 🔲 Next | 0/3 |
+| Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
+| Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
+| Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
+| Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
+| Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
+
+**Ready to start Lesson 4.1 — State Management at Scale & Advanced TypeScript?**
+
+**Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
