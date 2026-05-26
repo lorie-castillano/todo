@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './lib/queryClient'
+import { ThemeProvider } from './ThemeContext'
 import App from './App'
 
 // Note: Full integration tests with MSW + TanStack Query require
@@ -8,8 +12,16 @@ import App from './App'
 
 describe('App', () => {
   it('renders without crashing', () => {
-    // Basic smoke test - if this passes, component structure is valid
-    const { container } = render(<App />)
+    // Wrap in providers that App needs: Router + QueryClient + Theme
+    const { container } = render(
+      <MemoryRouter>
+        <QueryClientProvider client={queryClient}>
+          <ThemeProvider>
+            <App />
+          </ThemeProvider>
+        </QueryClientProvider>
+      </MemoryRouter>
+    )
     expect(container).toBeInTheDocument()
   })
 })

@@ -1,13 +1,10 @@
 import { useState, useCallback, useMemo, lazy, Suspense } from 'react'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
-import { queryClient } from './lib/queryClient'
+import { useLocation } from 'react-router-dom'
 import { Header } from './components/Header'
 import { TodoForm } from './components/TodoForm'
 import { TodoList } from './components/TodoList'
 import { TodoFooter } from './components/TodoFooter'
-import { ThemeProvider } from './ThemeContext'
-import { ErrorBoundary } from './components/ErrorBoundary'
+import { FilterNav } from './components/FilterNav'
 import {
   useTodos,
   useCreateTodo,
@@ -25,6 +22,13 @@ const HelpModal = lazy(() => import('./components/HelpModal'))
 if (import.meta.env.DEV && !import.meta.env.VITEST) {
   const { startMocking } = await import('./mocks/browser')
   startMocking()
+}
+
+// Get filter type from URL pathname
+function getFilterFromPath(path: string): 'all' | 'active' | 'completed' {
+  if (path === '/active') return 'active'
+  if (path === '/completed') return 'completed'
+  return 'all'
 }
 
 // --- Loading Spinner Component ---
@@ -53,15 +57,16 @@ function ErrorDisplay({ message, onRetry }: { message: string; onRetry: () => vo
 }
 
 // --- Main App Component ---
-// Now using TanStack Query for server state management.
-// Benefits:
-// - Automatic caching with background refetching
-// - Optimistic updates for instant UI feedback
-// - Built-in loading and error states
-// - Request deduplication
+// Now with URL-driven filtering via React Router.
+// The filter state comes from the URL (/active, /completed, /)
+// instead of local state — making it bookmarkable and shareable.
 
 function App() {
   const [showHelp, setShowHelp] = useState(false)
+  const location = useLocation()
+
+  // Get filter from URL (e.g., /active → 'active')
+  const filter = getFilterFromPath(location.pathname)
 
   // --- Data Fetching ---
   const { data: todos = [], isLoading, isError, error, refetch } = useTodos()
@@ -109,6 +114,18 @@ function App() {
     clearCompleted.mutate()
   }, [clearCompleted])
 
+  // --- Filtered Todos (URL-driven) ---
+  const filteredTodos = useMemo(() => {
+    switch (filter) {
+      case 'active':
+        return todos.filter((t) => !t.completed)
+      case 'completed':
+        return todos.filter((t) => t.completed)
+      default:
+        return todos
+    }
+  }, [todos, filter])
+
   // --- Derived State ---
   const remainingCount = useMemo(
     () => todos.filter((todo) => !todo.completed).length,
@@ -117,6 +134,16 @@ function App() {
   const hasCompleted = useMemo(
     () => todos.some((todo) => todo.completed),
     [todos]
+  )
+
+  // Filter counts for navigation
+  const filterCounts = useMemo(
+    () => ({
+      all: todos.length,
+      active: remainingCount,
+      completed: todos.length - remainingCount,
+    }),
+    [todos.length, remainingCount]
   )
 
   // --- Duplicate Check (using cache data) ---
@@ -131,41 +158,45 @@ function App() {
   )
 
   return (
-    <ThemeProvider>
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
-        <main className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
-          <Header />
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+      <main className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
+        <Header />
 
-          <TodoForm isDuplicate={isDuplicate} onAdd={handleAdd} />
+        <TodoForm isDuplicate={isDuplicate} onAdd={handleAdd} />
 
-          {/* Loading State */}
-          {isLoading && <LoadingSpinner />}
+        {/* Loading State */}
+        {isLoading && <LoadingSpinner />}
 
-          {/* Error State */}
-          {isError && (
-            <ErrorDisplay
-              message={error?.message || 'Failed to load todos'}
-              onRetry={() => refetch()}
+        {/* Error State */}
+        {isError && (
+          <ErrorDisplay
+            message={error?.message || 'Failed to load todos'}
+            onRetry={() => refetch()}
+          />
+        )}
+
+        {/* Success State */}
+        {!isLoading && !isError && (
+          <>
+            {/* Filter Navigation — URL-driven */}
+            <div className="px-4 pt-2 pb-1 sm:px-6 sm:pt-3 border-b border-gray-100 dark:border-gray-700/50">
+              <FilterNav counts={filterCounts} />
+            </div>
+
+            <TodoList
+              todos={filteredTodos}
+              isDuplicate={isDuplicate}
+              onToggle={handleToggle}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
             />
-          )}
-
-          {/* Success State */}
-          {!isLoading && !isError && (
-            <>
-              <TodoList
-                todos={todos}
-                isDuplicate={isDuplicate}
-                onToggle={handleToggle}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
-              <TodoFooter
-                remainingCount={remainingCount}
-                hasCompleted={hasCompleted}
-                onClearCompleted={handleClearCompleted}
-              />
-            </>
-          )}
+            <TodoFooter
+              remainingCount={remainingCount}
+              hasCompleted={hasCompleted}
+              onClearCompleted={handleClearCompleted}
+            />
+          </>
+        )}
 
           <div className="px-4 pb-4 sm:px-6 sm:pb-5">
             <button
@@ -177,28 +208,12 @@ function App() {
             </button>
           </div>
         </main>
+
+        <Suspense fallback={null}>
+          {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
+        </Suspense>
       </div>
-
-      <Suspense fallback={null}>
-        {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
-      </Suspense>
-
-      {/* TanStack Query Devtools — press Shift+Alt+Q to toggle */}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </ThemeProvider>
   )
 }
 
-// --- Root Component with Providers ---
-// ErrorBoundary catches React render errors.
-// QueryClientProvider gives the whole tree access to React Query.
-
-export default function AppWithProviders() {
-  return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    </ErrorBoundary>
-  )
-}
+export default App
