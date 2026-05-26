@@ -1,4 +1,4 @@
-import type { Todo } from './types'
+import { createTodoId, type Todo, type TodoId } from './types'
 
 // --- Action Types ---
 // A discriminated union: each action has a unique `type` string
@@ -8,9 +8,9 @@ import type { Todo } from './types'
 
 type TodoAction =
   | { type: 'ADD'; text: string }
-  | { type: 'EDIT'; id: number; text: string }
-  | { type: 'TOGGLE'; id: number }
-  | { type: 'DELETE'; id: number }
+  | { type: 'EDIT'; id: TodoId; text: string }
+  | { type: 'TOGGLE'; id: TodoId }
+  | { type: 'DELETE'; id: TodoId }
   | { type: 'CLEAR_COMPLETED' }
 
 // --- Reducer ---
@@ -23,7 +23,7 @@ export function todoReducer(state: Todo[], action: TodoAction): Todo[] {
       return [
         ...state,
         {
-          id: Date.now(),
+          id: createTodoId(Date.now()),
           text: action.text,
           completed: false,
         },
