@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface TodoFormProps {
   // Stable callback from parent so this component doesn't depend on the
@@ -12,6 +12,7 @@ const MAX_LENGTH = 100
 export function TodoForm({ isDuplicate, onAdd }: TodoFormProps) {
   const [inputValue, setInputValue] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const validate = (text: string): string | null => {
     const trimmed = text.trim()
@@ -37,6 +38,8 @@ export function TodoForm({ isDuplicate, onAdd }: TodoFormProps) {
     setInputValue('')
     setError(null)
     onAdd(trimmed)
+    // Keep focus on input so user can immediately type next todo
+    inputRef.current?.focus()
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,6 +55,7 @@ export function TodoForm({ isDuplicate, onAdd }: TodoFormProps) {
       <form onSubmit={handleSubmit} className="flex gap-2">
         <div className="flex-1 flex flex-col gap-1">
           <input
+            ref={inputRef}
             id="todo-input"
             type="text"
             value={inputValue}

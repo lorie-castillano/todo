@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, memo } from 'react'
 import { motion } from 'framer-motion'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import type { Todo } from '../types'
 
 // TodoItem with inline editing: double-click to edit, Enter to save, Escape to cancel.
@@ -21,6 +22,9 @@ const MAX_LENGTH = 100
 // Combined with stable callbacks from App, completing/editing one
 // todo no longer re-renders unrelated todos.
 function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoItemProps) {
+  // --- Accessibility: Respect user's motion preferences ---
+  const prefersReducedMotion = useReducedMotion()
+
   // --- Local UI State ---
   // isEditing is LOCAL to this component — App doesn't need to know about it.
   // This is "ephemeral" state that resets when the component unmounts.
@@ -93,16 +97,20 @@ function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoIte
 
   return (
     <motion.li
-      layout
-      initial={{ opacity: 0, y: -10, scale: 0.95 }}
+      layout={!prefersReducedMotion}
+      initial={prefersReducedMotion ? false : { opacity: 0, y: -10, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, x: -20, scale: 0.95 }}
-      transition={{
-        type: 'spring',
-        stiffness: 500,
-        damping: 30,
-        opacity: { duration: 0.2 },
-      }}
+      exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0, x: -20, scale: 0.95 }}
+      transition={
+        prefersReducedMotion
+          ? { duration: 0 }
+          : {
+              type: 'spring',
+              stiffness: 500,
+              damping: 30,
+              opacity: { duration: 0.2 },
+            }
+      }
       className={`group flex items-center gap-3 rounded-lg border p-3 ${
         todo.completed
           ? 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'
@@ -142,19 +150,27 @@ function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoIte
           )}
         </div>
       ) : (
-        // VIEW MODE: Clickable label
-        <label
-          htmlFor={`todo-${todo.id}`}
+        // VIEW MODE: Clickable text with keyboard support
+        <span
           onDoubleClick={handleDoubleClick}
-          className={`flex-1 text-sm transition-colors duration-200 cursor-pointer ${
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !todo.completed) {
+              e.preventDefault()
+              handleDoubleClick()
+            }
+          }}
+          tabIndex={todo.completed ? -1 : 0}
+          role={todo.completed ? undefined : 'button'}
+          aria-label={todo.completed ? undefined : `Edit todo: ${todo.text}`}
+          className={`flex-1 text-sm transition-colors duration-200 ${
             todo.completed
               ? 'line-through text-gray-400 dark:text-gray-500'
-              : 'text-gray-700 dark:text-gray-200'
+              : 'text-gray-700 dark:text-gray-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1'
           }`}
-          title={todo.completed ? 'Cannot edit completed todos' : 'Double-click to edit'}
+          title={todo.completed ? 'Cannot edit completed todos' : 'Double-click or press Enter to edit'}
         >
           {todo.text}
-        </label>
+        </span>
       )}
 
       <button

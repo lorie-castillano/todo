@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 import type { Todo } from '../types'
 import { TodoItem } from './TodoItem'
 
@@ -16,16 +17,18 @@ interface TodoListProps {
 }
 
 function TodoListImpl({ todos, isDuplicate, onToggle, onDelete, onEdit }: TodoListProps) {
+  const prefersReducedMotion = useReducedMotion()
+
   return (
     <section aria-label="Todo list" className="px-4 py-4 sm:px-6 sm:py-5">
       <AnimatePresence mode="wait">
         {todos.length === 0 ? (
           <motion.p
             key="empty"
-            initial={{ opacity: 0 }}
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
             className="text-sm text-gray-400 dark:text-gray-500 text-center py-8"
           >
             No todos yet. Add one above!
@@ -35,9 +38,9 @@ function TodoListImpl({ todos, isDuplicate, onToggle, onDelete, onEdit }: TodoLi
             key="list"
             className="space-y-2 sm:space-y-3"
             role="list"
-            initial={{ opacity: 0 }}
+            initial={prefersReducedMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.2 }}
+            transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
           >
             {/* popLayout makes remaining items slide up smoothly when one is removed */}
             <AnimatePresence mode="popLayout" initial={false}>

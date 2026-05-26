@@ -5,6 +5,7 @@ import { TodoForm } from './components/TodoForm'
 import { TodoList } from './components/TodoList'
 import { TodoFooter } from './components/TodoFooter'
 import { FilterNav } from './components/FilterNav'
+import { LiveRegion } from './components/LiveRegion'
 import {
   useTodos,
   useCreateTodo,
@@ -63,6 +64,7 @@ function ErrorDisplay({ message, onRetry }: { message: string; onRetry: () => vo
 
 function App() {
   const [showHelp, setShowHelp] = useState(false)
+  const [announcement, setAnnouncement] = useState('')
   const location = useLocation()
 
   // Get filter from URL (e.g., /active → 'active')
@@ -77,42 +79,6 @@ function App() {
   const editTodo = useEditTodo()
   const deleteTodo = useDeleteTodo()
   const clearCompleted = useClearCompleted()
-
-  // --- Handlers ---
-  const handleAdd = useCallback(
-    (text: string) => {
-      createTodo.mutate(text)
-    },
-    [createTodo]
-  )
-
-  const handleToggle = useCallback(
-    (id: number) => {
-      const todo = todos.find((t) => t.id === id)
-      if (todo) {
-        toggleTodo.mutate({ id, completed: !todo.completed })
-      }
-    },
-    [toggleTodo, todos]
-  )
-
-  const handleEdit = useCallback(
-    (id: number, text: string) => {
-      editTodo.mutate({ id, text })
-    },
-    [editTodo]
-  )
-
-  const handleDelete = useCallback(
-    (id: number) => {
-      deleteTodo.mutate(id)
-    },
-    [deleteTodo]
-  )
-
-  const handleClearCompleted = useCallback(() => {
-    clearCompleted.mutate()
-  }, [clearCompleted])
 
   // --- Filtered Todos (URL-driven) ---
   const filteredTodos = useMemo(() => {
@@ -146,6 +112,55 @@ function App() {
     [todos.length, remainingCount]
   )
 
+  // --- Handlers with screen reader announcements ---
+  const handleAdd = useCallback(
+    (text: string) => {
+      createTodo.mutate(text)
+      setAnnouncement(`Todo added: ${text}. ${remainingCount + 1} items remaining.`)
+    },
+    [createTodo, remainingCount]
+  )
+
+  const handleToggle = useCallback(
+    (id: number) => {
+      const todo = todos.find((t) => t.id === id)
+      if (todo) {
+        const newCompleted = !todo.completed
+        toggleTodo.mutate({ id, completed: newCompleted })
+        setAnnouncement(
+          newCompleted
+            ? `Todo completed: ${todo.text}`
+            : `Todo marked as active: ${todo.text}`
+        )
+      }
+    },
+    [toggleTodo, todos]
+  )
+
+  const handleEdit = useCallback(
+    (id: number, text: string) => {
+      const todo = todos.find((t) => t.id === id)
+      editTodo.mutate({ id, text })
+      setAnnouncement(`Todo edited${todo ? ` from "${todo.text}"` : ''} to "${text}"`)
+    },
+    [editTodo, todos]
+  )
+
+  const handleDelete = useCallback(
+    (id: number) => {
+      const todo = todos.find((t) => t.id === id)
+      deleteTodo.mutate(id)
+      setAnnouncement(`Todo deleted${todo ? `: ${todo.text}` : ''}. ${Math.max(0, remainingCount - (todo?.completed ? 0 : 1))} items remaining.`)
+    },
+    [deleteTodo, todos, remainingCount]
+  )
+
+  const handleClearCompleted = useCallback(() => {
+    const completedCount = todos.filter(t => t.completed).length
+    clearCompleted.mutate()
+    setAnnouncement(`${completedCount} completed ${completedCount === 1 ? 'todo' : 'todos'} cleared. ${remainingCount} items remaining.`)
+  }, [clearCompleted, todos, remainingCount])
+
   // --- Duplicate Check (using cache data) ---
   const isDuplicate = useCallback(
     (text: string, excludeId?: number) => {
@@ -159,6 +174,9 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-4 transition-colors duration-300">
+      {/* Screen reader announcements for dynamic updates */}
+      <LiveRegion message={announcement} />
+
       <main className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-lg dark:shadow-gray-900/50 transition-colors duration-300">
         <Header />
 

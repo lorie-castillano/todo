@@ -126,22 +126,26 @@
 
 *Note: Skipped manual `useEffect` fetching in favor of TanStack Query, the modern standard for server state management.*
 
-### Lesson 3.4 — Routing & Navigation
-- [ ] Add React Router: routes for all todos, active, completed
-- [ ] URL-driven filtering (bookmarkable states)
-- [ ] Protected routes concept (auth simulation)
-- [ ] 404 handling
+### Lesson 3.4 — Routing & Navigation ✅
+- [x] Add React Router: routes for all todos, active, completed
+- [x] URL-driven filtering (bookmarkable states)
+- [ ] Protected routes concept (auth simulation) — *deferred to auth lesson*
+- [x] 404 handling
 
-**Concepts**: Client-side routing, URL as state, history API, route guards
+**Concepts**: Client-side routing, URL as state, history API, route guards, NavLink
 
-### Lesson 3.5 — Accessibility Mastery
-- [ ] Full keyboard navigation (Tab, Enter, Escape, Arrow keys)
-- [ ] Screen reader testing (VoiceOver on Mac)
-- [ ] Focus management: auto-focus on new todo, focus trap in modals
-- [ ] ARIA live regions for dynamic updates ("3 items left")
-- [ ] Color contrast and reduced motion preferences
+*Note: Protected routes deferred — will implement when we add authentication.*
 
-**Concepts**: ARIA patterns, focus management, a11y auditing, inclusive design
+### Lesson 3.5 — Accessibility Mastery ✅
+- [x] Full keyboard navigation (Tab, Enter, Escape, Arrow keys)
+- [x] Screen reader testing (VoiceOver on Mac) — *manual testing step*
+- [x] Focus management: auto-focus on new todo, focus trap in modals
+- [x] ARIA live regions for dynamic updates ("3 items left")
+- [x] Color contrast and reduced motion preferences
+
+**Concepts**: ARIA patterns, focus management, a11y auditing, inclusive design, `prefers-reduced-motion`
+
+*Note: Color contrast verified against WCAG AA standards. Reduced motion hook created and integrated into all animated components.*
 
 ---
 

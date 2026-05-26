@@ -1,11 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '../ThemeContext'
+import { useReducedMotion } from '../hooks/useReducedMotion'
 
 // Header consumes dark mode from ThemeContext — no props needed.
 // Adds tap/hover micro-interactions and an icon swap animation.
+// Respects user's reduced motion preferences for accessibility.
 
 export function Header() {
   const { darkMode, toggleDarkMode } = useTheme()
+  const prefersReducedMotion = useReducedMotion()
 
   return (
     <header className="px-4 py-5 sm:px-6 sm:py-6 border-b border-gray-200 dark:border-gray-700">
@@ -21,8 +24,8 @@ export function Header() {
         <motion.button
           type="button"
           onClick={toggleDarkMode}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={prefersReducedMotion ? undefined : { scale: 1.1 }}
+          whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
           className="rounded-lg p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 overflow-hidden relative w-9 h-9 flex items-center justify-center"
           aria-label="Toggle dark mode"
         >
@@ -30,10 +33,10 @@ export function Header() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={darkMode ? 'sun' : 'moon'}
-              initial={{ rotate: -90, opacity: 0 }}
+              initial={prefersReducedMotion ? { opacity: 0 } : { rotate: -90, opacity: 0 }}
               animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.2 }}
+              exit={prefersReducedMotion ? { opacity: 0 } : { rotate: 90, opacity: 0 }}
+              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.2 }}
               className="absolute"
             >
               {darkMode ? '☀️' : '🌙'}
