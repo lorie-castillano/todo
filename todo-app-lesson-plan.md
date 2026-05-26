@@ -479,8 +479,6 @@ By the end of all 8 phases, you will have:
 - **AI Governance**: Knowledge of NIST AI RMF or EU AI Act + applied safety principles
 - **Architecture Skills**: Ability to design, defend, and responsibly deploy multi-agent AI systems at scale
 
-**Total Scope**: 8 phases, 28 lessons, estimated 9-10 weeks at 2 hrs/day
-
 ---
 
 ## Phase 9: LLM Fundamentals, AI Security & Production Optimization
