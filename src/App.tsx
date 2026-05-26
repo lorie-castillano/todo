@@ -6,14 +6,9 @@ import { TodoList } from './components/TodoList'
 import { TodoFooter } from './components/TodoFooter'
 import { FilterNav } from './components/FilterNav'
 import { LiveRegion } from './components/LiveRegion'
-import {
-  useTodos,
-  useCreateTodo,
-  useToggleTodo,
-  useEditTodo,
-  useDeleteTodo,
-  useClearCompleted,
-} from './hooks/useTodos'
+import { UndoRedoControls } from './components/UndoRedoControls'
+import { useTodos } from './hooks/useTodos'
+import { useTodoCommands } from './hooks/useTodoCommands'
 
 // CODE SPLITTING: HelpModal is loaded ONLY when the user opens it.
 const HelpModal = lazy(() => import('./components/HelpModal'))
@@ -73,12 +68,11 @@ function App() {
   // --- Data Fetching ---
   const { data: todos = [], isLoading, isError, error, refetch } = useTodos()
 
-  // --- Mutations (with optimistic updates) ---
-  const createTodo = useCreateTodo()
-  const toggleTodo = useToggleTodo()
-  const editTodo = useEditTodo()
-  const deleteTodo = useDeleteTodo()
-  const clearCompleted = useClearCompleted()
+  // --- Mutations wrapped with undo/redo command pattern ---
+  // Each call to addTodo/toggle/edit/remove/clearCompleted records a Command
+  // in the history store. The user can undo/redo via the UI buttons or
+  // keyboard shortcuts (⌘Z / ⌘⇧Z).
+  const { addTodo, toggle, edit, remove, clearCompleted } = useTodoCommands()
 
   // --- Filtered Todos (URL-driven) ---
   const filteredTodos = useMemo(() => {
@@ -113,12 +107,15 @@ function App() {
   )
 
   // --- Handlers with screen reader announcements ---
+  // Each handler awaits the command (so optimistic updates settle before
+  // we measure counts), but we fire-and-forget at the call site since
+  // these are user click handlers, not awaited by the renderer.
   const handleAdd = useCallback(
     (text: string) => {
-      createTodo.mutate(text)
+      void addTodo(text)
       setAnnouncement(`Todo added: ${text}. ${remainingCount + 1} items remaining.`)
     },
-    [createTodo, remainingCount]
+    [addTodo, remainingCount]
   )
 
   const handleToggle = useCallback(
@@ -126,7 +123,7 @@ function App() {
       const todo = todos.find((t) => t.id === id)
       if (todo) {
         const newCompleted = !todo.completed
-        toggleTodo.mutate({ id, completed: newCompleted })
+        void toggle(id)
         setAnnouncement(
           newCompleted
             ? `Todo completed: ${todo.text}`
@@ -134,30 +131,30 @@ function App() {
         )
       }
     },
-    [toggleTodo, todos]
+    [toggle, todos]
   )
 
   const handleEdit = useCallback(
     (id: number, text: string) => {
       const todo = todos.find((t) => t.id === id)
-      editTodo.mutate({ id, text })
+      void edit(id, text)
       setAnnouncement(`Todo edited${todo ? ` from "${todo.text}"` : ''} to "${text}"`)
     },
-    [editTodo, todos]
+    [edit, todos]
   )
 
   const handleDelete = useCallback(
     (id: number) => {
       const todo = todos.find((t) => t.id === id)
-      deleteTodo.mutate(id)
+      void remove(id)
       setAnnouncement(`Todo deleted${todo ? `: ${todo.text}` : ''}. ${Math.max(0, remainingCount - (todo?.completed ? 0 : 1))} items remaining.`)
     },
-    [deleteTodo, todos, remainingCount]
+    [remove, todos, remainingCount]
   )
 
   const handleClearCompleted = useCallback(() => {
     const completedCount = todos.filter(t => t.completed).length
-    clearCompleted.mutate()
+    void clearCompleted()
     setAnnouncement(`${completedCount} completed ${completedCount === 1 ? 'todo' : 'todos'} cleared. ${remainingCount} items remaining.`)
   }, [clearCompleted, todos, remainingCount])
 
@@ -196,9 +193,10 @@ function App() {
         {/* Success State */}
         {!isLoading && !isError && (
           <>
-            {/* Filter Navigation — URL-driven */}
-            <div className="px-4 pt-2 pb-1 sm:px-6 sm:pt-3 border-b border-gray-100 dark:border-gray-700/50">
+            {/* Filter Navigation — URL-driven, with undo/redo controls */}
+            <div className="px-4 pt-2 pb-1 sm:px-6 sm:pt-3 border-b border-gray-100 dark:border-gray-700/50 flex items-center justify-between gap-3 flex-wrap">
               <FilterNav counts={filterCounts} />
+              <UndoRedoControls />
             </div>
 
             <TodoList
