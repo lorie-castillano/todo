@@ -9,26 +9,36 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import { Suspense } from 'react'
 import { NotFound } from './pages/NotFound'
-import { ThemeProvider } from './ThemeContext'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from './lib/queryClient'
+import { useThemeDomSync } from './stores/themeStore'
 
 // Lazy load the main App component for code splitting
 const App = () => import('./App').then((m) => ({ Component: m.default }))
 
-// Root layout with providers — wraps all routes
+// ThemeSync is a tiny side-effect-only component. It calls `useThemeDomSync`
+// which adds/removes the `dark` class on <html> when the store changes.
+// We could call the hook directly in RootLayout, but extracting keeps the
+// side effect named and easy to find when debugging.
+function ThemeSync(): null {
+  useThemeDomSync()
+  return null
+}
+
+// Root layout with providers — wraps all routes.
+// Note: No <ThemeProvider> anymore. The Zustand theme store is global
+// and accessible from any component without a Provider.
 function RootLayout() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider>
-          <Suspense fallback={null}>
-            <Outlet />
-          </Suspense>
-          <ReactQueryDevtools initialIsOpen={false} />
-        </ThemeProvider>
+        <ThemeSync />
+        <Suspense fallback={null}>
+          <Outlet />
+        </Suspense>
+        <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </ErrorBoundary>
   )

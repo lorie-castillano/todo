@@ -1,13 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useTheme } from '../ThemeContext'
+import { useDarkMode, useToggleDarkMode } from '../stores/themeStore'
 import { useReducedMotion } from '../hooks/useReducedMotion'
 
-// Header consumes dark mode from ThemeContext — no props needed.
+// Header consumes dark mode from the Zustand theme store — no props needed.
 // Adds tap/hover micro-interactions and an icon swap animation.
 // Respects user's reduced motion preferences for accessibility.
 
 export function Header() {
-  const { darkMode, toggleDarkMode } = useTheme()
+  // Two selectors instead of one context object — each subscribes to a single
+  // slice. If the store gains more state later, this component won't re-render
+  // when that unrelated state changes.
+  const darkMode = useDarkMode()
+  const toggleDarkMode = useToggleDarkMode()
   const prefersReducedMotion = useReducedMotion()
 
   return (
