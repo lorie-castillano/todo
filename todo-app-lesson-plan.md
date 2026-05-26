@@ -152,17 +152,22 @@
 ## Phase 4: Senior-Level & Production Mastery
 
 ### Lesson 4.1 — State Management at Scale & Advanced TypeScript
-- [ ] Zustand or Jotai: lightweight global state (replace Context)
-- [ ] State normalization for complex data
-- [ ] Derived state with selectors
-- [ ] Undo/redo functionality with command pattern
-- [ ] Discriminated unions for todo actions
+- [x] Zustand or Jotai: lightweight global state (replace Context)
+- [ ] ~~State normalization for complex data~~ — *skipped: todos managed by TanStack Query (server state)*
+- [x] Derived state with selectors
+- [x] Undo/redo functionality with command pattern
+- [x] Discriminated unions for todo actions
 - [ ] Generic components (`List<T>`)
 - [ ] Utility types: `Pick`, `Omit`, `Partial`, `Record`
 - [ ] Type-safe event emitters and API responses
 - [ ] `satisfies` operator and `const` assertions
+- [x] **Bonus**: Branded types (`TodoId`) for compile-time ID safety
+- [x] **Bonus**: Keyboard shortcuts (⌘Z / ⌘⇧Z) for undo/redo
+- [x] **Bonus**: `window.matchMedia` polyfill for jsdom tests
 
 **Concepts**: State libraries tradeoffs, normalized state shape, command pattern, advanced type patterns, type-level programming
+
+*Progress: 5/9 core items done + 3 bonus items. Remaining: generic components, utility types, type-safe APIs, satisfies operator.*
 
 ### Lesson 4.2 — CI/CD, Monitoring & Production DevOps
 - [ ] GitHub Actions: lint, test, build on every PR
@@ -584,6 +589,7 @@ By the end of this plan, you will be able to:
 3. Each lesson ends with a **working app** you can see in the browser
 4. Ask questions at any point — that's how mastery happens
 5. Say **"next lesson"** when you're ready to move on
+6. Give me actual time I finished for each lesson so we can track progress
 
 ---
 
@@ -594,7 +600,7 @@ By the end of this plan, you will be able to:
 | Phase 1: Foundations | ✅ Complete | 5/5 |
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
-| Phase 4: Senior-Level & Production | 🔲 Next | 0/3 |
+| Phase 4: Senior-Level & Production | � In Progress | 0/3 (Lesson 4.1: 5/9 + bonuses) |
 | Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
