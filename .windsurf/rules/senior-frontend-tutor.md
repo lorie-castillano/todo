@@ -44,6 +44,27 @@ Always use and recommend the latest versions of:
 - Use **named exports** over default exports
 - Organize files by **feature/module**, not by type
 
+## Advanced TypeScript Patterns
+
+- **Discriminated unions**: Type-safe action handling (`{ type: 'ADD'; payload: Todo } | { type: 'REMOVE'; id: number }`)
+- **Generic components**: `List<T>`, `Button<T extends string>`, flexible with constraints
+- **Utility types mastery**: `Pick`, `Omit`, `Partial`, `Required`, `Record`, `Parameters`, `ReturnType`
+- **`satisfies` operator**: Preserve literal types while checking conformance
+- **Const assertions**: `as const` for readonly tuple and object literals
+- **Type narrowing**: Type guards, assertion functions, narrowing with `in` and `typeof`
+- **Conditional types**: Create types based on conditions (`T extends U ? X : Y`)
+- **Mapped types**: Transform object types (`{ [K in keyof T]: T[K] }`)
+- **Template literal types**: Type-safe CSS properties, route paths, event names
+- **Branded types**: Runtime-validated type-safe IDs (`type TodoId = string & { __brand: 'TodoId' }`)
+
+## Frontend-Backend Type Integration
+
+- **Shared type contracts**: Define API types in shared package for consistency
+- **Zod schema validation**: Runtime validation with TypeScript inference (`z.infer<typeof schema>`)
+- **OpenAPI generation**: Generate TypeScript from backend specs for type-safe clients
+- **End-to-end type safety**: Ensure API changes propagate correctly to frontend
+- **Type-safe fetch wrappers**: Generic `fetchWithTypes<T>(url)` with proper error handling
+
 ## When Answering Questions
 
 - Start with a brief, clear answer

@@ -219,3 +219,370 @@ By the end of this plan, you will be able to:
 5. Say **"next lesson"** when you're ready to move on
 
 **Ready to start with Lesson 1.1?**
+
+---
+
+## Phase 5: Backend & MCP Integration (Post-Frontend)
+
+*This phase will begin after completing Phase 4. It transforms our frontend-only app into a full-stack, MCP-ready system for AI agent consumption.*
+
+### Lesson 5.1 — Node.js Backend Foundation
+- [ ] Fastify server setup with TypeScript
+- [ ] Project structure: routes, services, middleware layers
+- [ ] Environment configuration with validation
+- [ ] Structured logging with correlation IDs
+- [ ] Health check and graceful shutdown
+
+**Concepts**: Backend architecture, separation of concerns, observability
+
+### Lesson 5.2 — Database Design & Persistence
+- [ ] PostgreSQL setup with Docker Compose
+- [ ] Prisma ORM: schema design, migrations, client generation
+- [ ] Todo CRUD operations with transactions
+- [ ] Connection pooling and query optimization
+- [ ] Soft deletes and audit timestamps
+
+**Concepts**: Relational databases, ORM patterns, data integrity
+
+### Lesson 5.3 — REST API Hardening
+- [ ] Zod validation for all inputs
+- [ ] Centralized error handling middleware
+- [ ] Rate limiting per endpoint and client
+- [ ] CORS and security headers (Helmet)
+- [ ] OpenAPI/Swagger documentation
+
+**Concepts**: API security, validation, documentation-driven development
+
+### Lesson 5.4 — Model Context Protocol (MCP) Implementation
+- [ ] MCP SDK integration (`@anthropic-ai/mcp`)
+- [ ] Define todo tools: `create_todo`, `list_todos`, `complete_todo`, `delete_todo`
+- [ ] Zod schemas for tool inputs (LLM-friendly validation)
+- [ ] Resource endpoints: `/resources/todos` for read-only access
+- [ ] Progress callbacks for batch operations
+
+**Concepts**: MCP protocol, AI agent interfaces, tool-based APIs
+
+### Lesson 5.5 — Agent Hardening & Production Readiness
+- [ ] API key authentication with middleware
+- [ ] Request/response audit logging
+- [ ] Circuit breakers for external calls
+- [ ] Resource quotas and abuse prevention
+- [ ] Integration testing with MCP inspector
+
+**Concepts**: Agent security, production hardening, compliance logging
+
+### Lesson 5.6 — Full-Stack Integration
+- [ ] Connect React frontend to real backend API
+- [ ] Replace MSW with actual HTTP calls
+- [ ] Frontend-to-backend end-to-end tests
+- [ ] Docker multi-container setup (frontend + backend + db)
+- [ ] Production deployment checklist
+
+**Concepts**: Full-stack systems, containerization, production deployment
+
+---
+
+## Final Goal: MCP-Ready Todo System
+
+By the end of Phase 5, you will have:
+
+- **Frontend**: Production-grade React app (completed in Phase 1-4)
+- **Backend**: Hardened Node.js API with PostgreSQL persistence
+- **MCP Layer**: AI agent can interact via tools (`create_todo`, `complete_todo`, etc.)
+- **Security**: Rate limits, auth, audit logs, input validation
+- **Documentation**: OpenAPI specs + MCP tool definitions
+
+**Senior Backend Tutor rule** (`senior-backend-tutor.md`) now active for Phase 5.
+
+---
+
+## Phase 6: A2A Protocol & Multi-Agent Systems
+
+*Build on your MCP knowledge to create cooperating agents using Google's Agent-to-Agent (A2A) protocol.*
+
+### Lesson 6.1 — A2A Protocol Fundamentals
+- [ ] Understand A2A vs MCP: when to use each
+- [ ] A2A discovery and capability negotiation
+- [ ] Task lifecycle: send, subscribe, update, complete
+- [ ] Artifact exchange between agents
+- [ ] Push notifications and streaming updates
+
+**Concepts**: Agent-to-Agent protocol, multi-agent orchestration, distributed task management
+
+### Lesson 6.2 — Building the Task Manager Agent
+- [ ] Fastify server with A2A endpoints (`/.well-known/agent.json`)
+- [ ] Task storage and state machine (pending → working → complete)
+- [ ] Implement `tasks/send`, `tasks/get`, `tasks/cancel`
+- [ ] Streaming responses with Server-Sent Events
+- [ ] Error handling and retry logic for agent communication
+
+**Concepts**: A2A server implementation, task state management, streaming APIs
+
+### Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid)
+- [ ] Agent that exposes both MCP tools AND A2A capabilities
+- [ ] Register as remote MCP server via A2A discovery
+- [ ] Handle complex tasks by delegating to MCP tools
+- [ ] Report progress back to Task Manager via A2A
+
+**Concepts**: Hybrid agent architecture, capability composition, remote MCP
+
+### Lesson 6.4 — Multi-Agent Collaboration Prototype
+- [ ] **Agent 1: Task Manager** — receives user requests, breaks down into subtasks
+- [ ] **Agent 2: Todo Worker** — specialized in todo CRUD via MCP tools
+- [ ] **Agent 3: Notification Worker** — handles reminders and alerts
+- [ ] Set up local agent mesh with HTTP + SSE communication
+- [ ] Demonstrate: "Remind me to call mom tomorrow" → Task Manager → Todo Worker (create) + Notification Worker (schedule)
+
+**Concepts**: Agent mesh, task decomposition, multi-agent workflows, capability routing
+
+### Lesson 6.5 — Production Multi-Agent Considerations
+- [ ] Agent authentication and trust boundaries
+- [ ] Rate limiting across agent boundaries
+- [ ] Circuit breakers for unreliable agents
+- [ ] Observability: tracing requests across agent calls
+- [ ] Security: validating agent identities, sandboxing tool execution
+
+**Concepts**: Production agent systems, trust and security, distributed tracing
+
+---
+
+## Phase 4 Extended: Deep TypeScript Mastery
+
+*Enhance your TypeScript skills with advanced patterns specifically for backend and agent integration.*
+
+### Lesson 4.6 — Advanced TypeScript for Backend & Agents
+- [ ] **Template literal types** for route paths and event names
+- [ ] **Conditional types** for API response shapes based on request
+- [ ] **Infer and mapped types** for deriving Zod schemas from TypeScript
+- [ ] **Branded types** for type-safe IDs (TodoId, UserId, AgentId)
+- [ ] **Function overloads** for flexible MCP tool signatures
+- [ ] **Declaration merging** for extending third-party types (MCP SDK)
+- [ ] **Type guards and assertions** for runtime validation narrowing
+- [ ] **Async generator types** for streaming A2A responses
+
+**Concepts**: Type-level programming, type-safe APIs, runtime-type boundary
+
+### Lesson 4.7 — TypeScript Integration Patterns
+- [ ] Share types between frontend and backend (monorepo setup)
+- [ ] Generate TypeScript from OpenAPI specs
+- [ ] Generate Zod schemas from TypeScript interfaces (zod-to-ts)
+- [ ] Type-safe event emitters for agent communication
+- [ ] RPC-style type safety for A2A calls (similar to tRPC)
+
+**Concepts**: End-to-end type safety, schema generation, type sharing
+
+---
+
+## Final Goal: Multi-Agent MCP-Ready System with Advanced TypeScript
+
+By the end of all phases, you will have:
+
+- **Frontend**: Production-grade React app with advanced TypeScript patterns
+- **Backend**: Hardened Node.js API with PostgreSQL and comprehensive types
+- **MCP Layer**: AI agent tools with full type safety
+- **A2A Layer**: Multi-agent system with cooperating Task Manager and Worker agents
+- **Type Safety**: End-to-end TypeScript from database to frontend to agent protocols
+- **Security**: Rate limits, auth, audit logs across all boundaries
+- **Documentation**: OpenAPI + MCP tool definitions + A2A agent cards
+
+**Total Scope**: 6 phases, 19 lessons, estimated 6-7 weeks at 2 hrs/day
+
+---
+
+## Phase 7: System Design Mastery
+
+*Refresh core system architecture concepts and apply them to a real AI architecture problem. This phase bridges theory and practice.*
+
+### Lesson 7.1 — System Design Fundamentals Review
+- [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
+- [ ] **Database design**: SQL vs NoSQL tradeoffs, sharding, replication, indexing strategies
+- [ ] **Microservices vs monoliths**: when to choose each, service boundaries, inter-service communication
+- [ ] **API design**: REST vs GraphQL vs gRPC, versioning, rate limiting strategies
+- [ ] **CAP theorem and consistency models**: strong vs eventual consistency, ACID vs BASE
+
+**Concepts**: Distributed systems, scalability, reliability, tradeoff analysis
+
+### Lesson 7.2 — Core System Components Deep Dive
+- [ ] **Message queues**: Kafka, RabbitMQ, SQS — when and why, at-least-once vs exactly-once delivery
+- [ ] **Caching layers**: Redis, CDN, browser caching, cache invalidation strategies
+- [ ] **Search and indexing**: Elasticsearch, full-text search, vector databases for AI
+- [ ] **Real-time systems**: WebSockets, SSE, long-polling, pub/sub patterns
+- [ ] **Authentication & authorization**: OAuth 2.0, JWT, session management, SSO
+
+**Concepts**: Component selection, integration patterns, failure handling
+
+### Lesson 7.3 — AI System Architecture Patterns
+- [ ] **LLM inference architecture**: model serving, batching, streaming responses
+- [ ] **Vector databases and RAG**: embedding storage, similarity search, knowledge retrieval
+- [ ] **Agent orchestration patterns**: supervisor agents, fan-out/fan-in, state management
+- [ ] **Rate limiting and cost control**: token budgets, tiered access, request queuing
+- [ ] **Observability in AI systems**: prompt logging, token tracking, A/B testing models
+
+**Concepts**: AI-specific infrastructure, cost optimization, monitoring LLM applications
+
+### Lesson 7.4 — Case Study: Design a Multi-Agent Task Management System
+- [ ] **Problem statement**: Design a system where multiple AI agents collaborate on complex tasks
+- [ ] **Requirements gathering**: functional, non-functional, scale estimates
+- [ ] **High-level design**: agent registry, task queue, result aggregator, human-in-the-loop
+- [ ] **Component selection**: database (PostgreSQL + Redis), message broker (Kafka/RabbitMQ), vector DB
+- [ ] **API design**: A2A protocol endpoints, MCP tool definitions, webhook callbacks
+- [ ] **Scalability considerations**: agent pooling, backpressure, circuit breakers
+- [ ] **Failure modes**: agent crashes, network partitions, poison messages
+- [ ] **Trade-off discussion**: latency vs consistency, cost vs accuracy, complexity vs maintainability
+
+**Concepts**: End-to-end architecture design, real-world constraints, defending design decisions
+
+### Lesson 7.5 — Architecture Implementation Review
+- [ ] **Review our actual implementation**: compare Phase 6 multi-agent system to the design
+- [ ] **Gap analysis**: what we simplified, what we could improve
+- [ ] **Production readiness**: monitoring, alerting, disaster recovery
+- [ ] **Cost estimation**: infra costs at scale, optimization opportunities
+- [ ] **Evolution roadmap**: how the architecture would evolve with more agents, more users
+
+**Concepts**: Design vs reality, iterative architecture, technical debt management
+
+---
+
+## Final Complete Goal: Full-Stack Senior Engineer with System Design + AI Architecture
+
+By the end of all 7 phases, you will have:
+
+- **Frontend**: Production-grade React with advanced TypeScript patterns
+- **Backend**: Hardened Node.js API with PostgreSQL, MCP tools, A2A protocol
+- **Multi-Agent System**: 3+ cooperating agents with task orchestration
+- **Type Safety**: End-to-end TypeScript from database to frontend to agent protocols
+- **Security**: Rate limits, auth, audit logs across all boundaries
+- **System Design**: Refreshed core concepts + hands-on AI architecture design practice
+- **Architecture Skills**: Ability to design and defend a multi-agent AI system at scale
+
+**Total Scope**: 7 phases, 24 lessons, estimated 8-9 weeks at 2 hrs/day
+
+---
+
+## Phase 8: AI Governance, Safety & Responsible Engineering
+
+*Understand AI governance frameworks and apply responsible AI principles to production systems. Critical for building trustworthy AI applications.*
+
+### Lesson 8.1 — AI Governance Frameworks Overview
+- [ ] **NIST AI Risk Management Framework (AI RMF)**: core functions (Govern, Map, Measure, Manage)
+- [ ] **EU AI Act**: risk categories (minimal, limited, high, unacceptable), compliance requirements
+- [ ] **Key principles**: transparency, accountability, fairness, privacy, human oversight
+- [ ] **Governance in practice**: AI system cards, model documentation, impact assessments
+- [ ] **Industry standards**: ISO/IEC 42001, IEEE standards for AI ethics
+
+**Concepts**: AI governance, regulatory compliance, risk management, responsible AI
+
+### Lesson 8.2 — Applying AI Safety to Our Multi-Agent System
+- [ ] **Human-in-the-loop design**: when and how to require human approval
+- [ ] **Agent behavior constraints**: sandboxing, permission boundaries, kill switches
+- [ ] **Audit trails and accountability**: tracking every agent decision
+- [ ] **Fairness and bias**: ensuring todo prioritization doesn't discriminate
+- [ ] **Transparency**: logging agent reasoning for debugging and trust
+
+**Concepts**: AI safety, human oversight, auditability, responsible deployment
+
+### Lesson 8.3 — Privacy and Data Protection in AI Systems
+- [ ] **Data minimization**: only collect what's needed for agent operation
+- [ ] **PII handling**: detecting and protecting personal information in agent inputs
+- [ ] **Consent and purpose limitation**: clear data use policies
+- [ ] **Right to explanation**: users can understand agent decisions
+- [ ] **Data retention and deletion**: implementing data lifecycle policies
+
+**Concepts**: Privacy by design, GDPR considerations, data ethics
+
+### Lesson 8.4 — Building Trustworthy AI: Final Review
+- [ ] **System card for our multi-agent todo system**: documenting capabilities and limitations
+- [ ] **Risk assessment**: identifying and mitigating potential harms
+- [ ] **Monitoring for misuse**: detecting anomalous agent behavior
+- [ ] **Incident response plan**: what to do when agents behave unexpectedly
+- [ ] **Final responsible AI checklist**: pre-deployment safety review
+
+**Concepts**: Trustworthy AI, safety engineering, operational ethics
+
+---
+
+## Final Complete Goal: Responsible Full-Stack Senior Engineer with AI Architecture
+
+By the end of all 8 phases, you will have:
+
+- **Frontend**: Production-grade React with advanced TypeScript patterns
+- **Backend**: Hardened Node.js API with PostgreSQL, MCP tools, A2A protocol
+- **Multi-Agent System**: 3+ cooperating agents with task orchestration
+- **Type Safety**: End-to-end TypeScript from database to frontend to agent protocols
+- **Security**: Rate limits, auth, audit logs across all boundaries
+- **System Design**: Refreshed core concepts + hands-on AI architecture design practice
+- **AI Governance**: Knowledge of NIST AI RMF or EU AI Act + applied safety principles
+- **Architecture Skills**: Ability to design, defend, and responsibly deploy multi-agent AI systems at scale
+
+**Total Scope**: 8 phases, 28 lessons, estimated 9-10 weeks at 2 hrs/day
+
+---
+
+## Phase 9: LLM Fundamentals, AI Security & Production Optimization
+
+*Complete your AI readiness with deep LLM knowledge, security hardening, and production-grade optimizations.*
+
+### Lesson 9.1 — LLM Fundamentals & Prompt Engineering
+- [ ] **How LLMs work**: transformers, attention mechanisms, context windows, tokenization
+- [ ] **Token economics**: counting tokens, cost per token, context window limits
+- [ ] **Prompt engineering patterns**: zero-shot, few-shot, chain-of-thought, ReAct pattern
+- [ ] **Structured output**: forcing JSON/XML from LLMs, output schemas, parsing reliability
+- [ ] **Model selection**: when to use GPT-4 vs GPT-3.5 vs open-source models
+
+**Concepts**: Transformer architecture, prompt patterns, output control, model tradeoffs
+
+### Lesson 9.2 — AI Security: Prompt Injection & Output Safety
+- [ ] **Prompt injection attacks**: DAN, jailbreaking, indirect injection via documents
+- [ ] **Defensive patterns**: input validation, prompt hardening, system prompt isolation
+- [ ] **Output filtering**: PII detection, toxicity moderation, fact-checking strategies
+- [ ] **Sandboxing tool execution**: restricted environments, permission boundaries
+- [ ] **Security testing**: red-teaming your agents, adversarial prompt testing
+
+**Concepts**: AI security, adversarial robustness, input/output sanitization
+
+### Lesson 9.3 — Production RAG: Evaluation & Optimization
+- [ ] **Chunking strategies**: semantic chunking, fixed-size, overlap, recursive splitting
+- [ ] **Embedding models**: OpenAI, sentence-transformers, fine-tuning embeddings
+- [ ] **Retrieval optimization**: hybrid search (sparse + dense), re-ranking (Cohere, cross-encoders)
+- [ ] **RAG evaluation metrics**: MRR, NDCG, answer relevance, faithfulness, context precision
+- [ ] **Production RAG patterns**: query preprocessing, incremental indexing, caching
+
+**Concepts**: Information retrieval, evaluation metrics, retrieval quality
+
+### Lesson 9.4 — AI Testing, Evaluation & A/B Testing
+- [ ] **LLM evaluation frameworks**: RAGAS, TruLens, custom benchmarks
+- [ ] **Regression testing**: ensuring model updates don't break agent behavior
+- [ ] **A/B testing models**: measuring business impact, statistical significance
+- [ ] **Synthetic data generation**: creating edge case test datasets
+- [ ] **Human evaluation pipelines**: collecting ground truth, inter-rater agreement
+
+**Concepts**: ML evaluation, statistical testing, dataset creation, human-in-the-loop validation
+
+### Lesson 9.5 — Cost Optimization & Production Observability
+- [ ] **Caching strategies**: semantic cache, exact match cache, prompt caching, response caching
+- [ ] **Model routing**: intelligent routing (complex→GPT-4, simple→GPT-3.5), fallbacks
+- [ ] **Batching and streaming**: optimizing token throughput, latency vs cost tradeoffs
+- [ ] **Cost tracking per user/feature**: billing, showback, budget alerts
+- [ ] **AI observability**: prompt/response tracing, latency breakdown, model drift detection
+
+**Concepts**: Cost engineering, latency optimization, production monitoring, budget management
+
+---
+
+## Final Complete Goal: Production-Ready AI Engineer
+
+By the end of all 9 phases, you will have:
+
+- **Frontend**: Production-grade React with advanced TypeScript patterns
+- **Backend**: Hardened Node.js API with PostgreSQL, MCP tools, A2A protocol
+- **Multi-Agent System**: 3+ cooperating agents with task orchestration
+- **Type Safety**: End-to-end TypeScript from database to frontend to agent protocols
+- **Security**: Rate limits, auth, audit logs, **prompt injection defenses**, output filtering
+- **System Design**: Refreshed core concepts + hands-on AI architecture design practice
+- **AI Governance**: Knowledge of NIST AI RMF or EU AI Act + applied safety principles
+- **LLM Expertise**: Transformer fundamentals, prompt engineering, model selection
+- **Production RAG**: Chunking, embeddings, evaluation metrics, optimization
+- **Cost Engineering**: Caching, model routing, budget management, observability
+- **Architecture Skills**: Ability to design, defend, and responsibly deploy multi-agent AI systems at scale
+
+**Total Scope**: 9 phases, 33 lessons, estimated 11-12 weeks at 2 hrs/day
