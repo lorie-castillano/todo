@@ -1,8 +1,13 @@
 import '@testing-library/jest-dom'
-import { beforeAll, afterAll, afterEach, vi } from 'vitest'
+import { beforeAll, afterAll, afterEach, vi, expect } from 'vitest'
+import * as axeMatchers from 'vitest-axe/matchers'
 import { cleanup } from '@testing-library/react'
 import { server } from '../mocks/server'
 import { resetDatabase } from '../mocks/server'
+
+// Extend Vitest's expect with axe accessibility matchers.
+// This gives us `expect(results).toHaveNoViolations()` in all test files.
+expect.extend(axeMatchers)
 
 // jsdom doesn't implement window.matchMedia. We polyfill it here so
 // hooks like useReducedMotion (which call matchMedia) work in tests.
