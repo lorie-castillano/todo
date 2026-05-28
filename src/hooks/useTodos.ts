@@ -30,11 +30,38 @@ export const todoKeys = {
   detail: (id: number) => [...todoKeys.details(), id] as const,
 }
 
+// --- `satisfies` Operator Demonstration ---
+//
+// The `satisfies` operator (TypeScript 4.9+) checks that an expression
+// matches a type WITHOUT widening it. This is perfect for configuration
+// objects where you want autocomplete AND precise literal types.
+
+/** Configuration for todo API endpoints. */
+export const TODO_ENDPOINTS = {
+  list: '/api/todos',
+  create: '/api/todos',
+  update: (id: number) => `/api/todos/${id}`,
+  delete: (id: number) => `/api/todos/${id}`,
+  clearCompleted: '/api/todos?completed=true',
+} as const satisfies Record<string, string | ((id: number) => string)>
+
+// With `satisfies`:
+// - TODO_ENDPOINTS.list is literally '/api/todos' (not widened to string)
+// - Autocomplete works for all keys
+// - Type error if we add a key that doesn't match the constraint
+// - `as const` preserves literal types; `satisfies` validates the shape
+
+/** Type inference from the satisfies object. */
+export type TodoEndpoint = keyof typeof TODO_ENDPOINTS
+
+/** Extract route path type (literals, not string). */
+export type TodoRoute = typeof TODO_ENDPOINTS['list'] // '/api/todos'
+
 // --- Queries (READ operations) ---
 
 // Fetch all todos
 async function fetchTodos(): Promise<Todo[]> {
-  const response = await fetch('/api/todos')
+  const response = await fetch(TODO_ENDPOINTS.list)
   if (!response.ok) {
     throw new Error('Failed to fetch todos')
   }
@@ -62,7 +89,7 @@ export function useTodosSuspense() {
 
 // ADD todo mutation
 async function createTodo(text: string): Promise<Todo> {
-  const response = await fetch('/api/todos', {
+  const response = await fetch(TODO_ENDPOINTS.create, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -128,7 +155,7 @@ async function updateTodo({
   id: number
   completed: boolean
 }): Promise<Todo> {
-  const response = await fetch(`/api/todos/${id}`, {
+  const response = await fetch(TODO_ENDPOINTS.update(id), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ completed }),
@@ -180,7 +207,7 @@ async function editTodoText({
   id: number
   text: string
 }): Promise<Todo> {
-  const response = await fetch(`/api/todos/${id}`, {
+  const response = await fetch(TODO_ENDPOINTS.update(id), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -225,7 +252,7 @@ export function useEditTodo() {
 
 // DELETE todo mutation
 async function deleteTodo(id: number): Promise<void> {
-  const response = await fetch(`/api/todos/${id}`, {
+  const response = await fetch(TODO_ENDPOINTS.delete(id), {
     method: 'DELETE',
   })
 
@@ -265,7 +292,7 @@ export function useDeleteTodo() {
 
 // CLEAR COMPLETED mutation
 async function clearCompleted(): Promise<void> {
-  const response = await fetch('/api/todos?completed=true', {
+  const response = await fetch(TODO_ENDPOINTS.clearCompleted, {
     method: 'DELETE',
   })
 
@@ -353,33 +380,6 @@ export async function fetchApi<T>(
     }
   }
 }
-
-// --- `satisfies` Operator Demonstration ---
-//
-// The `satisfies` operator (TypeScript 4.9+) checks that an expression
-// matches a type WITHOUT widening it. This is perfect for configuration
-// objects where you want autocomplete AND precise literal types.
-
-/** Configuration for todo API endpoints. */
-export const TODO_ENDPOINTS = {
-  list: '/api/todos',
-  create: '/api/todos',
-  update: (id: number) => `/api/todos/${id}`,
-  delete: (id: number) => `/api/todos/${id}`,
-  clearCompleted: '/api/todos?completed=true',
-} as const satisfies Record<string, string | ((id: number) => string)>
-
-// With `satisfies`:
-// - TODO_ENDPOINTS.list is literally '/api/todos' (not widened to string)
-// - Autocomplete works for all keys
-// - Type error if we add a key that doesn't match the constraint
-// - `as const` preserves literal types; `satisfies` validates the shape
-
-/** Type inference from the satisfies object. */
-export type TodoEndpoint = keyof typeof TODO_ENDPOINTS
-
-/** Extract route path type (literals, not string). */
-export type TodoRoute = typeof TODO_ENDPOINTS['list'] // '/api/todos'
 
 // Example: Using satisfies for theme tokens (in themeStore.ts)
 // const THEME_TOKENS = {
