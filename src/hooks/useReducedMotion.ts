@@ -3,26 +3,35 @@
 // Some users have vestibular disorders (dizziness, nausea) triggered by
 // motion/animation. They can set "Reduce motion" in their OS preferences.
 // This hook detects that preference and lets us disable/simplify animations.
+//
+// Uses `useSyncExternalStore` — the canonical React 18+ pattern for
+// subscribing to external state sources (like media queries). This avoids
+// the anti-pattern of "setState inside useEffect" and provides:
+// - Tearing prevention during concurrent rendering
+// - SSR support via getServerSnapshot
+// - Cleaner cleanup (subscription is managed by React)
 
-import { useState, useEffect } from 'react'
+import { useSyncExternalStore } from 'react'
+
+const QUERY = '(prefers-reduced-motion: reduce)'
+
+/** Subscribe to media query changes. Returns a cleanup function. */
+function subscribe(callback: () => void): () => void {
+  const mediaQuery = window.matchMedia(QUERY)
+  mediaQuery.addEventListener('change', callback)
+  return () => mediaQuery.removeEventListener('change', callback)
+}
+
+/** Read the current value of the media query. */
+function getSnapshot(): boolean {
+  return window.matchMedia(QUERY).matches
+}
+
+/** Server-side fallback — assume no preference (don't disable animations). */
+function getServerSnapshot(): boolean {
+  return false
+}
 
 export function useReducedMotion(): boolean {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    
-    // Set initial value
-    setPrefersReducedMotion(mediaQuery.matches)
-
-    // Listen for changes (user might toggle the setting)
-    const handleChange = (event: MediaQueryListEvent) => {
-      setPrefersReducedMotion(event.matches)
-    }
-
-    mediaQuery.addEventListener('change', handleChange)
-    return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [])
-
-  return prefersReducedMotion
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 }

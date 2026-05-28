@@ -361,7 +361,7 @@ export async function fetchApi<T>(
 // objects where you want autocomplete AND precise literal types.
 
 /** Configuration for todo API endpoints. */
-const TODO_ENDPOINTS = {
+export const TODO_ENDPOINTS = {
   list: '/api/todos',
   create: '/api/todos',
   update: (id: number) => `/api/todos/${id}`,

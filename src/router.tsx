@@ -5,6 +5,12 @@
 // /active    → Active (incomplete) todos
 // /completed → Completed todos
 // /*         → 404 Not Found
+//
+// Note: This file intentionally exports both components and the `router`
+// config object. Fast Refresh requires component-only files, but a router
+// config is the canonical exception. HMR works for child routes regardless.
+
+/* eslint-disable react-refresh/only-export-components */
 
 import { createBrowserRouter, Outlet } from 'react-router-dom'
 import { Suspense } from 'react'

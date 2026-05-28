@@ -83,40 +83,9 @@ function ListInner<T>({
 
 export const List = memo(ListInner) as <T>(props: ListProps<T>) => ReactNode
 
-// --- Type Predicate Helper ---
-//
-// When consuming List, you often need to narrow types. This helper
-// demonstrates the pattern (though it's not used directly here).
-// It's exported as documentation of the generic pattern.
-export function isListItemOfType<T>(
-  item: unknown,
-  predicate: (value: unknown) => value is T
-): item is T {
-  return predicate(item)
-}
-
-// --- Utility: Typed Key Extractor ---
-//
-// Common key extractors for primitive patterns. These are typed to
-// work with List<T> while providing intellisense for common cases.
-
-export const keyExtractors = {
-  /** Use when items have an `id: string | number` property. */
-  byId: <T extends { id: string | number }>(item: T): string | number => item.id,
-
-  /** Use when items have a `_id: string` property (MongoDB style). */
-  byUnderscoreId: <T extends { _id: string }>(item: T): string => item._id,
-
-  /** Use when items have a `key: string | number` property. */
-  byKey: <T extends { key: string | number }>(item: T): string | number => item.key,
-
-  /** Fallback: use array index (not recommended for dynamic lists). */
-  byIndex: (_item: unknown, index: number): number => index,
-} as const
-
-// The `as const` makes the object deeply readonly and preserves
-// literal types. Combined with `satisfies`, this is powerful for
-// configuration objects. See the next lesson item for `satisfies`.
+// Note: `keyExtractors` and `isListItemOfType` have been moved to
+// `./keyExtractors.ts` to satisfy the react-refresh/only-export-components
+// rule (component files should only export components for HMR to work).
 
 // --- AnimatedList<T> — Extended Generic Pattern ---
 //

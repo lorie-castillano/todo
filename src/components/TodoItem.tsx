@@ -32,6 +32,20 @@ function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoIte
   const [editValue, setEditValue] = useState(todo.text)
   const [error, setError] = useState<string | null>(null)
 
+  // --- Adjust state on prop change (React official pattern) ---
+  // When `todo.text` changes externally (e.g., another session edited it)
+  // and we're NOT currently editing, sync the displayed value.
+  //
+  // We track the previous prop with state and compare during render.
+  // This is the canonical alternative to "setState in useEffect" — it
+  // runs synchronously, avoiding cascading renders.
+  // See: https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes
+  const [prevText, setPrevText] = useState(todo.text)
+  if (!isEditing && prevText !== todo.text) {
+    setPrevText(todo.text)
+    setEditValue(todo.text)
+  }
+
   // Auto-focus the input when entering edit mode
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
@@ -40,13 +54,6 @@ function TodoItemImpl({ todo, isDuplicate, onToggle, onDelete, onEdit }: TodoIte
       inputRef.current?.select() // Select all text for easy replacement
     }
   }, [isEditing])
-
-  // Reset edit value if todo text changes externally (e.g., from another session)
-  useEffect(() => {
-    if (!isEditing) {
-      setEditValue(todo.text)
-    }
-  }, [todo.text, isEditing])
 
   const handleDoubleClick = () => {
     if (!todo.completed) {

@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { todoReducer } from './todoReducer'
 import type { Todo } from './types'
+import { createTodoId as tid } from './types'
 
 // --- Unit Tests for the Reducer ---
 //
@@ -32,7 +33,7 @@ describe('todoReducer', () => {
 
     it('appends to existing todos', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Existing', completed: false },
+        { id: tid(1), text: 'Existing', completed: false },
       ]
       const action = { type: 'ADD' as const, text: 'New' }
 
@@ -45,7 +46,7 @@ describe('todoReducer', () => {
 
     it('does not mutate original state (immutability)', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Existing', completed: false },
+        { id: tid(1), text: 'Existing', completed: false },
       ]
       const action = { type: 'ADD' as const, text: 'New' }
 
@@ -60,32 +61,32 @@ describe('todoReducer', () => {
   describe('TOGGLE action', () => {
     it('toggles a todo from incomplete to complete', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Task', completed: false },
+        { id: tid(1), text: 'Task', completed: false },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: 1 })
+      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: tid(1) })
 
       expect(nextState[0].completed).toBe(true)
     })
 
     it('toggles a todo back from complete to incomplete', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Task', completed: true },
+        { id: tid(1), text: 'Task', completed: true },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: 1 })
+      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: tid(1) })
 
       expect(nextState[0].completed).toBe(false)
     })
 
     it('only affects the targeted todo', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'A', completed: false },
-        { id: 2, text: 'B', completed: false },
-        { id: 3, text: 'C', completed: false },
+        { id: tid(1), text: 'A', completed: false },
+        { id: tid(2), text: 'B', completed: false },
+        { id: tid(3), text: 'C', completed: false },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: 2 })
+      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: tid(2) })
 
       expect(nextState[0].completed).toBe(false)
       expect(nextState[1].completed).toBe(true)
@@ -94,10 +95,10 @@ describe('todoReducer', () => {
 
     it('returns same state if id does not exist', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Task', completed: false },
+        { id: tid(1), text: 'Task', completed: false },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: 999 })
+      const nextState = todoReducer(initialState, { type: 'TOGGLE', id: tid(999) })
 
       expect(nextState[0].completed).toBe(false)
     })
@@ -106,12 +107,12 @@ describe('todoReducer', () => {
   describe('EDIT action', () => {
     it('updates the text of a todo', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Old text', completed: false },
+        { id: tid(1), text: 'Old text', completed: false },
       ]
 
       const nextState = todoReducer(initialState, {
         type: 'EDIT',
-        id: 1,
+        id: tid(1),
         text: 'New text',
       })
 
@@ -120,12 +121,12 @@ describe('todoReducer', () => {
 
     it('trims whitespace from edited text', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Old', completed: false },
+        { id: tid(1), text: 'Old', completed: false },
       ]
 
       const nextState = todoReducer(initialState, {
         type: 'EDIT',
-        id: 1,
+        id: tid(1),
         text: '  Trimmed  ',
       })
 
@@ -134,12 +135,12 @@ describe('todoReducer', () => {
 
     it('ignores empty text (defense in depth)', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Original', completed: false },
+        { id: tid(1), text: 'Original', completed: false },
       ]
 
       const nextState = todoReducer(initialState, {
         type: 'EDIT',
-        id: 1,
+        id: tid(1),
         text: '   ',
       })
 
@@ -149,12 +150,12 @@ describe('todoReducer', () => {
 
     it('preserves completed status when editing', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Old', completed: true },
+        { id: tid(1), text: 'Old', completed: true },
       ]
 
       const nextState = todoReducer(initialState, {
         type: 'EDIT',
-        id: 1,
+        id: tid(1),
         text: 'New',
       })
 
@@ -165,11 +166,11 @@ describe('todoReducer', () => {
   describe('DELETE action', () => {
     it('removes a todo by id', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'A', completed: false },
-        { id: 2, text: 'B', completed: false },
+        { id: tid(1), text: 'A', completed: false },
+        { id: tid(2), text: 'B', completed: false },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'DELETE', id: 1 })
+      const nextState = todoReducer(initialState, { type: 'DELETE', id: tid(1) })
 
       expect(nextState).toHaveLength(1)
       expect(nextState[0].id).toBe(2)
@@ -177,10 +178,10 @@ describe('todoReducer', () => {
 
     it('returns empty array when deleting the only todo', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'Only', completed: false },
+        { id: tid(1), text: 'Only', completed: false },
       ]
 
-      const nextState = todoReducer(initialState, { type: 'DELETE', id: 1 })
+      const nextState = todoReducer(initialState, { type: 'DELETE', id: tid(1) })
 
       expect(nextState).toEqual([])
     })
@@ -189,9 +190,9 @@ describe('todoReducer', () => {
   describe('CLEAR_COMPLETED action', () => {
     it('removes only completed todos', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'A', completed: true },
-        { id: 2, text: 'B', completed: false },
-        { id: 3, text: 'C', completed: true },
+        { id: tid(1), text: 'A', completed: true },
+        { id: tid(2), text: 'B', completed: false },
+        { id: tid(3), text: 'C', completed: true },
       ]
 
       const nextState = todoReducer(initialState, { type: 'CLEAR_COMPLETED' })
@@ -202,8 +203,8 @@ describe('todoReducer', () => {
 
     it('returns empty array when all are completed', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'A', completed: true },
-        { id: 2, text: 'B', completed: true },
+        { id: tid(1), text: 'A', completed: true },
+        { id: tid(2), text: 'B', completed: true },
       ]
 
       const nextState = todoReducer(initialState, { type: 'CLEAR_COMPLETED' })
@@ -213,7 +214,7 @@ describe('todoReducer', () => {
 
     it('returns same state when nothing is completed', () => {
       const initialState: Todo[] = [
-        { id: 1, text: 'A', completed: false },
+        { id: tid(1), text: 'A', completed: false },
       ]
 
       const nextState = todoReducer(initialState, { type: 'CLEAR_COMPLETED' })
