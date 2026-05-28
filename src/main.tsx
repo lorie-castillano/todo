@@ -4,8 +4,19 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { router } from './router'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-)
+async function bootstrap() {
+  // Start MSW service worker in all environments.
+  // This app has no real backend — MSW provides the API layer in both
+  // dev and production. The service worker intercepts /api/* requests
+  // and returns in-memory data (resets on page reload).
+  const { startMocking } = await import('./mocks/browser')
+  await startMocking()
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <RouterProvider router={router} />
+    </StrictMode>,
+  )
+}
+
+bootstrap()
