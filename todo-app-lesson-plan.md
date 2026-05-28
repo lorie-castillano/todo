@@ -171,9 +171,9 @@
 *Progress: 9/9 core items done + 4 bonus items. Lesson 4.1 complete!*
 
 ### Lesson 4.2 — CI/CD, Monitoring & Production DevOps
-- [ ] GitHub Actions: lint, test, build on every PR
-- [ ] Preview deployments (Vercel/Netlify)
-- [ ] Environment variables and configuration management
+- [x] GitHub Actions: lint, test, build on every PR
+- [x] Preview deployments (Vercel/Netlify)
+- [x] Environment variables and configuration management
 - [ ] Automated accessibility audits in CI (axe-core)
 - [ ] Error boundaries with error reporting
 - [ ] Performance monitoring (Web Vitals: LCP, FID, CLS)
