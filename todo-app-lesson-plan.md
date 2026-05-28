@@ -174,7 +174,7 @@
 - [x] GitHub Actions: lint, test, build on every PR
 - [x] Preview deployments (Vercel/Netlify)
 - [x] Environment variables and configuration management
-- [ ] Automated accessibility audits in CI (axe-core)
+- [x] Automated accessibility audits in CI (axe-core)
 - [ ] Error boundaries with error reporting
 - [ ] Performance monitoring (Web Vitals: LCP, FID, CLS)
 - [ ] Logging strategies for production
