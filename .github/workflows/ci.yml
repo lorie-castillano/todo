@@ -147,9 +147,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, typecheck, test, build]
     if: github.event_name == 'pull_request'
-    environment:
-      name: preview
-      url: ${{ steps.deploy.outputs.preview-url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
