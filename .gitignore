@@ -28,3 +28,5 @@ coverage/
 
 # bundle analyzer output
 stats.html
+.vercel
+.env*
