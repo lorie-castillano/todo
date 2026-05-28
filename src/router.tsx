@@ -20,6 +20,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from './lib/queryClient'
 import { useThemeDomSync } from './stores/themeStore'
+import { config } from './lib/config'
 
 // Lazy load the main App component for code splitting
 const App = () => import('./App').then((m) => ({ Component: m.default }))
@@ -44,7 +45,7 @@ function RootLayout() {
         <Suspense fallback={null}>
           <Outlet />
         </Suspense>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {config.features.devtools && <ReactQueryDevtools initialIsOpen={false} />}
       </QueryClientProvider>
     </ErrorBoundary>
   )
