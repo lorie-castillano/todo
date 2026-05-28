@@ -157,17 +157,18 @@
 - [x] Derived state with selectors
 - [x] Undo/redo functionality with command pattern
 - [x] Discriminated unions for todo actions
-- [ ] Generic components (`List<T>`)
-- [ ] Utility types: `Pick`, `Omit`, `Partial`, `Record`
-- [ ] Type-safe event emitters and API responses
-- [ ] `satisfies` operator and `const` assertions
+- [x] Generic components (`List<T>`, `AnimatedList<T>`)
+- [x] Utility types: `Pick`, `Omit`, `Partial`, `Record`, `Required`, `Readonly`
+- [x] Type-safe event emitters and API responses (`ApiResult<T>`, `ApiError`)
+- [x] `satisfies` operator and `const` assertions
 - [x] **Bonus**: Branded types (`TodoId`) for compile-time ID safety
 - [x] **Bonus**: Keyboard shortcuts (⌘Z / ⌘⇧Z) for undo/redo
 - [x] **Bonus**: `window.matchMedia` polyfill for jsdom tests
+- [x] **Bonus**: Type-safe key extractors with generic constraints
 
 **Concepts**: State libraries tradeoffs, normalized state shape, command pattern, advanced type patterns, type-level programming
 
-*Progress: 5/9 core items done + 3 bonus items. Remaining: generic components, utility types, type-safe APIs, satisfies operator.*
+*Progress: 9/9 core items done + 4 bonus items. Lesson 4.1 complete!*
 
 ### Lesson 4.2 — CI/CD, Monitoring & Production DevOps
 - [ ] GitHub Actions: lint, test, build on every PR
@@ -600,13 +601,13 @@ By the end of this plan, you will be able to:
 | Phase 1: Foundations | ✅ Complete | 5/5 |
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
-| Phase 4: Senior-Level & Production | � In Progress | 0/3 (Lesson 4.1: 5/9 + bonuses) |
+| Phase 4: Senior-Level & Production | 🚧 In Progress | 0.33/3 (Lesson 4.1 ✅ Complete) |
 | Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Ready to start Lesson 4.1 — State Management at Scale & Advanced TypeScript?**
+**Ready to start Lesson 4.2 — CI/CD, Monitoring & Production DevOps?**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day

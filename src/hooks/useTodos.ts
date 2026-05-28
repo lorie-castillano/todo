@@ -18,6 +18,7 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 import type { Todo } from '../types'
+import { createTodoId } from '../types'
 
 // Query key factory — centralizes cache key patterns
 // Makes cache invalidation predictable
@@ -94,7 +95,7 @@ export function useCreateTodo() {
       // We use a temporary ID that will be replaced by the server response
       queryClient.setQueryData<Todo[]>(todoKeys.lists(), (old) => {
         const optimisticTodo: Todo = {
-          id: Date.now(), // temporary ID
+          id: createTodoId(Date.now()), // temporary ID
           text: newText,
           completed: false,
         }
@@ -301,3 +302,91 @@ export function useClearCompleted() {
     },
   })
 }
+
+// --- Type-Safe API Response Handling ---
+//
+// These types and utilities demonstrate how to enforce type safety at
+// API boundaries. The `satisfies` operator (see below) is the modern
+// way to ensure objects match types while preserving literal inference.
+
+/** Branded error type for API failures. */
+export type ApiError = { readonly __brand: 'ApiError'; message: string; status: number }
+
+export function createApiError(message: string, status: number): ApiError {
+  return { __brand: 'ApiError', message, status } as ApiError
+}
+
+/** Discriminated union for API results: either data or error. */
+export type ApiResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: ApiError }
+
+/**
+ * Type-safe fetch wrapper that returns a discriminated union.
+ * The caller must check `ok` before accessing `data`.
+ */
+export async function fetchApi<T>(
+  url: string,
+  options?: RequestInit
+): Promise<ApiResult<T>> {
+  try {
+    const response = await fetch(url, options)
+    if (!response.ok) {
+      const errorText = await response.text()
+      return {
+        ok: false,
+        error: createApiError(
+          errorText || `HTTP ${response.status}`,
+          response.status
+        ),
+      }
+    }
+    const data = (await response.json()) as T
+    return { ok: true, data }
+  } catch (err) {
+    return {
+      ok: false,
+      error: createApiError(
+        err instanceof Error ? err.message : 'Network error',
+        0
+      ),
+    }
+  }
+}
+
+// --- `satisfies` Operator Demonstration ---
+//
+// The `satisfies` operator (TypeScript 4.9+) checks that an expression
+// matches a type WITHOUT widening it. This is perfect for configuration
+// objects where you want autocomplete AND precise literal types.
+
+/** Configuration for todo API endpoints. */
+const TODO_ENDPOINTS = {
+  list: '/api/todos',
+  create: '/api/todos',
+  update: (id: number) => `/api/todos/${id}`,
+  delete: (id: number) => `/api/todos/${id}`,
+  clearCompleted: '/api/todos?completed=true',
+} as const satisfies Record<string, string | ((id: number) => string)>
+
+// With `satisfies`:
+// - TODO_ENDPOINTS.list is literally '/api/todos' (not widened to string)
+// - Autocomplete works for all keys
+// - Type error if we add a key that doesn't match the constraint
+// - `as const` preserves literal types; `satisfies` validates the shape
+
+/** Type inference from the satisfies object. */
+export type TodoEndpoint = keyof typeof TODO_ENDPOINTS
+
+/** Extract route path type (literals, not string). */
+export type TodoRoute = typeof TODO_ENDPOINTS['list'] // '/api/todos'
+
+// Example: Using satisfies for theme tokens (in themeStore.ts)
+// const THEME_TOKENS = {
+//   colors: { primary: '#3b82f6', danger: '#ef4444' },
+//   spacing: { sm: '0.5rem', md: '1rem', lg: '1.5rem' },
+// } as const satisfies { colors: Record<string, string>; spacing: Record<string, string> }
+//
+// Now THEME_TOKENS.colors.primary is '#3b82f6' (literal), not string.
+// Autocomplete works: THEME_TOKENS.colors. shows 'primary' | 'danger'
+
