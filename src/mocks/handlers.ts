@@ -5,6 +5,7 @@
 import { http, HttpResponse, delay } from 'msw'
 import { db } from './db'
 import type { Todo } from '../types'
+import { createTodoId } from '../types'
 
 // Simulate network latency (100-400ms random)
 // This forces us to handle loading states properly.
@@ -18,10 +19,14 @@ interface DbTodo {
   createdAt: number
 }
 
-// Transform DB model to our app's Todo type
+// Transform DB model to our app's Todo type.
+// We brand the numeric id with `createTodoId` so it matches the
+// `TodoId` type the rest of the app uses.
 function toTodo(dbTodo: DbTodo): Todo {
+  const numericId =
+    typeof dbTodo.id === 'string' ? parseInt(dbTodo.id, 10) || Date.now() : dbTodo.id
   return {
-    id: typeof dbTodo.id === 'string' ? parseInt(dbTodo.id, 10) || Date.now() : dbTodo.id,
+    id: createTodoId(numericId),
     text: dbTodo.text,
     completed: dbTodo.completed,
   }
