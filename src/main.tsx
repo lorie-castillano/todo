@@ -3,6 +3,11 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { router } from './router'
+import { initSentry } from './lib/sentry'
+
+// Initialize Sentry as early as possible to catch all errors.
+// Only activates if VITE_SENTRY_DSN is set in environment.
+initSentry()
 
 async function bootstrap() {
   // Start MSW service worker in all environments.

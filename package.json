@@ -16,6 +16,7 @@
     "analyze": "ANALYZE=true vite build"
   },
   "dependencies": {
+    "@sentry/react": "^10.55.0",
     "@tanstack/react-query": "^5.100.11",
     "@tanstack/react-query-devtools": "^5.100.11",
     "framer-motion": "^12.38.0",

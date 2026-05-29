@@ -228,6 +228,7 @@ function App() {
         <Suspense fallback={null}>
           {showHelp && <HelpModal onClose={() => setShowHelp(false)} />}
         </Suspense>
+
       </div>
   )
 }

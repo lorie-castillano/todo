@@ -175,7 +175,7 @@
 - [x] Preview deployments (Vercel/Netlify)
 - [x] Environment variables and configuration management
 - [x] Automated accessibility audits in CI (axe-core)
-- [ ] Error boundaries with error reporting
+- [x] Error boundaries with error reporting
 - [ ] Performance monitoring (Web Vitals: LCP, FID, CLS)
 - [ ] Logging strategies for production
 - [ ] Feature flags for gradual rollouts

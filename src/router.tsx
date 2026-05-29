@@ -21,6 +21,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from './lib/queryClient'
 import { useThemeDomSync } from './stores/themeStore'
 import { config } from './lib/config'
+import { reportBoundaryError } from './lib/errorReporter'
 
 // Lazy load the main App component for code splitting
 const App = () => import('./App').then((m) => ({ Component: m.default }))
@@ -39,7 +40,7 @@ function ThemeSync(): null {
 // and accessible from any component without a Provider.
 function RootLayout() {
   return (
-    <ErrorBoundary>
+    <ErrorBoundary onError={reportBoundaryError}>
       <QueryClientProvider client={queryClient}>
         <ThemeSync />
         <Suspense fallback={null}>
