@@ -4,10 +4,15 @@ import { RouterProvider } from 'react-router-dom'
 import './index.css'
 import { router } from './router'
 import { initSentry } from './lib/sentry'
+import { initWebVitals } from './lib/webVitals'
 
 // Initialize Sentry as early as possible to catch all errors.
 // Only activates if VITE_SENTRY_DSN is set in environment.
 initSentry()
+
+// Initialize Web Vitals monitoring for performance metrics.
+// Reports LCP, INP, CLS, TTFB, FCP to Sentry and console.
+initWebVitals()
 
 async function bootstrap() {
   // Start MSW service worker in all environments.

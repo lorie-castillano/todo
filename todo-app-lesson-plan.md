@@ -176,7 +176,7 @@
 - [x] Environment variables and configuration management
 - [x] Automated accessibility audits in CI (axe-core)
 - [x] Error boundaries with error reporting
-- [ ] Performance monitoring (Web Vitals: LCP, FID, CLS)
+- [x] Performance monitoring (Web Vitals: LCP, INP, CLS)
 - [ ] Logging strategies for production
 - [ ] Feature flags for gradual rollouts
 
