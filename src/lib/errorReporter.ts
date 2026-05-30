@@ -12,6 +12,7 @@
 import type { ErrorInfo } from 'react'
 import * as Sentry from '@sentry/react'
 import { config } from './config'
+import { logger } from './logger'
 
 // --- Types ---
 
@@ -74,6 +75,8 @@ export function reportBoundaryError(error: Error, errorInfo: ErrorInfo): void {
     context: {
       appVersion: config.appVersion,
       url: window.location.href,
+      // Correlation ID ties this error to the user's full session log trail
+      correlationId: logger.getCorrelationId(),
     },
   })
 }
