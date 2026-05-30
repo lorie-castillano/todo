@@ -601,13 +601,90 @@ By the end of this plan, you will be able to:
 | Phase 1: Foundations | ✅ Complete | 5/5 |
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
-| Phase 4: Senior-Level & Production | 🚧 In Progress | 0.33/3 (Lesson 4.1 ✅ Complete) |
+| Phase 4: Senior-Level & Production | 🚧 In Progress | 1.75/3 (4.1 ✅, 4.2 at 6/8 items) |
 | Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Ready to start Lesson 4.2 — CI/CD, Monitoring & Production DevOps?**
+**Next up: Finish Lesson 4.2 — Logging strategies + Feature flags (2 items left)**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
+
+---
+
+## 🎯 Target Checkpoint Schedule
+
+> **Commitment**: 2 hrs/day, weekdays only (~10 hrs/week)
+> **Target graduation**: **August 31, 2026**
+> **Plan start of remaining work**: May 30, 2026
+
+Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
+
+| Checkpoint | Target Date | Actual Date | Status |
+|------------|-------------|-------------|--------|
+| **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | _____ | _____ |
+| **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | _____ | _____ |
+| **Phase 5 complete** (Backend & MCP) | Jun 27, 2026 | _____ | _____ |
+| **Phase 6 complete** (A2A & Multi-Agent) | Jul 18, 2026 | _____ | _____ |
+| **Phase 7 complete** (System Design) | Aug 1, 2026 | _____ | _____ |
+| **Phase 8 complete** (AI Governance) | Aug 15, 2026 | _____ | _____ |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 29, 2026 | _____ | _____ |
+
+**Buffer**: Targets land 2 days before Aug 31 — built-in slack for tough lessons or missed days.
+
+---
+
+## 📊 Progress Report Guide
+
+Use this after completing **each phase checkpoint** to know if you need to adjust. Compare your **actual date** to the **target date**:
+
+### 🟢 On Time / Advanced — "Great job!"
+- **Actual date ≤ target date**
+- You're pacing perfectly or ahead. Keep the 2 hrs/day rhythm.
+- **If 3+ days ahead**: You're *advanced*. Optional — tackle bonus items (circuit breakers, Elasticsearch, advanced RAG) you'd otherwise skip, or bank the time as buffer.
+
+### 🟡 Slightly Behind — "Catch-up mode"
+- **Actual date is 1–4 days late**
+- Recoverable without stress. Pick one:
+  - Add **30 min** to your next 5 weekday sessions (2.5 hrs/day)
+  - Do **one weekend session** (1–2 hrs) to absorb the gap
+- Re-check at the next checkpoint.
+
+### 🔴 Significantly Behind — "Re-plan needed"
+- **Actual date is 5+ days late**
+- The Aug 31 goal is at risk. Choose one strategy:
+  - **Increase pace**: 3 hrs/day weekdays until back on target
+  - **Add weekends**: 2 hrs each Sat + Sun (+20 hrs over the remaining stretch)
+  - **Trim scope**: Apply the strategic skips (SQLite over PostgreSQL, conceptual-only RAG, skip circuit breakers) — see notes below
+- If still behind after 2 checkpoints, **move graduation to mid-September** rather than burning out.
+
+### Quick Self-Check Formula
+```
+Days off target = (actual completion date) − (target date)
+
+≤ 0 days   → 🟢 On time / advanced
+1–4 days   → 🟡 Slightly behind, minor catch-up
+5+ days    → 🔴 Re-plan: add hours, weekends, or trim scope
+```
+
+### Strategic Scope Trims (use only if 🔴)
+| Lesson | Streamline to save time |
+|--------|------------------------|
+| 5.2 Database | Use SQLite instead of full PostgreSQL setup |
+| 5.5 Agent hardening | Core auth + audit only; skip circuit breakers for MVP |
+| 7.2 Core components | Focus on caching + message queues; skip Elasticsearch |
+| 9.3 Production RAG | Conceptual only — you already have RAG basics |
+
+---
+
+## 📅 Progress Log
+
+> Record the **actual finish date** for each lesson here. This feeds the checkpoint status above.
+
+| Lesson | Target | Actual | Notes |
+|--------|--------|--------|-------|
+| 4.1 — State + Advanced TS | — | ✅ Done | Completed ahead of schedule |
+| 4.2 — CI/CD & Monitoring | Jun 2 | 6/8 in progress | Logging + feature flags remain |
+| 4.3 — Architecture & Docs | Jun 6 | _____ | |
