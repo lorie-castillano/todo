@@ -178,9 +178,13 @@
 - [x] Error boundaries with error reporting
 - [x] Performance monitoring (Web Vitals: LCP, INP, CLS)
 - [x] Logging strategies for production
-- [ ] Feature flags for gradual rollouts
+- [x] Feature flags for gradual rollouts
+  - *Note: Built the flag engine (boolean / percentage / userList strategies) + tests.
+    Real use-case rollout test with authenticated users is deferred to Lesson 5.6.*
 
 **Concepts**: Continuous integration, deployment pipelines, observability, performance metrics, progressive delivery
+
+*Progress: 8/8 items done. Lesson 4.2 complete!*
 
 ### Lesson 4.3 — Architecture, Documentation & Code Review
 - [ ] Final refactor: clean architecture review
@@ -248,8 +252,16 @@
 - [ ] Frontend-to-backend end-to-end tests
 - [ ] Docker multi-container setup (frontend + backend + db)
 - [ ] Production deployment checklist
+- [ ] **Feature flags — real use-case test** (deferred from Lesson 4.2)
+  - Pass the authenticated user's real `userId` into `useFeatureFlag`/`isFeatureEnabled`
+  - Wire `bulkActions` (percentage rollout) into an actual UI feature and confirm
+    the same logged-in user consistently gets the same experience across sessions
+  - Add a real beta user's ID to `aiSuggestions` (userList) and verify targeting
+  - Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
+  - *Why deferred*: a meaningful rollout test needs real authenticated users, which
+    only exist once the backend + user auth are in place (not the build-time stub).
 
-**Concepts**: Full-stack systems, containerization, production deployment
+**Concepts**: Full-stack systems, containerization, production deployment, feature flag rollouts with real users
 
 ---
 
@@ -601,14 +613,14 @@ By the end of this plan, you will be able to:
 | Phase 1: Foundations | ✅ Complete | 5/5 |
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
-| Phase 4: Senior-Level & Production | 🚧 In Progress | 1.75/3 (4.1 ✅, 4.2 at 6/8 items) |
+| Phase 4: Senior-Level & Production | 🚧 In Progress | 2/3 (4.1 ✅, 4.2 ✅) |
 | Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Finish Lesson 4.2 — Logging strategies + Feature flags (2 items left)**
+**Next up: Lesson 4.3 — Architecture, Documentation & Code Review**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -624,7 +636,7 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 
 | Checkpoint | Target Date | Actual Date | Status |
 |------------|-------------|-------------|--------|
-| **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | _____ | _____ |
+| **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | _____ | _____ |
 | **Phase 5 complete** (Backend & MCP) | Jun 27, 2026 | _____ | _____ |
 | **Phase 6 complete** (A2A & Multi-Agent) | Jul 18, 2026 | _____ | _____ |
@@ -686,5 +698,5 @@ Days off target = (actual completion date) − (target date)
 | Lesson | Target | Actual | Notes |
 |--------|--------|--------|-------|
 | 4.1 — State + Advanced TS | — | ✅ Done | Completed ahead of schedule |
-| 4.2 — CI/CD & Monitoring | Jun 2 | 6/8 in progress | Logging + feature flags remain |
+| 4.2 — CI/CD & Monitoring | Jun 2 | ✅ May 30 | Done 3 days early (overtime session) |
 | 4.3 — Architecture & Docs | Jun 6 | _____ | |
