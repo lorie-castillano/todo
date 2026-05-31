@@ -30,3 +30,4 @@ coverage/
 stats.html
 .vercel
 .env*
+!.env.example

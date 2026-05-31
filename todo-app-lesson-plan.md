@@ -187,13 +187,15 @@
 *Progress: 8/8 items done. Lesson 4.2 complete!*
 
 ### Lesson 4.3 — Architecture, Documentation & Code Review
-- [ ] Final refactor: clean architecture review
-- [ ] File/folder structure for scalability
-- [ ] Documentation: README, component docs, ADRs (Architecture Decision Records)
-- [ ] Code review checklist: what senior engineers look for
-- [ ] Final production-readiness audit (use the production-ready-checklist skill)
+- [x] Final refactor: clean architecture review
+- [x] File/folder structure for scalability
+- [x] Documentation: README, component docs, ADRs (Architecture Decision Records)
+- [x] Code review checklist: what senior engineers look for
+- [x] Final production-readiness audit (use the production-ready-checklist skill)
 
 **Concepts**: Software architecture, technical documentation, code review culture, engineering maturity
+
+*Progress: 5/5 items done. Lesson 4.3 complete! Phase 4 done!*
 
 ---
 
@@ -613,14 +615,14 @@ By the end of this plan, you will be able to:
 | Phase 1: Foundations | ✅ Complete | 5/5 |
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
-| Phase 4: Senior-Level & Production | 🚧 In Progress | 2/3 (4.1 ✅, 4.2 ✅) |
+| Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
 | Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 4.3 — Architecture, Documentation & Code Review**
+**Next up: Lesson 5.1 — Node.js Backend Foundation**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -637,7 +639,7 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 | Checkpoint | Target Date | Actual Date | Status |
 |------------|-------------|-------------|--------|
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
-| **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | _____ | _____ |
+| **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
 | **Phase 5 complete** (Backend & MCP) | Jun 27, 2026 | _____ | _____ |
 | **Phase 6 complete** (A2A & Multi-Agent) | Jul 18, 2026 | _____ | _____ |
 | **Phase 7 complete** (System Design) | Aug 1, 2026 | _____ | _____ |
@@ -699,4 +701,4 @@ Days off target = (actual completion date) − (target date)
 |--------|--------|--------|-------|
 | 4.1 — State + Advanced TS | — | ✅ Done | Completed ahead of schedule |
 | 4.2 — CI/CD & Monitoring | Jun 2 | ✅ May 30 | Done 3 days early (overtime session) |
-| 4.3 — Architecture & Docs | Jun 6 | _____ | |
+| 4.3 — Architecture & Docs | Jun 6 | ✅ May 31 | Done 6 days early (overtime session) |

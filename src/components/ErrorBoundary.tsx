@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
+import { logger } from '../lib/logger'
 
 // Error Boundary — the React way to handle errors in the component tree.
 //
@@ -35,9 +36,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log to error reporting service
-    console.error('ErrorBoundary caught error:', error.message)
-    console.error('Component stack:', errorInfo.componentStack)
+    logger.error('ErrorBoundary caught error', {
+      message: error.message,
+      componentStack: errorInfo.componentStack ?? undefined,
+    })
     this.props.onError?.(error, errorInfo)
   }
 
