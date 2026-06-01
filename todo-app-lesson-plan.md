@@ -204,13 +204,15 @@
 *This phase will begin after completing Phase 4. It transforms our frontend-only app into a full-stack, MCP-ready system for AI agent consumption.*
 
 ### Lesson 5.1 — Node.js Backend Foundation
-- [ ] Fastify server setup with TypeScript
-- [ ] Project structure: routes, services, middleware layers
-- [ ] Environment configuration with validation
-- [ ] Structured logging with correlation IDs
-- [ ] Health check and graceful shutdown
+- [x] Fastify server setup with TypeScript
+- [x] Project structure: routes, services, middleware layers
+- [x] Environment configuration with validation
+- [x] Structured logging with correlation IDs
+- [x] Health check and graceful shutdown
 
 **Concepts**: Backend architecture, separation of concerns, observability
+
+*Progress: 5/5 items done. Lesson 5.1 complete! See ADR-005 for the backend structure + Fastify decision.*
 
 ### Lesson 5.2 — Database Design & Persistence
 - [ ] PostgreSQL setup with Docker Compose
@@ -616,13 +618,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🔲 Pending | 0/6 |
+| Phase 5: Backend & MCP Integration | � In Progress | 1/6 (5.1 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.1 — Node.js Backend Foundation**
+**Next up: Lesson 5.2 — Database Design & Persistence**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -702,3 +704,4 @@ Days off target = (actual completion date) − (target date)
 | 4.1 — State + Advanced TS | — | ✅ Done | Completed ahead of schedule |
 | 4.2 — CI/CD & Monitoring | Jun 2 | ✅ May 30 | Done 3 days early (overtime session) |
 | 4.3 — Architecture & Docs | Jun 6 | ✅ May 31 | Done 6 days early (overtime session) |
+| 5.1 — Node.js Backend Foundation | — | ✅ Jun 1 | Fastify + Pino + Zod; health checks, graceful shutdown |

@@ -165,6 +165,7 @@ See [`docs/ADR/`](./docs/ADR/) for documented architectural decisions:
 - [ADR-002: Command pattern for undo/redo](./docs/ADR/002-command-pattern-undo-redo.md)
 - [ADR-003: MSW for API mocking in tests](./docs/ADR/003-msw-api-mocking.md)
 - [ADR-004: Feature flags with deterministic hashing](./docs/ADR/004-feature-flags-deterministic-hashing.md)
+- [ADR-005: Backend as a separate package with Fastify](./docs/ADR/005-backend-monorepo-fastify.md)
 
 ---
 
