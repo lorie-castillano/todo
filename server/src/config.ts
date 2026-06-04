@@ -30,6 +30,13 @@ const envSchema = z.object({
     .default('info'),
 
   CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
+
+  // PostgreSQL connection string. Prisma uses this directly.
+  // The default matches docker-compose.yml for zero-config local dev.
+  DATABASE_URL: z
+    .string()
+    .url()
+    .default('postgresql://todo_user:todo_pass@localhost:5432/todo_dev?schema=public'),
 })
 
 // --- Parse & validate ---
@@ -58,6 +65,7 @@ export const config = Object.freeze({
   nodeEnv: parsed.data.NODE_ENV,
   logLevel: parsed.data.LOG_LEVEL,
   corsOrigin: parsed.data.CORS_ORIGIN,
+  databaseUrl: parsed.data.DATABASE_URL,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

@@ -1,0 +1,50 @@
+// Prisma schema — the single source of truth for the database structure.
+//
+// When you change this file:
+//   npx prisma migrate dev --name <description>   → creates a migration
+//   npx prisma generate                           → regenerates the TS client
+//
+// Key design decisions:
+// - autoincrement Integer id (matches frontend's branded TodoId = number)
+// - createdAt / updatedAt for audit trail
+// - deletedAt for soft deletes (null = active, timestamp = deleted)
+// - index on (completed, deletedAt) for the most common query: filter by status
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Todo {
+  // Autoincrement integer matches the frontend's `TodoId = number & { __brand }`
+  id        Int      @id @default(autoincrement())
+
+  // The todo text. Can't be empty (enforced at the app layer with Zod).
+  text      String
+
+  // Completion status. Defaults to false on creation.
+  completed Boolean  @default(false)
+
+  // --- Audit timestamps ---
+  // `createdAt` is set once on insert, never changes.
+  // `updatedAt` is refreshed automatically by Prisma on every update.
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt       @map("updated_at")
+
+  // --- Soft delete ---
+  // null = active record. A timestamp = when it was "deleted".
+  // Queries filter on `deletedAt IS NULL` to hide soft-deleted rows.
+  deletedAt DateTime?                  @map("deleted_at")
+
+  // --- Indexes ---
+  // The frontend's most common query is "show me active/completed todos".
+  // A composite index on (completed, deletedAt) makes this fast.
+  @@index([completed, deletedAt])
+
+  // Use snake_case table name (PostgreSQL convention).
+  @@map("todos")
+}

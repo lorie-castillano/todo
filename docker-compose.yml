@@ -1,0 +1,33 @@
+# Docker Compose for local development dependencies.
+#
+# Usage:
+#   docker compose up -d      # Start PostgreSQL in the background
+#   docker compose down        # Stop it
+#   docker compose down -v     # Stop and wipe all data (fresh start)
+#   docker compose logs -f db  # Watch database logs
+#
+# The server connects via DATABASE_URL in server/.env (see .env.example).
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: todo-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: todo_user
+      POSTGRES_PASSWORD: todo_pass
+      POSTGRES_DB: todo_dev
+    volumes:
+      # Named volume persists data across container restarts.
+      # `docker compose down -v` removes it for a clean slate.
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo_user -d todo_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:

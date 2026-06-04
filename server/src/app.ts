@@ -13,6 +13,7 @@ import Fastify, { type FastifyError } from 'fastify'
 import { config } from './config.js'
 import { logger } from './logger.js'
 import correlationId from './plugins/correlationId.js'
+import prisma from './plugins/prisma.js'
 import { healthRoutes } from './routes/health.js'
 
 // Return type is intentionally inferred. Passing a custom Pino
@@ -41,6 +42,7 @@ export async function buildApp() {
   // --- Plugins (middleware layer) ---
   // Registered first so their hooks apply to all routes below.
   await app.register(correlationId)
+  await app.register(prisma)
 
   // --- Routes layer ---
   await app.register(healthRoutes)

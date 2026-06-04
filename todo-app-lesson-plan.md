@@ -215,13 +215,15 @@
 *Progress: 5/5 items done. Lesson 5.1 complete! See ADR-005 for the backend structure + Fastify decision.*
 
 ### Lesson 5.2 — Database Design & Persistence
-- [ ] PostgreSQL setup with Docker Compose
-- [ ] Prisma ORM: schema design, migrations, client generation
-- [ ] Todo CRUD operations with transactions
-- [ ] Connection pooling and query optimization
-- [ ] Soft deletes and audit timestamps
+- [x] PostgreSQL setup with Docker Compose
+- [x] Prisma ORM: schema design, migrations, client generation
+- [x] Todo CRUD operations with transactions
+- [x] Connection pooling and query optimization
+- [x] Soft deletes and audit timestamps
 
 **Concepts**: Relational databases, ORM patterns, data integrity
+
+*Progress: 5/5 items done. Lesson 5.2 complete! pg.Pool + @prisma/adapter-pg driver adapter, todo service with soft deletes.*
 
 ### Lesson 5.3 — REST API Hardening
 - [ ] Zod validation for all inputs
@@ -618,13 +620,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | � In Progress | 1/6 (5.1 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 2/6 (5.1 ✅ 5.2 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.2 — Database Design & Persistence**
+**Next up: Lesson 5.3 — REST API Hardening**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -705,3 +707,4 @@ Days off target = (actual completion date) − (target date)
 | 4.2 — CI/CD & Monitoring | Jun 2 | ✅ May 30 | Done 3 days early (overtime session) |
 | 4.3 — Architecture & Docs | Jun 6 | ✅ May 31 | Done 6 days early (overtime session) |
 | 5.1 — Node.js Backend Foundation | — | ✅ Jun 1 | Fastify + Pino + Zod; health checks, graceful shutdown |
+| 5.2 — Database Design & Persistence | — | ✅ Jun 4 | PostgreSQL + Prisma 6 + pg.Pool adapter; todo service with soft deletes |

@@ -29,14 +29,20 @@ export const healthRoutes: FastifyPluginAsync = async (fastify) => {
   })
 
   // --- Readiness ---
-  // Today there are no external dependencies, so we're always ready.
-  // In Lesson 5.2 we'll check the database connection here and return
-  // 503 Service Unavailable if it's down.
+  // Checks that all external dependencies are reachable. Load balancers
+  // stop routing traffic if this returns 503, but don't restart the
+  // container — the process is fine, a dependency just isn't ready yet.
   fastify.get('/health/ready', async (_req, reply) => {
-    const checks = {
-      // database: await checkDatabase(),  // ← added in Lesson 5.2
+    // Check database connectivity with a lightweight query.
+    let database = false
+    try {
+      await fastify.prisma.$queryRawUnsafe('SELECT 1')
+      database = true
+    } catch {
+      _req.log.error('Database health check failed')
     }
 
+    const checks = { database }
     const allHealthy = Object.values(checks).every(Boolean)
 
     if (!allHealthy) {
