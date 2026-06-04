@@ -236,25 +236,7 @@
 
 *Progress: 5/5 items done. Lesson 5.3 complete! REST endpoints match MSW contract; safeParse validation, CORS, Helmet, rate limiter, Swagger UI at /docs.*
 
-### Lesson 5.4 — Model Context Protocol (MCP) Implementation
-- [ ] MCP SDK integration (`@anthropic-ai/mcp`)
-- [ ] Define todo tools: `create_todo`, `list_todos`, `complete_todo`, `delete_todo`
-- [ ] Zod schemas for tool inputs (LLM-friendly validation)
-- [ ] Resource endpoints: `/resources/todos` for read-only access
-- [ ] Progress callbacks for batch operations
-
-**Concepts**: MCP protocol, AI agent interfaces, tool-based APIs
-
-### Lesson 5.5 — Agent Hardening & Production Readiness
-- [ ] API key authentication with middleware
-- [ ] Request/response audit logging
-- [ ] Circuit breakers for external calls
-- [ ] Resource quotas and abuse prevention
-- [ ] Integration testing with MCP inspector
-
-**Concepts**: Agent security, production hardening, compliance logging
-
-### Lesson 5.6 — Full-Stack Integration ✅
+### Lesson 5.4 — Full-Stack Integration ✅
 - [x] Connect React frontend to real backend API
 - [x] Replace MSW with actual HTTP calls
 - [x] Frontend-to-backend end-to-end tests (Playwright, 9 tests)
@@ -263,9 +245,9 @@
 
 **Concepts**: Full-stack systems, containerization, production deployment, e2e testing
 
-*Progress: 5/5 items done. Lesson 5.6 complete! Monorepo structure with docker compose up -d running everything.*
+*Progress: 5/5 items done. Lesson 5.4 complete! Monorepo structure with docker compose up -d running everything.*
 
-### Lesson 5.7 — Authentication & Feature Flag Rollouts
+### Lesson 5.5 — Authentication & Feature Flag Rollouts
 - [ ] User registration and login (bcrypt password hashing, JWT tokens)
 - [ ] Fastify auth middleware (protect `/api/todos` routes)
 - [ ] Session management (refresh tokens, token expiry)
@@ -279,6 +261,33 @@
   - Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
 
 **Concepts**: Authentication, authorization, JWT, password hashing, session management, feature flag rollouts with real users
+
+### Lesson 5.6 — System Design Fundamentals
+- [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
+- [ ] **Database design**: SQL vs NoSQL tradeoffs, sharding, replication, indexing strategies
+- [ ] **Microservices vs monoliths**: when to choose each, service boundaries, inter-service communication
+- [ ] **API design**: REST vs GraphQL vs gRPC, versioning, rate limiting strategies
+- [ ] **CAP theorem and consistency models**: strong vs eventual consistency, ACID vs BASE
+
+**Concepts**: Distributed systems, scalability, reliability, tradeoff analysis
+
+### Lesson 5.7 — Model Context Protocol (MCP) Implementation
+- [ ] MCP SDK integration (`@anthropic-ai/mcp`)
+- [ ] Define todo tools: `create_todo`, `list_todos`, `complete_todo`, `delete_todo`
+- [ ] Zod schemas for tool inputs (LLM-friendly validation)
+- [ ] Resource endpoints: `/resources/todos` for read-only access
+- [ ] Progress callbacks for batch operations
+
+**Concepts**: MCP protocol, AI agent interfaces, tool-based APIs
+
+### Lesson 5.8 — Agent Hardening & Production Readiness
+- [ ] API key authentication with middleware
+- [ ] Request/response audit logging
+- [ ] Circuit breakers for external calls
+- [ ] Resource quotas and abuse prevention
+- [ ] Integration testing with MCP inspector
+
+**Concepts**: Agent security, production hardening, compliance logging
 
 ---
 
@@ -392,18 +401,9 @@ By the end of all phases, you will have:
 
 ## Phase 7: System Design Mastery
 
-*Refresh core system architecture concepts and apply them to a real AI architecture problem. This phase bridges theory and practice.*
+*Build on the fundamentals from Lesson 5.6. This phase dives into advanced components, AI architecture, and a hands-on case study.*
 
-### Lesson 7.1 — System Design Fundamentals Review
-- [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
-- [ ] **Database design**: SQL vs NoSQL tradeoffs, sharding, replication, indexing strategies
-- [ ] **Microservices vs monoliths**: when to choose each, service boundaries, inter-service communication
-- [ ] **API design**: REST vs GraphQL vs gRPC, versioning, rate limiting strategies
-- [ ] **CAP theorem and consistency models**: strong vs eventual consistency, ACID vs BASE
-
-**Concepts**: Distributed systems, scalability, reliability, tradeoff analysis
-
-### Lesson 7.2 — Core System Components Deep Dive
+### Lesson 7.1 — Core System Components Deep Dive
 - [ ] **Message queues**: Kafka, RabbitMQ, SQS — when and why, at-least-once vs exactly-once delivery
 - [ ] **Caching layers**: Redis, CDN, browser caching, cache invalidation strategies
 - [ ] **Search and indexing**: Elasticsearch, full-text search, vector databases for AI
@@ -412,7 +412,7 @@ By the end of all phases, you will have:
 
 **Concepts**: Component selection, integration patterns, failure handling
 
-### Lesson 7.3 — AI System Architecture Patterns
+### Lesson 7.2 — AI System Architecture Patterns
 - [ ] **LLM inference architecture**: model serving, batching, streaming responses
 - [ ] **Vector databases and RAG**: embedding storage, similarity search, knowledge retrieval
 - [ ] **Agent orchestration patterns**: supervisor agents, fan-out/fan-in, state management
@@ -421,7 +421,7 @@ By the end of all phases, you will have:
 
 **Concepts**: AI-specific infrastructure, cost optimization, monitoring LLM applications
 
-### Lesson 7.4 — Case Study: Design a Multi-Agent Task Management System
+### Lesson 7.3 — Case Study: Design a Multi-Agent Task Management System
 - [ ] **Problem statement**: Design a system where multiple AI agents collaborate on complex tasks
 - [ ] **Requirements gathering**: functional, non-functional, scale estimates
 - [ ] **High-level design**: agent registry, task queue, result aggregator, human-in-the-loop
@@ -433,7 +433,7 @@ By the end of all phases, you will have:
 
 **Concepts**: End-to-end architecture design, real-world constraints, defending design decisions
 
-### Lesson 7.5 — Architecture Implementation Review
+### Lesson 7.4 — Architecture Implementation Review
 - [ ] **Review our actual implementation**: compare Phase 6 multi-agent system to the design
 - [ ] **Gap analysis**: what we simplified, what we could improve
 - [ ] **Production readiness**: monitoring, alerting, disaster recovery
@@ -632,15 +632,17 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 4/7 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.6 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 4/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
-| Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
+| Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.4 — Model Context Protocol (MCP) Implementation**
+**Next up: Lesson 5.5 — Authentication & Feature Flag Rollouts**
 
 **Total Scope**: 9 phases, 32 lessons, estimated 10-11 weeks at 2 hrs/day
+
+**Lesson order**: 5.1–5.4 (backend + integration) → 5.5 (auth) → 5.6 (system design) → 5.7–5.8 (MCP + agent hardening)
 
 ---
 
@@ -721,4 +723,4 @@ Days off target = (actual completion date) − (target date)
 | 5.1 — Node.js Backend Foundation | — | ✅ Jun 1 | Fastify + Pino + Zod; health checks, graceful shutdown |
 | 5.2 — Database Design & Persistence | — | ✅ Jun 4 | PostgreSQL + Prisma 6 + pg.Pool adapter; todo service with soft deletes |
 | 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |
-| 5.6 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
+| 5.4 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
