@@ -5,10 +5,11 @@
 # - Push to main (verifies trunk health)
 #
 # Jobs run in PARALLEL for speed:
-#   lint      → ESLint code quality
-#   typecheck → TypeScript type errors
-#   test      → Vitest unit tests
-#   build     → Vite production build verification
+#   lint           → ESLint code quality (frontend)
+#   typecheck      → TypeScript type errors (frontend + backend)
+#   test           → Vitest unit tests (frontend)
+#   build          → Vite production build verification (frontend)
+#   backend-check  → TypeScript type errors (backend)
 #
 # All jobs must pass before a PR can be merged (configured via branch protection).
 
@@ -28,11 +29,14 @@ concurrency:
 
 jobs:
   # ───────────────────────────────────────────────────────────
-  # Lint: Catch code quality issues
+  # Frontend — Lint: Catch code quality issues
   # ───────────────────────────────────────────────────────────
   lint:
-    name: Lint
+    name: Lint (frontend)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,26 +44,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          # Built-in npm cache — skips redundant downloads on subsequent runs
+          node-version: '22'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        # `npm ci` is faster and stricter than `npm install` for CI:
-        # - Requires exact package-lock.json match
-        # - Deletes node_modules first (clean install)
-        # - Fails if lockfile is out of sync
         run: npm ci
 
       - name: Run ESLint
         run: npm run lint
 
   # ───────────────────────────────────────────────────────────
-  # Typecheck: Catch TypeScript errors
+  # Frontend — Typecheck: Catch TypeScript errors
   # ───────────────────────────────────────────────────────────
   typecheck:
-    name: TypeScript
+    name: TypeScript (frontend)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -67,8 +70,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -77,11 +81,14 @@ jobs:
         run: npx tsc --noEmit
 
   # ───────────────────────────────────────────────────────────
-  # Test: Run Vitest test suite
+  # Frontend — Test: Run Vitest test suite
   # ───────────────────────────────────────────────────────────
   test:
-    name: Tests
+    name: Tests (frontend)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -89,24 +96,25 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run Vitest tests
         run: npm run test:run -- --reporter=verbose
-        # `test:run` (defined in package.json) uses `vitest run` to disable
-        # watch mode — critical because CI processes must exit, not hang.
-        # `--reporter=verbose` shows all test names for debugging failures.
 
   # ───────────────────────────────────────────────────────────
-  # Build: Verify production bundle compiles
+  # Frontend — Build: Verify production bundle compiles
   # ───────────────────────────────────────────────────────────
   build:
-    name: Build
+    name: Build (frontend)
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -114,8 +122,9 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -124,13 +133,40 @@ jobs:
         run: npm run build
 
       - name: Upload build artifact
-        # Save the build output so other workflows (e.g., deploy, a11y audit)
-        # can download it without rebuilding. Artifacts auto-expire after 90 days.
         uses: actions/upload-artifact@v4
         with:
           name: dist
-          path: dist/
+          path: frontend/dist/
           retention-days: 7
+
+  # ───────────────────────────────────────────────────────────
+  # Backend — Typecheck: Catch TypeScript errors
+  # ───────────────────────────────────────────────────────────
+  backend-check:
+    name: TypeScript (backend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run TypeScript compiler check
+        run: npm run typecheck
 
   # ───────────────────────────────────────────────────────────
   # Preview Deploy: Deploy PR to Vercel for review
@@ -145,7 +181,7 @@ jobs:
   preview:
     name: Preview Deploy
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, test, build]
+    needs: [lint, typecheck, test, build, backend-check]
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
@@ -158,6 +194,7 @@ jobs:
 
       - name: Deploy to Vercel (preview)
         id: deploy
+        working-directory: frontend
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -165,7 +202,7 @@ jobs:
         run: |
           PREVIEW_URL=$(vercel deploy --token "$VERCEL_TOKEN" 2>&1 | grep -E '^https://' | tail -1)
           echo "preview-url=$PREVIEW_URL" >> $GITHUB_OUTPUT
-          echo "✅ Preview deployed: $PREVIEW_URL"
+          echo "Preview deployed: $PREVIEW_URL"
 
       - name: Comment preview URL on PR
         uses: actions/github-script@v7
@@ -175,5 +212,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `## 🚀 Preview Deployment\n\n**URL:** ${{ steps.deploy.outputs.preview-url }}`
+              body: `## Preview Deployment\n\n**URL:** ${{ steps.deploy.outputs.preview-url }}`
             })

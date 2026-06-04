@@ -28,7 +28,9 @@ export default defineConfig({
     ? {
         proxy: {
           '/api': {
-            target: 'http://localhost:3000',
+            // In Docker, the backend service is reachable at http://backend:3000.
+            // Locally, it's http://localhost:3000. Configurable via env var.
+            target: process.env.VITE_API_TARGET || 'http://localhost:3000',
             changeOrigin: true,
           },
         },

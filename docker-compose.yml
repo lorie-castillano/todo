@@ -1,14 +1,19 @@
-# Docker Compose for local development dependencies.
+# Docker Compose — full-stack local development.
 #
 # Usage:
-#   docker compose up -d      # Start PostgreSQL in the background
-#   docker compose down        # Stop it
-#   docker compose down -v     # Stop and wipe all data (fresh start)
-#   docker compose logs -f db  # Watch database logs
+#   docker compose up -d        Start everything (frontend + backend + database)
+#   docker compose down          Stop and remove containers
+#   docker compose down -v       Stop, remove, AND delete the database volume
+#   docker compose logs -f       Tail logs from all services
 #
-# The server connects via DATABASE_URL in server/.env (see .env.example).
+# Services:
+#   frontend  — Vite dev server with HMR (port 5173)
+#   backend   — Fastify API server (port 3000)
+#   db        — PostgreSQL 16 (port 5432)
+#   pgadmin   — pgAdmin 4 web UI (port 5050)
 
 services:
+  # --- PostgreSQL database ---
   db:
     image: postgres:16-alpine
     container_name: todo-db
@@ -20,8 +25,6 @@ services:
       POSTGRES_PASSWORD: todo_pass
       POSTGRES_DB: todo_dev
     volumes:
-      # Named volume persists data across container restarts.
-      # `docker compose down -v` removes it for a clean slate.
       - pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U todo_user -d todo_dev"]
@@ -29,5 +32,73 @@ services:
       timeout: 3s
       retries: 5
 
+  # --- Fastify backend ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: deps
+    container_name: todo-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      HOST: 0.0.0.0
+      NODE_ENV: development
+      DATABASE_URL: postgresql://todo_user:todo_pass@db:5432/todo_dev?schema=public
+      CORS_ORIGIN: http://localhost:5173
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/prisma:/app/prisma
+      - ./backend/prisma.config.ts:/app/prisma.config.ts
+      - ./backend/tsconfig.json:/app/tsconfig.json
+    working_dir: /app
+    command: ["sh", "-c", "npx prisma generate && npx prisma migrate deploy && npx tsx watch src/index.ts"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # --- Vite frontend ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: todo-frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_USE_BACKEND: "true"
+      VITE_API_TARGET: http://backend:3000
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+    depends_on:
+      - backend
+
+  # --- pgAdmin 4 (database viewer) ---
+  # Login: admin@todo.dev / admin
+  # The "Todo Dev" server is pre-configured. When prompted for a
+  # database password, enter: todo_pass
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: todo-pgadmin
+    restart: unless-stopped
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@todo.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  pgadmin_data:

@@ -1,0 +1,13 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Todo Dev",
+      "Group": "Servers",
+      "Host": "db",
+      "Port": 5432,
+      "MaintenanceDB": "todo_dev",
+      "Username": "todo_user",
+      "SSLMode": "prefer"
+    }
+  }
+}

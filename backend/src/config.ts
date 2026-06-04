@@ -50,7 +50,7 @@ if (!parsed.success) {
   // .format() gives a readable nested view of which fields failed and why.
   console.error('❌ Invalid environment configuration:')
   console.error(JSON.stringify(parsed.error.format(), null, 2))
-  console.error('\nCopy server/.env.example to server/.env and fix the values above.')
+  console.error('\nCopy backend/.env.example to backend/.env and fix the values above.')
   process.exit(1)
 }
 
