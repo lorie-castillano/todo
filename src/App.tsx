@@ -13,12 +13,8 @@ import { useTodoCommands } from './hooks/useTodoCommands'
 // CODE SPLITTING: HelpModal is loaded ONLY when the user opens it.
 const HelpModal = lazy(() => import('./components/HelpModal'))
 
-// Start MSW in development mode (browser only, not in tests)
-// Tests use server.ts (Node.js), browser uses browser.ts (Service Worker)
-if (import.meta.env.DEV && !import.meta.env.VITEST) {
-  const { startMocking } = await import('./mocks/browser')
-  startMocking()
-}
+// MSW startup moved to main.tsx where it's controlled by VITE_USE_BACKEND.
+// When VITE_USE_BACKEND=true, MSW is skipped and requests go to the real backend.
 
 // Get filter type from URL pathname
 function getFilterFromPath(path: string): 'all' | 'active' | 'completed' {

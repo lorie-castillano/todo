@@ -226,13 +226,15 @@
 *Progress: 5/5 items done. Lesson 5.2 complete! pg.Pool + @prisma/adapter-pg driver adapter, todo service with soft deletes.*
 
 ### Lesson 5.3 — REST API Hardening
-- [ ] Zod validation for all inputs
-- [ ] Centralized error handling middleware
-- [ ] Rate limiting per endpoint and client
-- [ ] CORS and security headers (Helmet)
-- [ ] OpenAPI/Swagger documentation
+- [x] Zod validation for all inputs
+- [x] Centralized error handling middleware
+- [x] Rate limiting per endpoint and client
+- [x] CORS and security headers (Helmet)
+- [x] OpenAPI/Swagger documentation
 
 **Concepts**: API security, validation, documentation-driven development
+
+*Progress: 5/5 items done. Lesson 5.3 complete! REST endpoints match MSW contract; safeParse validation, CORS, Helmet, rate limiter, Swagger UI at /docs.*
 
 ### Lesson 5.4 — Model Context Protocol (MCP) Implementation
 - [ ] MCP SDK integration (`@anthropic-ai/mcp`)
@@ -620,13 +622,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 2/6 (5.1 ✅ 5.2 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 3/6 (5.1 ✅ 5.2 ✅ 5.3 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.3 — REST API Hardening**
+**Next up: Lesson 5.4 — Model Context Protocol (MCP) Implementation**
 
 **Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -708,3 +710,4 @@ Days off target = (actual completion date) − (target date)
 | 4.3 — Architecture & Docs | Jun 6 | ✅ May 31 | Done 6 days early (overtime session) |
 | 5.1 — Node.js Backend Foundation | — | ✅ Jun 1 | Fastify + Pino + Zod; health checks, graceful shutdown |
 | 5.2 — Database Design & Persistence | — | ✅ Jun 4 | PostgreSQL + Prisma 6 + pg.Pool adapter; todo service with soft deletes |
+| 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |

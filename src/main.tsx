@@ -18,13 +18,29 @@ initWebVitals()
 async function bootstrap() {
   logger.info('App bootstrapping', { correlationId: logger.getCorrelationId() })
 
-  // Start MSW service worker in all environments.
-  // This app has no real backend — MSW provides the API layer in both
-  // dev and production. The service worker intercepts /api/* requests
-  // and returns in-memory data (resets on page reload).
-  const { startMocking } = await import('./mocks/browser')
-  await startMocking()
-  logger.debug('MSW mocking started')
+  // MSW cleanup: always unregister any cached service worker first.
+  // This ensures a clean slate regardless of which mode we're switching to.
+  // Without this, a previously registered MSW worker keeps intercepting
+  // requests even after switching to the real backend.
+  const registrations = await navigator.serviceWorker.getRegistrations()
+  for (const registration of registrations) {
+    if (registration.active?.scriptURL.includes('mockServiceWorker')) {
+      await registration.unregister()
+      logger.debug('MSW service worker unregistered')
+    }
+  }
+
+  // Start MSW ONLY when there's no real backend.
+  // When VITE_USE_BACKEND=true, the Vite dev server proxies /api/*
+  // to the Fastify backend on :3000.
+  const useBackend = import.meta.env.VITE_USE_BACKEND === 'true'
+  if (!useBackend) {
+    const { startMocking } = await import('./mocks/browser')
+    await startMocking()
+    logger.debug('MSW mocking started')
+  } else {
+    logger.info('Using real backend (MSW disabled)')
+  }
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

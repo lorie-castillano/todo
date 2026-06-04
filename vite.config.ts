@@ -20,6 +20,20 @@ export default defineConfig({
         brotliSize: true,
       }),
   ].filter(Boolean),
+  // Proxy /api requests to the Fastify backend in development.
+  // This lets the frontend use relative URLs ("/api/todos") that work
+  // with both MSW (when no backend is running) and the real server.
+  // The proxy only activates when VITE_USE_BACKEND=true is set.
+  server: process.env.VITE_USE_BACKEND === 'true'
+    ? {
+        proxy: {
+          '/api': {
+            target: 'http://localhost:3000',
+            changeOrigin: true,
+          },
+        },
+      }
+    : {},
   test: {
     globals: true, // describe/it/expect available without imports
     environment: 'jsdom', // browser-like DOM for component tests
