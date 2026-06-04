@@ -41,5 +41,6 @@ export default defineConfig({
     environment: 'jsdom', // browser-like DOM for component tests
     setupFiles: './src/test/setup.ts', // runs before each test file
     css: false, // skip CSS processing in tests (we don't test styles)
+    exclude: ['e2e/**', 'node_modules/**'], // Playwright e2e tests have their own runner
   },
 })
