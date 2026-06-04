@@ -254,22 +254,31 @@
 
 **Concepts**: Agent security, production hardening, compliance logging
 
-### Lesson 5.6 — Full-Stack Integration
-- [ ] Connect React frontend to real backend API
-- [ ] Replace MSW with actual HTTP calls
-- [ ] Frontend-to-backend end-to-end tests
-- [ ] Docker multi-container setup (frontend + backend + db)
-- [ ] Production deployment checklist
+### Lesson 5.6 — Full-Stack Integration ✅
+- [x] Connect React frontend to real backend API
+- [x] Replace MSW with actual HTTP calls
+- [x] Frontend-to-backend end-to-end tests (Playwright, 9 tests)
+- [x] Docker multi-container setup (frontend + backend + db + pgAdmin)
+- [x] Production deployment checklist (`docs/PRODUCTION_CHECKLIST.md`)
+
+**Concepts**: Full-stack systems, containerization, production deployment, e2e testing
+
+*Progress: 5/5 items done. Lesson 5.6 complete! Monorepo structure with docker compose up -d running everything.*
+
+### Lesson 5.7 — Authentication & Feature Flag Rollouts
+- [ ] User registration and login (bcrypt password hashing, JWT tokens)
+- [ ] Fastify auth middleware (protect `/api/todos` routes)
+- [ ] Session management (refresh tokens, token expiry)
+- [ ] Frontend auth flow (login page, protected routes, auth context)
+- [ ] Per-user todo ownership (users only see their own todos)
 - [ ] **Feature flags — real use-case test** (deferred from Lesson 4.2)
   - Pass the authenticated user's real `userId` into `useFeatureFlag`/`isFeatureEnabled`
   - Wire `bulkActions` (percentage rollout) into an actual UI feature and confirm
     the same logged-in user consistently gets the same experience across sessions
   - Add a real beta user's ID to `aiSuggestions` (userList) and verify targeting
   - Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
-  - *Why deferred*: a meaningful rollout test needs real authenticated users, which
-    only exist once the backend + user auth are in place (not the build-time stub).
 
-**Concepts**: Full-stack systems, containerization, production deployment, feature flag rollouts with real users
+**Concepts**: Authentication, authorization, JWT, password hashing, session management, feature flag rollouts with real users
 
 ---
 
@@ -279,6 +288,7 @@ By the end of Phase 5, you will have:
 
 - **Frontend**: Production-grade React app (completed in Phase 1-4)
 - **Backend**: Hardened Node.js API with PostgreSQL persistence
+- **Auth**: User registration, login, JWT-based session management
 - **MCP Layer**: AI agent can interact via tools (`create_todo`, `complete_todo`, etc.)
 - **Security**: Rate limits, auth, audit logs, input validation
 - **Documentation**: OpenAPI specs + MCP tool definitions
@@ -622,7 +632,7 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 3/6 (5.1 ✅ 5.2 ✅ 5.3 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 4/7 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.6 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/5 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
@@ -630,7 +640,7 @@ By the end of this plan, you will be able to:
 
 **Next up: Lesson 5.4 — Model Context Protocol (MCP) Implementation**
 
-**Total Scope**: 9 phases, 31 lessons, estimated 10-11 weeks at 2 hrs/day
+**Total Scope**: 9 phases, 32 lessons, estimated 10-11 weeks at 2 hrs/day
 
 ---
 
@@ -711,3 +721,4 @@ Days off target = (actual completion date) − (target date)
 | 5.1 — Node.js Backend Foundation | — | ✅ Jun 1 | Fastify + Pino + Zod; health checks, graceful shutdown |
 | 5.2 — Database Design & Persistence | — | ✅ Jun 4 | PostgreSQL + Prisma 6 + pg.Pool adapter; todo service with soft deletes |
 | 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |
+| 5.6 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
