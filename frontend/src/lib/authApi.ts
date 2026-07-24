@@ -47,11 +47,16 @@ async function extractError(response: Response): Promise<string> {
   }
 }
 
+// Note: every auth call uses `credentials: 'include'` so the browser sends and
+// stores the httpOnly refresh-token cookie, even cross-origin (Vite :5173 →
+// backend :3000 in dev). Without this, Set-Cookie is ignored by the browser.
+
 // --- Register ---
 export async function registerUser(creds: Credentials): Promise<AuthUser> {
   const response = await fetch('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(creds),
   })
 
@@ -68,6 +73,7 @@ export async function loginUser(creds: Credentials): Promise<LoginResult> {
   const response = await fetch('/api/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
     body: JSON.stringify(creds),
   })
 
@@ -76,6 +82,30 @@ export async function loginUser(creds: Credentials): Promise<LoginResult> {
   }
 
   return (await response.json()) as LoginResult
+}
+
+// --- Refresh ---
+// Exchanges the httpOnly refresh cookie for a new access token (and rotates the
+// cookie). Returns the new session, or null if the cookie is missing/expired.
+export async function refreshSession(): Promise<LoginResult | null> {
+  const response = await fetch('/api/auth/refresh', {
+    method: 'POST',
+    credentials: 'include',
+  })
+
+  if (!response.ok) return null
+  return (await response.json()) as LoginResult
+}
+
+// --- Logout ---
+// Revokes the refresh token server-side and clears the cookie. Best-effort:
+// network failures shouldn't block the client from clearing local state.
+export async function logoutRequest(): Promise<void> {
+  try {
+    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+  } catch {
+    // Ignore — local logout still proceeds.
+  }
 }
 
 // --- Me ---

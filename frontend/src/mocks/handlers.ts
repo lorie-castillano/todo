@@ -75,6 +75,19 @@ export const handlers = [
     return HttpResponse.json({ user: MOCK_USER })
   }),
 
+  // POST /api/auth/refresh — the mock backend has no cookie session, so there's
+  // nothing to refresh. Return 401 to mimic "no valid refresh token".
+  http.post('/api/auth/refresh', async () => {
+    await networkDelay()
+    return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }),
+
+  // POST /api/auth/logout — always succeeds (idempotent), clears nothing here.
+  http.post('/api/auth/logout', async () => {
+    await networkDelay()
+    return new HttpResponse(null, { status: 204 })
+  }),
+
   // GET /api/todos — list all todos
   http.get('/api/todos', async () => {
     await networkDelay()

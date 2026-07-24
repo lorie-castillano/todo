@@ -25,6 +25,8 @@ import {
   loginUser,
   registerUser,
   fetchMe,
+  refreshSession,
+  logoutRequest,
   type AuthUser,
   type Credentials,
 } from '../lib/authApi'
@@ -46,11 +48,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // On mount, try to restore the session from a stored token.
+  // On mount, restore the session. Two-step:
+  // 1. Try the stored access token via /me (fast path, still valid).
+  // 2. If that fails (expired/absent token), try /refresh — the httpOnly
+  //    cookie may still be valid, giving us a new access token without a login.
   useEffect(() => {
     let cancelled = false
 
-    fetchMe()
+    async function restore(): Promise<AuthUser | null> {
+      const me = await fetchMe()
+      if (me) return me
+
+      // Access token missing/expired — attempt a silent refresh via cookie.
+      const session = await refreshSession()
+      if (session) {
+        setToken(session.accessToken)
+        return session.user
+      }
+      return null
+    }
+
+    restore()
       .then((restored) => {
         if (!cancelled) setUser(restored)
       })
@@ -83,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const logout = useCallback(() => {
+    // Fire-and-forget server revocation, then clear local state immediately so
+    // the UI responds instantly regardless of network latency.
+    void logoutRequest()
     clearToken()
     setUser(null)
     logger.info('User logged out')
