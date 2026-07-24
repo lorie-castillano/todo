@@ -14,6 +14,7 @@
 - [ ] **CORS_ORIGIN** set to production frontend URL (not `localhost:5173`)
 - [ ] **JWT_SECRET** set to a strong secret (≥32 chars) — required for signing access tokens
 - [ ] **JWT_EXPIRES_IN / REFRESH_TOKEN_TTL_DAYS** reviewed (defaults: 15m access, 7d refresh)
+- [ ] **REDIS_URL** set when running >1 backend instance — shared rate-limit counter (in-memory fallback is per-process)
 - [ ] **NODE_ENV=production** — enables Fastify production optimizations, dev logging off, and cookie `secure=true`
 
 ## 2. Database

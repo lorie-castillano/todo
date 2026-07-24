@@ -48,6 +48,12 @@ const envSchema = z.object({
   // Refresh token lifetime in days. Long-lived, but revocable and rotated on
   // every use, so a leaked token has a short practical window.
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
+
+  // Optional Redis connection for a SHARED rate-limit store. When set, all
+  // backend instances share one counter (correct under horizontal scaling).
+  // When unset, the limiter falls back to per-process in-memory counters —
+  // fine for single-instance local dev, wrong for multi-instance production.
+  REDIS_URL: z.string().url().optional(),
 })
 
 // --- Parse & validate ---
@@ -80,6 +86,7 @@ export const config = Object.freeze({
   jwtSecret: parsed.data.JWT_SECRET,
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   refreshTokenTtlDays: parsed.data.REFRESH_TOKEN_TTL_DAYS,
+  redisUrl: parsed.data.REDIS_URL,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

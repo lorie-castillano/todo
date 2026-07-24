@@ -19,6 +19,7 @@ import swaggerUi from '@fastify/swagger-ui'
 import { ZodError } from 'zod'
 import { config } from './config.js'
 import { logger } from './logger.js'
+import { createRedisClient } from './redis.js'
 import correlationId from './plugins/correlationId.js'
 import prisma from './plugins/prisma.js'
 import auth from './plugins/auth.js'
@@ -75,10 +76,29 @@ export async function buildApp() {
 
   // Rate limiter: prevents a single client from flooding the API.
   // 100 requests per minute per IP is generous for a todo app.
+  //
+  // Store selection:
+  // - REDIS_URL set   → SHARED Redis store: all instances share one counter,
+  //   so the limit holds under horizontal scaling (see ADR-007).
+  // - REDIS_URL unset → per-process in-memory store (single-instance dev).
+  //
+  // skipOnError (default true) makes the limiter FAIL OPEN: if Redis is
+  // unreachable, requests are allowed rather than blocking the whole API on
+  // an infra dependency. Availability > strict limiting for this tradeoff.
+  const redis = config.redisUrl ? createRedisClient(config.redisUrl, logger) : undefined
   await app.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute',
+    ...(redis ? { redis } : {}),
   })
+
+  // Close the Redis connection cleanly on shutdown so we don't leak sockets.
+  if (redis) {
+    app.addHook('onClose', async () => {
+      logger.info('Closing Redis connection')
+      await redis.quit()
+    })
+  }
 
   // --- Application plugins ---
   await app.register(correlationId)

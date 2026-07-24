@@ -43,58 +43,90 @@ function clearRefreshCookie(reply: FastifyReply): void {
 
 export const authRoutes: FastifyPluginAsync = async (fastify) => {
   // --- POST /api/auth/register (public) ---
-  fastify.post('/api/auth/register', async (req, reply) => {
-    const body = await validate(registerSchema, req.body, req, reply)
-    if (!body) return
+  // Public account creation is abusable: bots can flood the DB with junk
+  // accounts and burn bcrypt CPU (each register hashes a password). Cap it at
+  // 10 per hour per IP — generous for real humans, hostile to automated spam.
+  // Uses the same shared Redis store, so the limit holds across instances.
+  fastify.post(
+    '/api/auth/register',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 hour',
+        },
+      },
+    },
+    async (req, reply) => {
+      const body = await validate(registerSchema, req.body, req, reply)
+      if (!body) return
 
-    try {
-      const user = await fastify.authService.register({
-        email: body.email,
-        password: body.password,
-      })
-
-      return reply.code(201).send({ user })
-    } catch (err) {
-      if (err instanceof Error && err.name === 'DuplicateEmailError') {
-        return reply.code(409).send({
-          error: 'Conflict',
-          message: 'Email already registered',
-          correlationId: req.correlationId,
+      try {
+        const user = await fastify.authService.register({
+          email: body.email,
+          password: body.password,
         })
+
+        return reply.code(201).send({ user })
+      } catch (err) {
+        if (err instanceof Error && err.name === 'DuplicateEmailError') {
+          return reply.code(409).send({
+            error: 'Conflict',
+            message: 'Email already registered',
+            correlationId: req.correlationId,
+          })
+        }
+        throw err
       }
-      throw err
     }
-  })
+  )
 
   // --- POST /api/auth/login ---
-  fastify.post('/api/auth/login', async (req, reply) => {
-    const body = await validate(loginSchema, req.body, req, reply)
-    if (!body) return
+  // Stricter per-route limit than the global 100/min. Login is the prime
+  // target for brute-force / credential-stuffing, so we cap it hard: 5
+  // attempts per minute per IP. The override reuses the global Redis store,
+  // so this tighter counter is ALSO shared across instances (see ADR-007).
+  // Note: this rate-limits by IP, so it slows online guessing regardless of
+  // which email is targeted; bcrypt's slow hash is the second line of defense.
+  fastify.post(
+    '/api/auth/login',
+    {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    async (req, reply) => {
+      const body = await validate(loginSchema, req.body, req, reply)
+      if (!body) return
 
-    try {
-      const session = await fastify.authService.login({
-        email: body.email,
-        password: body.password,
-      })
-
-      // Refresh token goes into the httpOnly cookie; access token in the body.
-      setRefreshCookie(reply, session.refreshToken)
-
-      return reply.code(200).send({
-        user: session.user,
-        accessToken: session.accessToken,
-      })
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AuthenticationError') {
-        return reply.code(401).send({
-          error: 'Unauthorized',
-          message: 'Invalid email or password',
-          correlationId: req.correlationId,
+      try {
+        const session = await fastify.authService.login({
+          email: body.email,
+          password: body.password,
         })
+
+        // Refresh token goes into the httpOnly cookie; access token in the body.
+        setRefreshCookie(reply, session.refreshToken)
+
+        return reply.code(200).send({
+          user: session.user,
+          accessToken: session.accessToken,
+        })
+      } catch (err) {
+        if (err instanceof Error && err.name === 'AuthenticationError') {
+          return reply.code(401).send({
+            error: 'Unauthorized',
+            message: 'Invalid email or password',
+            correlationId: req.correlationId,
+          })
+        }
+        throw err
       }
-      throw err
     }
-  })
+  )
 
   // --- POST /api/auth/refresh ---
   // Reads the refresh cookie, rotates it, and returns a new access token.

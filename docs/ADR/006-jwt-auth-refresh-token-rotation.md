@@ -116,7 +116,7 @@ service in Lesson 5.7.
 ### Future Work
 - Reuse-detection: if a revoked refresh token is presented, revoke the entire
   token family (not just the single token).
-- Per-route rate limits on `/api/auth/*` (brute-force hardening).
+- ~~Per-route rate limits on `/api/auth/*` (brute-force hardening).~~ ✅ Done (ADR-007): `/login` capped at 5/min and `/register` at 10/hour per IP, backed by the shared Redis store. Next layer: per-account lockout (email-keyed exponential backoff) and CAPTCHA after N failures.
 - Move access token to in-memory storage to eliminate the `localStorage` XSS surface.
 
 ---
