@@ -266,13 +266,15 @@
 *Progress: **Lesson 5.5 complete.** Auth (register/login/JWT), refresh-token rotation via httpOnly cookie, per-user todos with required ownership, and the hands-on feature-flag rollout (bulkActions toolbar + aiSuggestions targeting + ramp tests). Verified e2e against the live backend.*
 
 ### Lesson 5.6 — System Design Fundamentals
-- [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
-- [ ] **Database design**: SQL vs NoSQL tradeoffs, sharding, replication, indexing strategies
-- [ ] **Microservices vs monoliths**: when to choose each, service boundaries, inter-service communication
-- [ ] **API design**: REST vs GraphQL vs gRPC, versioning, rate limiting strategies
-- [ ] **CAP theorem and consistency models**: strong vs eventual consistency, ACID vs BASE
+- [x] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
+- [x] **Database design**: SQL vs NoSQL tradeoffs, sharding, replication, indexing strategies
+- [x] **Microservices vs monoliths**: when to choose each, service boundaries, inter-service communication
+- [x] **API design**: REST vs GraphQL vs gRPC, versioning, rate limiting strategies
+- [x] **CAP theorem and consistency models**: strong vs eventual consistency, ACID vs BASE
 
 **Concepts**: Distributed systems, scalability, reliability, tradeoff analysis
+
+*Progress: **Lesson 5.6 complete.** Studied the five system-design pillars grounded in this codebase — confirmed the app is already horizontally-scalable (stateless JWT + DB-backed state), relationally correct (FK cascades + `userId`-first composite index), and a deliberate modular monolith with clean extraction seams. Scaling posture and tradeoffs captured in ADR-007. Known gap noted: in-memory rate limiter must move to a shared Redis store before horizontal scaling.*
 
 ### Lesson 5.7 — Model Context Protocol (MCP) Implementation
 - [ ] MCP SDK integration (`@anthropic-ai/mcp`)

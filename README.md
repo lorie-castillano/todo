@@ -183,6 +183,7 @@ See [`docs/ADR/`](./docs/ADR/) for documented architectural decisions:
 - [ADR-004: Feature flags with deterministic hashing](./docs/ADR/004-feature-flags-deterministic-hashing.md)
 - [ADR-005: Backend as a separate package with Fastify](./docs/ADR/005-backend-monorepo-fastify.md)
 - [ADR-006: JWT authentication with refresh-token rotation](./docs/ADR/006-jwt-auth-refresh-token-rotation.md)
+- [ADR-007: System design & scaling posture](./docs/ADR/007-system-design-scaling-posture.md)
 
 ---
 
