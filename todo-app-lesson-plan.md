@@ -635,13 +635,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 4/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 5/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.5 — Authentication & Feature Flag Rollouts**
+**Next up: Lesson 5.6 — System Design Fundamentals**
 
 **Total Scope**: 9 phases, 32 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -653,10 +653,10 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **3 hrs/day, weekdays only** (~15 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **August 14, 2026** (restarting Jul 14 at 3 hrs/day)
-> **Plan restart of remaining work**: July 14, 2026
+> **Revised target graduation**: **August 19, 2026** (recalculated Jul 24 at 3 hrs/day)
+> **Plan restart of remaining work**: July 27, 2026
 
-*Note: You completed Lessons 4.2–5.4 well ahead of the original schedule, then paused from approximately June 4 to July 13. The schedule below restarts from July 14 at 3 hrs/day. This assumes ~1.2 lessons per weekday, which is realistic for dense topics like MCP, A2A, and System Design. If you need to drop back to 2 hrs/day, revert to the Sep 26 targets.*
+*Note: Recalculated on July 24, 2026. Lessons 5.1–5.5 are complete (5.5 finished today). The remaining 21 lessons (5.6 through 9.5) restart Monday, July 27 at 3 hrs/day (~1.2 lessons/weekday). At that pace, graduation lands ~August 19, 2026 — still ~12 days inside the original Aug 31 goal. You've been outpacing 1.2 lessons/day recently, so treat these as conservative targets.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -664,13 +664,13 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 |------------|-------------|-------------|--------|
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
-| **Phase 5 complete** (Backend & MCP) | Jul 18, 2026 | _____ | _____ |
-| **Phase 6 complete** (A2A & Multi-Agent) | Jul 25, 2026 | _____ | _____ |
-| **Phase 7 complete** (System Design) | Jul 31, 2026 | _____ | _____ |
-| **Phase 8 complete** (AI Governance) | Aug 7, 2026 | _____ | _____ |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 14, 2026 | _____ | _____ |
+| **Phase 5 complete** (Backend & MCP) | Jul 29, 2026 | _____ | 🚧 5/8 done (5.6–5.8 left) |
+| **Phase 6 complete** (A2A & Multi-Agent) | Aug 4, 2026 | _____ | _____ |
+| **Phase 7 complete** (System Design) | Aug 7, 2026 | _____ | _____ |
+| **Phase 8 complete** (AI Governance) | Aug 13, 2026 | _____ | _____ |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 19, 2026 | _____ | _____ |
 
-**Buffer**: Targets land with 2 weeks of slack before the original Aug 31 graduation date.
+**Buffer**: Targets land ~12 days (roughly 2 weeks) before the original Aug 31 graduation date.
 
 ---
 
@@ -730,3 +730,4 @@ Days off target = (actual completion date) − (target date)
 | 5.2 — Database Design & Persistence | — | ✅ Jun 4 | PostgreSQL + Prisma 6 + pg.Pool adapter; todo service with soft deletes |
 | 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |
 | 5.4 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
+| 5.5 — Authentication & Feature Flags | Jul 18 | ✅ Jul 24 | JWT + bcrypt, refresh-token rotation (httpOnly cookie), per-user todos, bulkActions + aiSuggestions flags, 96 tests |
