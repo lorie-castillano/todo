@@ -37,6 +37,13 @@ const envSchema = z.object({
     .string()
     .url()
     .default('postgresql://todo_user:todo_pass@localhost:5432/todo_dev?schema=public'),
+
+  // JWT secret for signing access tokens. Required in production.
+  // In dev, a hardcoded default is fine for local testing but NEVER use it in prod.
+  JWT_SECRET: z.string().min(32).default('dev-secret-do-not-use-in-production-32chars'),
+
+  // Access token lifetime. Short-lived tokens limit blast radius if leaked.
+  JWT_EXPIRES_IN: z.string().default('15m'),
 })
 
 // --- Parse & validate ---
@@ -66,6 +73,8 @@ export const config = Object.freeze({
   logLevel: parsed.data.LOG_LEVEL,
   corsOrigin: parsed.data.CORS_ORIGIN,
   databaseUrl: parsed.data.DATABASE_URL,
+  jwtSecret: parsed.data.JWT_SECRET,
+  jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

@@ -24,13 +24,15 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { PrismaClient } from '../generated/prisma/client.js'
 import { config } from '../config.js'
 import { createTodoService, type TodoService } from '../services/todoService.js'
+import { createAuthService, type AuthService } from '../services/authService.js'
 
 // Module augmentation — extend FastifyInstance so TypeScript knows about
-// `app.prisma` and `app.todoService` everywhere in the codebase.
+// `app.prisma`, `app.todoService`, and `app.authService` everywhere.
 declare module 'fastify' {
   interface FastifyInstance {
     prisma: PrismaClient
     todoService: TodoService
+    authService: AuthService
   }
 }
 
@@ -54,6 +56,7 @@ const prismaPlugin: FastifyPluginAsync = async (fastify) => {
   // available in all routes via Fastify's dependency injection.
   fastify.decorate('prisma', prisma)
   fastify.decorate('todoService', createTodoService(prisma))
+  fastify.decorate('authService', createAuthService(prisma))
 
   // --- Cleanup on shutdown ---
   // Disconnect Prisma first (drains in-flight queries), then close the

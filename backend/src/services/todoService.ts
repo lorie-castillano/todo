@@ -19,6 +19,7 @@ export type { Todo } from '../generated/prisma/client.js'
 
 export interface CreateTodoInput {
   text: string
+  userId: string
 }
 
 export interface UpdateTodoInput {
@@ -43,9 +44,10 @@ export function createTodoService(prisma: PrismaClient) {
 
   return {
     // --- List ---
-    // Optional filter by completed status. Always excludes soft-deleted.
-    async list(filter?: ListTodosFilter) {
-      const where: Prisma.TodoWhereInput = { ...notDeleted }
+    // Scoped to a single user. Optional filter by completed status.
+    // Always excludes soft-deleted rows.
+    async list(userId: string, filter?: ListTodosFilter) {
+      const where: Prisma.TodoWhereInput = { ...notDeleted, userId }
 
       if (filter?.completed !== undefined) {
         where.completed = filter.completed
@@ -58,10 +60,11 @@ export function createTodoService(prisma: PrismaClient) {
     },
 
     // --- Get by ID ---
-    // Returns null if not found OR soft-deleted (same thing to the caller).
-    async getById(id: number) {
+    // Scoped to the owner. Returns null if not found, soft-deleted, OR
+    // owned by a different user (prevents cross-user access).
+    async getById(id: number, userId: string) {
       return prisma.todo.findFirst({
-        where: { id, ...notDeleted },
+        where: { id, userId, ...notDeleted },
       })
     },
 
@@ -74,6 +77,7 @@ export function createTodoService(prisma: PrismaClient) {
         return tx.todo.create({
           data: {
             text: input.text,
+            userId: input.userId,
             // completed defaults to false (schema default)
           },
         })
@@ -83,10 +87,10 @@ export function createTodoService(prisma: PrismaClient) {
     // --- Update ---
     // Finds the record first to ensure it exists and isn't soft-deleted.
     // Returns null if not found (the route layer maps this to 404).
-    async update(id: number, input: UpdateTodoInput) {
+    async update(id: number, userId: string, input: UpdateTodoInput) {
       return prisma.$transaction(async (tx) => {
         const existing = await tx.todo.findFirst({
-          where: { id, ...notDeleted },
+          where: { id, userId, ...notDeleted },
         })
         if (!existing) return null
 
@@ -101,10 +105,10 @@ export function createTodoService(prisma: PrismaClient) {
     // Sets `deletedAt` to now instead of removing the row.
     // The record becomes invisible to list/getById but remains in the DB
     // for audit, undo, and compliance (GDPR "right to erasure" uses hardDelete).
-    async softDelete(id: number) {
+    async softDelete(id: number, userId: string) {
       return prisma.$transaction(async (tx) => {
         const existing = await tx.todo.findFirst({
-          where: { id, ...notDeleted },
+          where: { id, userId, ...notDeleted },
         })
         if (!existing) return null
 
@@ -117,11 +121,11 @@ export function createTodoService(prisma: PrismaClient) {
 
     // --- Restore ---
     // Reverses a soft delete by clearing `deletedAt`. Useful for undo.
-    async restore(id: number) {
+    async restore(id: number, userId: string) {
       return prisma.$transaction(async (tx) => {
-        // Only restore records that ARE soft-deleted.
+        // Only restore records that ARE soft-deleted and owned by the user.
         const existing = await tx.todo.findFirst({
-          where: { id, deletedAt: { not: null } },
+          where: { id, userId, deletedAt: { not: null } },
         })
         if (!existing) return null
 
@@ -146,10 +150,10 @@ export function createTodoService(prisma: PrismaClient) {
 
     // --- Toggle completed ---
     // Convenience method: flips the completed status.
-    async toggleCompleted(id: number) {
+    async toggleCompleted(id: number, userId: string) {
       return prisma.$transaction(async (tx) => {
         const existing = await tx.todo.findFirst({
-          where: { id, ...notDeleted },
+          where: { id, userId, ...notDeleted },
         })
         if (!existing) return null
 

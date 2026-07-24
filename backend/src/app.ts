@@ -20,8 +20,10 @@ import { config } from './config.js'
 import { logger } from './logger.js'
 import correlationId from './plugins/correlationId.js'
 import prisma from './plugins/prisma.js'
+import auth from './plugins/auth.js'
 import { healthRoutes } from './routes/health.js'
 import { todoRoutes } from './routes/todos.js'
+import { authRoutes } from './routes/auth.js'
 
 // Return type is intentionally inferred. Passing a custom Pino
 // `loggerInstance` specializes the FastifyInstance's logger generic, so
@@ -73,6 +75,8 @@ export async function buildApp() {
   // --- Application plugins ---
   await app.register(correlationId)
   await app.register(prisma)
+  // Auth depends on prisma (for authService), so register it after.
+  await app.register(auth)
 
   // --- OpenAPI / Swagger ---
   // Generates an OpenAPI 3.0 spec from route schemas and serves an
@@ -94,6 +98,7 @@ export async function buildApp() {
 
   // --- Routes layer ---
   await app.register(healthRoutes)
+  await app.register(authRoutes)
   await app.register(todoRoutes)
 
   // --- Root route: a friendly landing response ---
