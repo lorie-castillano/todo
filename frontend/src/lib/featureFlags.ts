@@ -33,8 +33,15 @@ const FLAGS = {
   // Example: a new bulk-actions toolbar, rolled out to 25% of users
   bulkActions: { kind: 'percentage', rollout: 25 },
 
-  // Example: an experimental AI suggestions panel, internal testers only
-  aiSuggestions: { kind: 'userList', userIds: ['user-1', 'user-internal'] },
+  // Experimental AI suggestions panel — internal/beta testers only.
+  // Now that auth is live, these are REAL account IDs. 'mock-user-1' is the
+  // demo user from the MSW mock backend so the feature is visible in dev.
+  // To onboard a real beta user, paste their user UUID here (from the users
+  // table or the login response), e.g. 'd6252915-fb1f-47d4-9d13-8d98b7a0c3ab'.
+  aiSuggestions: {
+    kind: 'userList',
+    userIds: ['user-1', 'user-internal', 'mock-user-1', '8eb6f7e4-2139-4754-99c0-5a5fa2b86df8'],
+  },
 
   // Example: a finished feature that's fully on
   darkModeV2: { kind: 'boolean', enabled: true },
@@ -60,6 +67,20 @@ function hashToBucket(input: string): number {
   return Math.abs(hash) % 100
 }
 
+// Pure percentage-rollout check, exported so we can simulate a gradual rollout
+// (0 → 25 → 100) in tests without mutating the flag registry.
+//
+// Key property — MONOTONICITY: a user's bucket is fixed, so raising the rollout
+// only ever ADDS users. Someone enabled at 25% is guaranteed to stay enabled at
+// 50% or 100%. This is why ramping a rollout never flips a user off mid-release.
+export function isInPercentageRollout(
+  flagName: string,
+  userId: string,
+  rollout: number
+): boolean {
+  return hashToBucket(`${flagName}:${userId}`) < rollout
+}
+
 // --- Evaluation ---
 
 export interface FlagContext {
@@ -80,8 +101,7 @@ export function isFeatureEnabled(name: FlagName, context: FlagContext = {}): boo
 
     case 'percentage': {
       // Bucket on userId + flag name so different flags roll out independently
-      const bucket = hashToBucket(`${name}:${userId}`)
-      result = bucket < rule.rollout
+      result = isInPercentageRollout(name, userId, rule.rollout)
       break
     }
 

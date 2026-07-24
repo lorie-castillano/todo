@@ -7,8 +7,11 @@ import { TodoFooter } from './components/TodoFooter'
 import { FilterNav } from './components/FilterNav'
 import { LiveRegion } from './components/LiveRegion'
 import { UndoRedoControls } from './components/UndoRedoControls'
+import { BulkActionsToolbar } from './components/BulkActionsToolbar'
+import { AiSuggestionsPanel } from './components/AiSuggestionsPanel'
 import { useTodos } from './hooks/useTodos'
 import { useTodoCommands } from './hooks/useTodoCommands'
+import { useFeatureFlag } from './hooks/useFeatureFlag'
 
 // CODE SPLITTING: HelpModal is loaded ONLY when the user opens it.
 const HelpModal = lazy(() => import('./components/HelpModal'))
@@ -69,6 +72,15 @@ function App() {
   // in the history store. The user can undo/redo via the UI buttons or
   // keyboard shortcuts (⌘Z / ⌘⇧Z).
   const { addTodo, toggle, edit, remove, clearCompleted } = useTodoCommands()
+
+  // --- Feature flag: bulk actions ---
+  // Gated behind a percentage rollout keyed on the authenticated user's id.
+  // The same user consistently gets the same experience across sessions.
+  const showBulkActions = useFeatureFlag('bulkActions')
+
+  // --- Feature flag: AI suggestions (beta) ---
+  // userList strategy: visible only to specific account IDs in the registry.
+  const showAiSuggestions = useFeatureFlag('aiSuggestions')
 
   // --- Filtered Todos (URL-driven) ---
   const filteredTodos = useMemo(() => {
@@ -154,6 +166,16 @@ function App() {
     setAnnouncement(`${completedCount} completed ${completedCount === 1 ? 'todo' : 'todos'} cleared. ${remainingCount} items remaining.`)
   }, [clearCompleted, todos, remainingCount])
 
+  // Bulk action: mark every active todo as completed. Each toggle records its
+  // own undo command, so the user can still undo the batch step by step.
+  const handleCompleteAll = useCallback(() => {
+    const active = todos.filter((t) => !t.completed)
+    active.forEach((t) => void toggle(t.id))
+    setAnnouncement(
+      `${active.length} ${active.length === 1 ? 'todo' : 'todos'} marked complete.`
+    )
+  }, [toggle, todos])
+
   // --- Duplicate Check (using cache data) ---
   const isDuplicate = useCallback(
     (text: string, excludeId?: number) => {
@@ -194,6 +216,21 @@ function App() {
               <FilterNav counts={filterCounts} />
               <UndoRedoControls />
             </div>
+
+            {/* Bulk actions — only for users in the `bulkActions` rollout */}
+            {showBulkActions && (
+              <BulkActionsToolbar
+                activeCount={remainingCount}
+                completedCount={filterCounts.completed}
+                onCompleteAll={handleCompleteAll}
+                onClearCompleted={handleClearCompleted}
+              />
+            )}
+
+            {/* AI suggestions — beta, userList-targeted */}
+            {showAiSuggestions && (
+              <AiSuggestionsPanel todos={todos} onAdd={handleAdd} />
+            )}
 
             <TodoList
               todos={filteredTodos}
