@@ -637,13 +637,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 5/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 6/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅ 5.6 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.6 — System Design Fundamentals**
+**Next up: Lesson 5.7 — Model Context Protocol (MCP) Implementation**
 
 **Total Scope**: 9 phases, 32 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -658,7 +658,7 @@ By the end of this plan, you will be able to:
 > **Revised target graduation**: **August 19, 2026** (recalculated Jul 24 at 3 hrs/day)
 > **Plan restart of remaining work**: July 27, 2026
 
-*Note: Recalculated on July 24, 2026. Lessons 5.1–5.5 are complete (5.5 finished today). The remaining 21 lessons (5.6 through 9.5) restart Monday, July 27 at 3 hrs/day (~1.2 lessons/weekday). At that pace, graduation lands ~August 19, 2026 — still ~12 days inside the original Aug 31 goal. You've been outpacing 1.2 lessons/day recently, so treat these as conservative targets.*
+*Note: Recalculated on July 24, 2026. Lessons 5.1–5.6 are complete (5.5 **and** 5.6 finished today, plus a Redis rate-limit hardening bundle). The remaining **20 lessons** (5.7 through 9.5) restart Monday, July 27 at 3 hrs/day (~1.2 lessons/weekday ≈ 17 weekdays), landing graduation ~August 19, 2026 — still ~12 days inside the original Aug 31 goal. Finishing 5.6 **early** (targeted Jul 27) puts you ~1 lesson ahead, so the checkpoint dates below are conservative — expect to land a day or two sooner if the pace holds.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -666,7 +666,7 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 |------------|-------------|-------------|--------|
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
-| **Phase 5 complete** (Backend & MCP) | Jul 29, 2026 | _____ | 🚧 5/8 done (5.6–5.8 left) |
+| **Phase 5 complete** (Backend & MCP) | Jul 29, 2026 | _____ | 🚧 6/8 done (5.7–5.8 left) |
 | **Phase 6 complete** (A2A & Multi-Agent) | Aug 4, 2026 | _____ | _____ |
 | **Phase 7 complete** (System Design) | Aug 7, 2026 | _____ | _____ |
 | **Phase 8 complete** (AI Governance) | Aug 13, 2026 | _____ | _____ |
@@ -733,3 +733,4 @@ Days off target = (actual completion date) − (target date)
 | 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |
 | 5.4 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
 | 5.5 — Authentication & Feature Flags | Jul 18 | ✅ Jul 24 | JWT + bcrypt, refresh-token rotation (httpOnly cookie), per-user todos, bulkActions + aiSuggestions flags, 96 tests |
+| 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | 5 pillars (scalability, DB, monolith vs microservices, API, CAP) grounded in the codebase; ADR-007 scaling posture; shipped Redis-backed shared rate-limit store + per-route auth limits (/login 5/min, /register 10/hr) with integration tests |
