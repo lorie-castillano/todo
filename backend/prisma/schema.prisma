@@ -19,6 +19,21 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  // UUID for user IDs. Using string lets us integrate with external identity
+  // providers (OAuth, SSO) without remapping IDs later.
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String   // bcrypt hash, never plaintext
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt       @map("updated_at")
+
+  todos Todo[]
+
+  @@map("users")
+}
+
 model Todo {
   // Autoincrement integer matches the frontend's `TodoId = number & { __brand }`
   id        Int      @id @default(autoincrement())
@@ -28,6 +43,12 @@ model Todo {
 
   // Completion status. Defaults to false on creation.
   completed Boolean  @default(false)
+
+  // --- Ownership ---
+  // Every todo belongs to a user. Now required: auth is enforced and all
+  // requests pass an authenticated userId. The database rejects ownerless rows.
+  userId    String   @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // --- Audit timestamps ---
   // `createdAt` is set once on insert, never changes.
@@ -42,8 +63,9 @@ model Todo {
 
   // --- Indexes ---
   // The frontend's most common query is "show me active/completed todos".
-  // A composite index on (completed, deletedAt) makes this fast.
-  @@index([completed, deletedAt])
+  // A composite index on (userId, completed, deletedAt) scopes every query
+  // to the authenticated user first, which is critical for performance and privacy.
+  @@index([userId, completed, deletedAt])
 
   // Use snake_case table name (PostgreSQL convention).
   @@map("todos")
