@@ -11,6 +11,7 @@
 
 import Fastify, { type FastifyError } from 'fastify'
 import cors from '@fastify/cors'
+import cookie from '@fastify/cookie'
 import helmet from '@fastify/helmet'
 import rateLimit from '@fastify/rate-limit'
 import swagger from '@fastify/swagger'
@@ -53,10 +54,17 @@ export async function buildApp() {
 
   // CORS: allow the frontend dev server to make cross-origin requests.
   // Without this, the browser blocks fetch() from :5173 to :3000.
+  // credentials:true lets the browser send/receive the httpOnly refresh cookie
+  // on cross-origin auth requests (requires a specific origin, not '*').
   await app.register(cors, {
     origin: config.corsOrigin,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    credentials: true,
   })
+
+  // Cookie plugin: parses incoming Cookie headers into req.cookies and adds
+  // reply.setCookie/clearCookie. Used for the httpOnly refresh token.
+  await app.register(cookie)
 
   // Helmet: sets security headers (X-Content-Type-Options, X-Frame-Options,
   // Strict-Transport-Security, etc.). Cheap defense-in-depth.

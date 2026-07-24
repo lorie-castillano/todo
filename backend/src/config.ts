@@ -44,6 +44,10 @@ const envSchema = z.object({
 
   // Access token lifetime. Short-lived tokens limit blast radius if leaked.
   JWT_EXPIRES_IN: z.string().default('15m'),
+
+  // Refresh token lifetime in days. Long-lived, but revocable and rotated on
+  // every use, so a leaked token has a short practical window.
+  REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
 })
 
 // --- Parse & validate ---
@@ -75,6 +79,7 @@ export const config = Object.freeze({
   databaseUrl: parsed.data.DATABASE_URL,
   jwtSecret: parsed.data.JWT_SECRET,
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
+  refreshTokenTtlDays: parsed.data.REFRESH_TOKEN_TTL_DAYS,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',
