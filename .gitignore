@@ -31,3 +31,7 @@ stats.html
 .vercel
 .env*
 !.env.example
+
+# Stray root lockfile — real lockfiles live in frontend/ and backend/.
+# This ignores an empty stub created by accidental `npm` runs at the repo root.
+/package-lock.json
