@@ -248,19 +248,23 @@
 *Progress: 5/5 items done. Lesson 5.4 complete! Monorepo structure with docker compose up -d running everything.*
 
 ### Lesson 5.5 — Authentication & Feature Flag Rollouts
-- [ ] User registration and login (bcrypt password hashing, JWT tokens)
-- [ ] Fastify auth middleware (protect `/api/todos` routes)
-- [ ] Session management (refresh tokens, token expiry)
-- [ ] Frontend auth flow (login page, protected routes, auth context)
-- [ ] Per-user todo ownership (users only see their own todos)
-- [ ] **Feature flags — real use-case test** (deferred from Lesson 4.2)
-  - Pass the authenticated user's real `userId` into `useFeatureFlag`/`isFeatureEnabled`
-  - Wire `bulkActions` (percentage rollout) into an actual UI feature and confirm
+- [x] User registration and login (bcrypt password hashing, JWT tokens) — `authService.ts`, `routes/auth.ts`
+- [x] Fastify auth middleware (protect `/api/todos` routes) — `plugins/auth.ts` `authenticate` guard
+- [~] Session management (token expiry ✅ 15m access token; refresh tokens **deferred**)
+- [x] Frontend auth flow (login page, protected routes, auth context) — `AuthContext`, `LoginPage`, `ProtectedRoute`, `apiFetch`
+- [x] Per-user todo ownership (users only see their own todos) — todo service/routes scoped to `userId`
+  - [x] Migration applied — `20260724095225_add_user_and_todo_ownership` (users table, nullable user_id, FK, index)
+  - [x] `Todo.userId` now **required** — `20260724100138_require_todo_owner` (30 orphaned dev todos deleted first)
+- [~] **Feature flags — real use-case test** (deferred from Lesson 4.2)
+  - [x] Pass the authenticated user's real `userId` into `useFeatureFlag`/`isFeatureEnabled` — auto-injected from `AuthContext`
+  - [ ] Wire `bulkActions` (percentage rollout) into an actual UI feature and confirm
     the same logged-in user consistently gets the same experience across sessions
-  - Add a real beta user's ID to `aiSuggestions` (userList) and verify targeting
-  - Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
+  - [ ] Add a real beta user's ID to `aiSuggestions` (userList) and verify targeting
+  - [ ] Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
 
 **Concepts**: Authentication, authorization, JWT, password hashing, session management, feature flag rollouts with real users
+
+*Progress: core auth complete and migrated (register/login/JWT, guard, protected routes, per-user todos with required ownership, real userId in flags). Remaining: refresh tokens, and the hands-on flag rollout UI test.*
 
 ### Lesson 5.6 — System Design Fundamentals
 - [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
@@ -648,9 +652,12 @@ By the end of this plan, you will be able to:
 
 ## 🎯 Target Checkpoint Schedule
 
-> **Commitment**: 2 hrs/day, weekdays only (~10 hrs/week)
-> **Target graduation**: **August 31, 2026**
-> **Plan start of remaining work**: May 30, 2026
+> **Commitment**: **3 hrs/day, weekdays only** (~15 hrs/week)
+> **Original target graduation**: August 31, 2026
+> **Revised target graduation**: **August 14, 2026** (restarting Jul 14 at 3 hrs/day)
+> **Plan restart of remaining work**: July 14, 2026
+
+*Note: You completed Lessons 4.2–5.4 well ahead of the original schedule, then paused from approximately June 4 to July 13. The schedule below restarts from July 14 at 3 hrs/day. This assumes ~1.2 lessons per weekday, which is realistic for dense topics like MCP, A2A, and System Design. If you need to drop back to 2 hrs/day, revert to the Sep 26 targets.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -658,13 +665,13 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 |------------|-------------|-------------|--------|
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
-| **Phase 5 complete** (Backend & MCP) | Jun 27, 2026 | _____ | _____ |
-| **Phase 6 complete** (A2A & Multi-Agent) | Jul 18, 2026 | _____ | _____ |
-| **Phase 7 complete** (System Design) | Aug 1, 2026 | _____ | _____ |
-| **Phase 8 complete** (AI Governance) | Aug 15, 2026 | _____ | _____ |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 29, 2026 | _____ | _____ |
+| **Phase 5 complete** (Backend & MCP) | Jul 18, 2026 | _____ | _____ |
+| **Phase 6 complete** (A2A & Multi-Agent) | Jul 25, 2026 | _____ | _____ |
+| **Phase 7 complete** (System Design) | Jul 31, 2026 | _____ | _____ |
+| **Phase 8 complete** (AI Governance) | Aug 7, 2026 | _____ | _____ |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 14, 2026 | _____ | _____ |
 
-**Buffer**: Targets land 2 days before Aug 31 — built-in slack for tough lessons or missed days.
+**Buffer**: Targets land with 2 weeks of slack before the original Aug 31 graduation date.
 
 ---
 
