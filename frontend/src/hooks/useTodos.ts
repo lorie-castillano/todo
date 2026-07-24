@@ -19,6 +19,7 @@ import {
 } from '@tanstack/react-query'
 import type { Todo } from '../types'
 import { createTodoId } from '../types'
+import { apiFetch } from '../lib/apiFetch'
 
 // Query key factory — centralizes cache key patterns
 // Makes cache invalidation predictable
@@ -61,7 +62,7 @@ export type TodoRoute = typeof TODO_ENDPOINTS['list'] // '/api/todos'
 
 // Fetch all todos
 async function fetchTodos(): Promise<Todo[]> {
-  const response = await fetch(TODO_ENDPOINTS.list)
+  const response = await apiFetch(TODO_ENDPOINTS.list)
   if (!response.ok) {
     throw new Error('Failed to fetch todos')
   }
@@ -89,7 +90,7 @@ export function useTodosSuspense() {
 
 // ADD todo mutation
 async function createTodo(text: string): Promise<Todo> {
-  const response = await fetch(TODO_ENDPOINTS.create, {
+  const response = await apiFetch(TODO_ENDPOINTS.create, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -155,7 +156,7 @@ async function updateTodo({
   id: number
   completed: boolean
 }): Promise<Todo> {
-  const response = await fetch(TODO_ENDPOINTS.update(id), {
+  const response = await apiFetch(TODO_ENDPOINTS.update(id), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ completed }),
@@ -207,7 +208,7 @@ async function editTodoText({
   id: number
   text: string
 }): Promise<Todo> {
-  const response = await fetch(TODO_ENDPOINTS.update(id), {
+  const response = await apiFetch(TODO_ENDPOINTS.update(id), {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text }),
@@ -252,7 +253,7 @@ export function useEditTodo() {
 
 // DELETE todo mutation
 async function deleteTodo(id: number): Promise<void> {
-  const response = await fetch(TODO_ENDPOINTS.delete(id), {
+  const response = await apiFetch(TODO_ENDPOINTS.delete(id), {
     method: 'DELETE',
   })
 
@@ -292,7 +293,7 @@ export function useDeleteTodo() {
 
 // CLEAR COMPLETED mutation
 async function clearCompleted(): Promise<void> {
-  const response = await fetch(TODO_ENDPOINTS.clearCompleted, {
+  const response = await apiFetch(TODO_ENDPOINTS.clearCompleted, {
     method: 'DELETE',
   })
 

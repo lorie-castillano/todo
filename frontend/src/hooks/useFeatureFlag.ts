@@ -15,13 +15,24 @@ import {
   type FlagName,
   type FlagContext,
 } from '../lib/featureFlags'
+import { useAuth } from '../context/AuthContext'
 
 export function useFeatureFlag(name: FlagName, context?: FlagContext): boolean {
-  // Memoize on the flag name + userId so we only re-evaluate when they change.
-  // This todo app has no auth, so userId is usually undefined ('anonymous').
-  // When you add auth in Phase 5, pass the real userId via context.
+  // Pull the authenticated user from context. Now that auth is wired (Lesson
+  // 5.5), the real userId flows into flag evaluation automatically — so
+  // percentage rollouts bucket each user consistently across sessions, and
+  // userList targeting works against real account IDs.
+  const { user } = useAuth()
+
+  // An explicitly-passed context.userId always wins (useful for testing or
+  // evaluating flags on behalf of another user). Otherwise fall back to the
+  // logged-in user's id, then to 'anonymous' inside isFeatureEnabled.
+  const userId = context?.userId ?? user?.id
+
+  // Memoize on the flag name + resolved userId so we only re-evaluate when
+  // they change, not on every render.
   return useMemo(
-    () => isFeatureEnabled(name, context),
-    [name, context?.userId]
+    () => isFeatureEnabled(name, userId ? { userId } : {}),
+    [name, userId]
   )
 }

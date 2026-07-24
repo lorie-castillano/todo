@@ -3,6 +3,7 @@ import { render } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './lib/queryClient'
+import { AuthProvider } from './context/AuthContext'
 import App from './App'
 
 // Note: Full integration tests with MSW + TanStack Query require
@@ -11,12 +12,14 @@ import App from './App'
 
 describe('App', () => {
   it('renders without crashing', () => {
-    // Wrap in providers that App needs: Router + QueryClient.
+    // Wrap in providers that App needs: Router + QueryClient + Auth.
     // Theme no longer needs a Provider — Zustand store is global.
     const { container } = render(
       <MemoryRouter>
         <QueryClientProvider client={queryClient}>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </QueryClientProvider>
       </MemoryRouter>
     )

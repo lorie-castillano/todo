@@ -32,7 +32,49 @@ function toTodo(dbTodo: DbTodo): Todo {
   }
 }
 
+// --- Mock auth ---
+// A tiny fake auth backend for dev/test when VITE_USE_BACKEND is false.
+// It doesn't hash passwords or sign real JWTs — it returns a stable fake
+// token and user so the auth flow (login → protected app) works end-to-end
+// against MSW. The real backend does proper bcrypt + JWT.
+const MOCK_TOKEN = 'mock-access-token'
+const MOCK_USER = {
+  id: 'mock-user-1',
+  email: 'demo@todo.dev',
+  createdAt: new Date().toISOString(),
+}
+
 export const handlers = [
+  // POST /api/auth/register — accept any credentials, return the mock user
+  http.post('/api/auth/register', async ({ request }) => {
+    await networkDelay()
+    const body = (await request.json()) as { email?: string }
+    return HttpResponse.json(
+      { user: { ...MOCK_USER, email: body.email ?? MOCK_USER.email } },
+      { status: 201 }
+    )
+  }),
+
+  // POST /api/auth/login — accept any credentials, return user + token
+  http.post('/api/auth/login', async ({ request }) => {
+    await networkDelay()
+    const body = (await request.json()) as { email?: string }
+    return HttpResponse.json({
+      user: { ...MOCK_USER, email: body.email ?? MOCK_USER.email },
+      accessToken: MOCK_TOKEN,
+    })
+  }),
+
+  // GET /api/auth/me — validate the Bearer token, return the user
+  http.get('/api/auth/me', async ({ request }) => {
+    await networkDelay()
+    const auth = request.headers.get('authorization')
+    if (auth !== `Bearer ${MOCK_TOKEN}`) {
+      return HttpResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return HttpResponse.json({ user: MOCK_USER })
+  }),
+
   // GET /api/todos — list all todos
   http.get('/api/todos', async () => {
     await networkDelay()

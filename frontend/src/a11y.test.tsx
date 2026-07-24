@@ -17,6 +17,7 @@ import { axe } from 'vitest-axe'
 import 'vitest-axe/extend-expect'
 import App from './App'
 import { NotFound } from './pages/NotFound'
+import { AuthProvider } from './context/AuthContext'
 
 // Fresh QueryClient per test — no shared cache state between tests
 function makeQueryClient() {
@@ -29,7 +30,9 @@ function AppWrapper({ route = '/' }: { route?: string }) {
   return (
     <MemoryRouter initialEntries={[route]}>
       <QueryClientProvider client={makeQueryClient()}>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </QueryClientProvider>
     </MemoryRouter>
   )
