@@ -1,6 +1,6 @@
 # Todo App
 
-A production-grade Todo application built as a learning curriculum for full-stack, AI-ready engineering. It demonstrates senior-level patterns: URL-driven state, accessibility, performance monitoring, error boundaries, feature flags, structured logging, and CI/CD — all in a React + TypeScript frontend.
+A production-grade Todo application built as a learning curriculum for full-stack, AI-ready engineering. It demonstrates senior-level patterns across a **React + TypeScript frontend** and a **Fastify + PostgreSQL backend**: URL-driven state, accessibility, performance monitoring, error boundaries, feature flags, structured logging, CI/CD, JWT authentication with refresh-token rotation, and per-user data ownership.
 
 > **Curriculum**: This app is the hands-on project for a 9-phase engineering curriculum covering React, Node.js, MCP, A2A, system design, AI governance, and more.
 
@@ -9,6 +9,9 @@ A production-grade Todo application built as a learning curriculum for full-stac
 ## Features
 
 - **Full CRUD** — create, edit, toggle, delete todos with optimistic updates
+- **Authentication** — register/login with bcrypt + JWT access tokens and rotating, revocable refresh tokens (httpOnly cookie)
+- **Per-user data** — todos are scoped to the authenticated user; no cross-user access
+- **Feature-flagged UI** — bulk-actions toolbar (percentage rollout) and AI suggestions panel (beta userList targeting)
 - **URL-driven filtering** — `/`, `/active`, `/completed` are bookmarkable and shareable
 - **Undo/redo** — command pattern with keyboard shortcuts (⌘Z / ⌘⇧Z)
 - **Accessibility** — WCAG 2.1 AA: keyboard navigation, ARIA live regions, screen reader announcements
@@ -34,6 +37,19 @@ A production-grade Todo application built as a learning curriculum for full-stac
 | Testing | Vitest + Testing Library + vitest-axe |
 | Error monitoring | Sentry |
 | CI/CD | GitHub Actions + Vercel |
+
+### Backend
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Fastify 5 + TypeScript (strict mode) |
+| Database | PostgreSQL + Prisma ORM |
+| Auth | JWT (access) + rotating refresh tokens, bcrypt password hashing |
+| Validation | Zod (request bodies, params, query, env) |
+| Security | Helmet, CORS (credentials), rate limiting |
+| Logging | Pino (structured, correlation IDs) |
+| API docs | OpenAPI / Swagger UI at `/docs` |
+| Runtime | Docker Compose (db + backend + frontend + pgAdmin) |
 
 ---
 
@@ -166,6 +182,7 @@ See [`docs/ADR/`](./docs/ADR/) for documented architectural decisions:
 - [ADR-003: MSW for API mocking in tests](./docs/ADR/003-msw-api-mocking.md)
 - [ADR-004: Feature flags with deterministic hashing](./docs/ADR/004-feature-flags-deterministic-hashing.md)
 - [ADR-005: Backend as a separate package with Fastify](./docs/ADR/005-backend-monorepo-fastify.md)
+- [ADR-006: JWT authentication with refresh-token rotation](./docs/ADR/006-jwt-auth-refresh-token-rotation.md)
 
 ---
 

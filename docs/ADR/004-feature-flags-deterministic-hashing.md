@@ -101,8 +101,7 @@ const FLAGS = {
 
 ### Future Work (Phase 5+)
 - Integrate with backend flag service for real-time updates
-- Add real `userId` from authentication (currently defaults to `'anonymous'`)
-- Real use-case rollout test deferred to Lesson 5.6
+- ~~Add real `userId` from authentication (currently defaults to `'anonymous'`)~~ ✅ Done in Lesson 5.5: `useFeatureFlag` now reads the authenticated user's id (see ADR-006). Live features: `bulkActions` (percentage) and `aiSuggestions` (userList).
 
 ---
 

@@ -97,7 +97,21 @@
 
 ---
 
-## 10. Before Merging
+## 10. Backend & API (server-side)
+
+- [ ] All request input (body, params, query) validated with a Zod schema at the route — the **trust boundary**
+- [ ] Protected routes use the `authenticate` guard; `req.user.id` drives ownership
+- [ ] Every DB query is scoped by `userId` — no way to read/mutate another user's data
+- [ ] Business logic lives in the service layer, not the route (reusable by REST + future MCP tools)
+- [ ] No secrets hardcoded — read from Zod-validated `config`; `JWT_SECRET` is never the dev default in prod
+- [ ] Passwords hashed with bcrypt; tokens stored as hashes, never plaintext
+- [ ] Errors go through the centralized handler — no stack traces or internals leaked (500s masked in prod)
+- [ ] Mutations that touch multiple rows run in a transaction (e.g., refresh-token rotation)
+- [ ] New/changed endpoints reflected in the OpenAPI/Swagger docs
+
+---
+
+## 11. Before Merging
 
 - [ ] PR title follows conventional commits format: `feat(scope): description`
 - [ ] PR description explains *why* the change was made, not just *what*

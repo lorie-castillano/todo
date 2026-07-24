@@ -12,7 +12,9 @@
 - [ ] **Database provisioned** — managed PostgreSQL (e.g., Supabase, Neon, AWS RDS) with connection pooling
 - [ ] **DATABASE_URL** points to production database (not `localhost`)
 - [ ] **CORS_ORIGIN** set to production frontend URL (not `localhost:5173`)
-- [ ] **NODE_ENV=production** — enables Fastify production optimizations and disables dev logging
+- [ ] **JWT_SECRET** set to a strong secret (≥32 chars) — required for signing access tokens
+- [ ] **JWT_EXPIRES_IN / REFRESH_TOKEN_TTL_DAYS** reviewed (defaults: 15m access, 7d refresh)
+- [ ] **NODE_ENV=production** — enables Fastify production optimizations, dev logging off, and cookie `secure=true`
 
 ## 2. Database
 
@@ -29,7 +31,12 @@
 - [ ] **Rate limiting** — per-IP and per-endpoint limits configured for production load
 - [ ] **CORS restricted** — only allow the production frontend origin
 - [ ] **No secrets in code** — verified with `git log --all -p | grep -i "password\|secret\|key"` (should find nothing)
-- [ ] **API authentication** — API keys or OAuth for backend endpoints (Lesson 5.5)
+- [ ] **API authentication** — JWT auth on all `/api/todos` routes via the `authenticate` guard (implemented, Lesson 5.5)
+- [ ] **JWT_SECRET set** — strong (≥32 char) secret from env; NEVER the dev default `dev-secret-do-not-use-in-production-32chars`
+- [ ] **Refresh-token cookie hardened** — `httpOnly`, `sameSite=lax`, `secure=true` (prod), path-scoped to `/api/auth`
+- [ ] **Refresh-token rotation** — old token revoked on every refresh; DB stores SHA-256 hashes, not raw tokens
+- [ ] **Passwords hashed** — bcrypt for user passwords (never plaintext or fast hashes)
+- [ ] **Per-user ownership** — every todo query scoped by `userId`; no cross-user access
 - [ ] **Input validation** — Zod schemas on all endpoints (already done)
 
 ## 4. Frontend
@@ -92,4 +99,4 @@ cd backend && DATABASE_URL=$PROD_DB_URL npx prisma migrate deploy
 
 ---
 
-*Last updated: June 4, 2026*
+*Last updated: July 24, 2026 (Lesson 5.5 — authentication & refresh-token rotation)*
