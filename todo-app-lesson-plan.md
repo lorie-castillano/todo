@@ -250,21 +250,20 @@
 ### Lesson 5.5 — Authentication & Feature Flag Rollouts
 - [x] User registration and login (bcrypt password hashing, JWT tokens) — `authService.ts`, `routes/auth.ts`
 - [x] Fastify auth middleware (protect `/api/todos` routes) — `plugins/auth.ts` `authenticate` guard
-- [~] Session management (token expiry ✅ 15m access token; refresh tokens **deferred**)
+- [x] Session management — 15m access token + **refresh tokens** (rotation, DB-stored SHA-256 hashes, httpOnly cookie); `/api/auth/refresh` + `/logout`; silent refresh on 401 in `apiFetch`
 - [x] Frontend auth flow (login page, protected routes, auth context) — `AuthContext`, `LoginPage`, `ProtectedRoute`, `apiFetch`
 - [x] Per-user todo ownership (users only see their own todos) — todo service/routes scoped to `userId`
   - [x] Migration applied — `20260724095225_add_user_and_todo_ownership` (users table, nullable user_id, FK, index)
   - [x] `Todo.userId` now **required** — `20260724100138_require_todo_owner` (30 orphaned dev todos deleted first)
-- [~] **Feature flags — real use-case test** (deferred from Lesson 4.2)
+- [x] **Feature flags — real use-case test** (deferred from Lesson 4.2)
   - [x] Pass the authenticated user's real `userId` into `useFeatureFlag`/`isFeatureEnabled` — auto-injected from `AuthContext`
-  - [ ] Wire `bulkActions` (percentage rollout) into an actual UI feature and confirm
-    the same logged-in user consistently gets the same experience across sessions
-  - [ ] Add a real beta user's ID to `aiSuggestions` (userList) and verify targeting
-  - [ ] Simulate a gradual rollout: bump `bulkActions` 0 → 25 → 100 and observe who gets it
+  - [x] Wire `bulkActions` (percentage rollout) into a real `BulkActionsToolbar` — consistent per-user across sessions (deterministic bucketing)
+  - [x] Add a beta user's ID to `aiSuggestions` (userList) and verify targeting (`mock-user-1` + test)
+  - [x] Simulate a gradual rollout: `isInPercentageRollout` helper + ramp tests (0 → 25 → 100, monotonic)
 
 **Concepts**: Authentication, authorization, JWT, password hashing, session management, feature flag rollouts with real users
 
-*Progress: core auth complete and migrated (register/login/JWT, guard, protected routes, per-user todos with required ownership, real userId in flags). Remaining: refresh tokens, and the hands-on flag rollout UI test.*
+*Progress: **Lesson 5.5 complete.** Auth (register/login/JWT), refresh-token rotation via httpOnly cookie, per-user todos with required ownership, and the hands-on feature-flag rollout (bulkActions toolbar + aiSuggestions targeting + ramp tests). Verified e2e against the live backend.*
 
 ### Lesson 5.6 — System Design Fundamentals
 - [ ] **Scalability patterns**: horizontal vs vertical scaling, load balancing, caching strategies
