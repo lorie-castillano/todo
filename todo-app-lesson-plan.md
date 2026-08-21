@@ -274,7 +274,7 @@
 
 **Concepts**: Distributed systems, scalability, reliability, tradeoff analysis
 
-*Progress: **Lesson 5.6 complete.** Studied the five system-design pillars grounded in this codebase — confirmed the app is already horizontally-scalable (stateless JWT + DB-backed state), relationally correct (FK cascades + `userId`-first composite index), and a deliberate modular monolith with clean extraction seams. Scaling posture and tradeoffs captured in ADR-007. Known gap noted: in-memory rate limiter must move to a shared Redis store before horizontal scaling.*
+*Progress: **Lesson 5.6 complete.** Studied the five system-design pillars grounded in this codebase — confirmed the app is already horizontally-scalable (stateless JWT + DB-backed state), relationally correct (FK cascades + `userId`-first composite index), and a deliberate modular monolith with clean extraction seams. Scaling posture and tradeoffs captured in ADR-007. Rate-limiter gap resolved: implemented shared Redis store (REDIS_URL, in-memory fallback) + per-route auth limits (login 5/min, register 10/hr). 26 tests passing.*
 
 ### Lesson 5.7 — Model Context Protocol (MCP) Implementation
 - [ ] MCP SDK integration (`@anthropic-ai/mcp`)
@@ -645,7 +645,7 @@ By the end of this plan, you will be able to:
 
 **Next up: Lesson 5.7 — Model Context Protocol (MCP) Implementation**
 
-**Total Scope**: 9 phases, 32 lessons, estimated 10-11 weeks at 2 hrs/day
+**Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
 **Lesson order**: 5.1–5.4 (backend + integration) → 5.5 (auth) → 5.6 (system design) → 5.7–5.8 (MCP + agent hardening)
 
@@ -655,10 +655,10 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **3 hrs/day, weekdays only** (~15 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **August 19, 2026** (recalculated Jul 24 at 3 hrs/day)
-> **Plan restart of remaining work**: July 27, 2026
+> **Revised target graduation**: **September 20, 2026** (recalculated Aug 21 at 3 hrs/day)
+> **Plan restart of remaining work**: August 22, 2026
 
-*Note: Recalculated on July 24, 2026. Lessons 5.1–5.6 are complete (5.5 **and** 5.6 finished today, plus a Redis rate-limit hardening bundle). The remaining **20 lessons** (5.7 through 9.5) restart Monday, July 27 at 3 hrs/day (~1.2 lessons/weekday ≈ 17 weekdays), landing graduation ~August 19, 2026 — still ~12 days inside the original Aug 31 goal. Finishing 5.6 **early** (targeted Jul 27) puts you ~1 lesson ahead, so the checkpoint dates below are conservative — expect to land a day or two sooner if the pace holds.*
+*Note: Recalculated on August 21, 2026. Lessons 5.1–5.6 are complete (5.6 finished Jul 24). The remaining 20 lessons (5.7 through 9.5) restart Thursday, August 22 at 3 hrs/day (~1.2 lessons/weekday). At that pace, graduation lands ~September 20, 2026. This reflects a ~4-week gap between Jul 24 and Aug 21 with no lesson progress (life happens). The new target is realistic and builds in buffer.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -666,13 +666,13 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 |------------|-------------|-------------|--------|
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
-| **Phase 5 complete** (Backend & MCP) | Jul 29, 2026 | _____ | 🚧 6/8 done (5.7–5.8 left) |
-| **Phase 6 complete** (A2A & Multi-Agent) | Aug 4, 2026 | _____ | _____ |
-| **Phase 7 complete** (System Design) | Aug 7, 2026 | _____ | _____ |
-| **Phase 8 complete** (AI Governance) | Aug 13, 2026 | _____ | _____ |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Aug 19, 2026 | _____ | _____ |
+| **Phase 5 complete** (Backend & MCP) | Aug 27, 2026 | _____ | 🚧 6/8 done (5.7–5.8 left) |
+| **Phase 6 complete** (A2A & Multi-Agent) | Sep 3, 2026 | _____ | _____ |
+| **Phase 7 complete** (System Design) | Sep 6, 2026 | _____ | _____ |
+| **Phase 8 complete** (AI Governance) | Sep 12, 2026 | _____ | _____ |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Sep 20, 2026 | _____ | _____ |
 
-**Buffer**: Targets land ~12 days (roughly 2 weeks) before the original Aug 31 graduation date.
+**Buffer**: Targets land ~10 days before the original Aug 31 goal was missed due to the 4-week gap. New realistic target: Sep 20.
 
 ---
 
@@ -733,4 +733,4 @@ Days off target = (actual completion date) − (target date)
 | 5.3 — REST API Hardening | — | ✅ Jun 4 | Zod safeParse, CORS, Helmet, rate limiter, Swagger UI |
 | 5.4 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
 | 5.5 — Authentication & Feature Flags | Jul 18 | ✅ Jul 24 | JWT + bcrypt, refresh-token rotation (httpOnly cookie), per-user todos, bulkActions + aiSuggestions flags, 96 tests |
-| 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | 5 pillars (scalability, DB, monolith vs microservices, API, CAP) grounded in the codebase; ADR-007 scaling posture; shipped Redis-backed shared rate-limit store + per-route auth limits (/login 5/min, /register 10/hr) with integration tests |
+| 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | Scalability, DB design, monolith vs microservices, API design, CAP theorem; ADR-007 + Redis rate-limit store + per-route auth limits (5/min login, 10/hr register) |
