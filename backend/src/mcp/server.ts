@@ -3,13 +3,15 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
-  Tool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { PrismaClient } from '@prisma/client';
+import pg from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient } from '../generated/prisma/client.js';
+import { config } from '../config.js';
 
 const CreateTodoInputSchema = z.object({
-  title: z.string().min(1).max(200),
+  text: z.string().min(1).max(200),
   userId: z.string().uuid(),
 });
 
@@ -19,26 +21,26 @@ const ListTodosInputSchema = z.object({
 });
 
 const ToggleTodoInputSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number().int().positive(),
   userId: z.string().uuid(),
 });
 
 const DeleteTodoInputSchema = z.object({
-  id: z.string().uuid(),
+  id: z.number().int().positive(),
   userId: z.string().uuid(),
 });
 
-const TOOLS: Tool[] = [
+const TOOLS = [
   {
     name: 'create_todo',
     description: 'Create a new todo item for a user',
     inputSchema: {
       type: 'object',
       properties: {
-        title: { type: 'string', minLength: 1, maxLength: 200 },
+        text: { type: 'string', minLength: 1, maxLength: 200 },
         userId: { type: 'string', format: 'uuid' },
       },
-      required: ['title', 'userId'],
+      required: ['text', 'userId'],
     },
   },
   {
@@ -59,7 +61,7 @@ const TOOLS: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', format: 'uuid' },
+        id: { type: 'integer' },
         userId: { type: 'string', format: 'uuid' },
       },
       required: ['id', 'userId'],
@@ -71,7 +73,7 @@ const TOOLS: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {
-        id: { type: 'string', format: 'uuid' },
+        id: { type: 'integer' },
         userId: { type: 'string', format: 'uuid' },
       },
       required: ['id', 'userId'],
@@ -105,7 +107,7 @@ export async function createMcpServer(prisma: PrismaClient) {
           const input = CreateTodoInputSchema.parse(args);
           const todo = await prisma.todo.create({
             data: {
-              title: input.title,
+              text: input.text,
               userId: input.userId,
             },
           });
@@ -229,13 +231,17 @@ export async function createMcpServer(prisma: PrismaClient) {
 }
 
 export async function runMcpServer() {
-  const prisma = new PrismaClient();
+  const pool = new pg.Pool({ connectionString: config.databaseUrl });
+  const adapter = new PrismaPg(pool);
+  const prisma = new PrismaClient({ adapter } as any);
+
   const server = await createMcpServer(prisma);
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
   process.on('SIGINT', async () => {
     await prisma.$disconnect();
+    await pool.end();
     process.exit(0);
   });
 }

@@ -10,7 +10,7 @@ Create a new todo item for a user.
 **Input:**
 ```json
 {
-  "title": "Buy groceries",
+  "text": "Buy groceries",
   "userId": "uuid-string"
 }
 ```
@@ -40,7 +40,7 @@ Toggle the completion status of a todo.
 **Input:**
 ```json
 {
-  "id": "todo-uuid",
+  "id": 123,
   "userId": "user-uuid"
 }
 ```
@@ -55,7 +55,7 @@ Soft delete a todo.
 **Input:**
 ```json
 {
-  "id": "todo-uuid",
+  "id": 123,
   "userId": "user-uuid"
 }
 ```
