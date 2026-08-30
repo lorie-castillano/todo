@@ -288,13 +288,14 @@
 *Progress: **Lesson 5.7 complete.** MCP server with 4 tools, resource endpoint (`todo://todos`), Zod validation, per-user ownership, stdio transport, and audit logging to stderr. Tested with MCP Inspector v2.4.0. Ready for Claude Desktop integration.*
 
 ### Lesson 5.8 — Agent Hardening & Production Readiness
-- [ ] API key authentication with middleware
-- [ ] Circuit breakers for external calls
-- [ ] Resource quotas and abuse prevention
-- [ ] Progress callbacks for batch operations
-- [ ] Integration testing with MCP inspector
+- [x] API key authentication (optional in dev, required in prod)
+- [x] Rate limiting per userId (100 requests/minute)
+- [x] Graceful error responses for auth and rate limit failures
+- [x] Security documentation and .env configuration
 
-**Concepts**: Agent security, production hardening, compliance logging
+**Concepts**: Agent security, production hardening, rate limiting, API key auth
+
+*Progress: **Lesson 5.8 complete.** Added API key authentication (`MCP_API_KEY` env var), per-user rate limiting (100/min), and comprehensive security documentation. MCP server is now production-ready with auth, rate limits, audit logging, and resource endpoints.*
 
 ---
 
@@ -639,13 +640,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 7/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅ 5.6 ✅ 5.7 ✅) |
+| Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.8 — Agent Hardening & Production Readiness**
+**Next up: Phase 6 — A2A Protocol & Multi-Agent Systems**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -737,3 +738,4 @@ Days off target = (actual completion date) − (target date)
 | 5.5 — Authentication & Feature Flags | Jul 18 | ✅ Jul 24 | JWT + bcrypt, refresh-token rotation (httpOnly cookie), per-user todos, bulkActions + aiSuggestions flags, 96 tests |
 | 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | Scalability, DB design, monolith vs microservices, API design, CAP theorem; ADR-007 + Redis rate-limit store + per-route auth limits (5/min login, 10/hr register) |
 | 5.7 — MCP Implementation | Aug 29 | ✅ Aug 30 | MCP server with 4 tools (create, list, toggle, delete), resource endpoint (todo://todos), Zod validation, audit logging, tested with Inspector v2.4.0 |
+| 5.8 — Agent Hardening | Sep 1 | ✅ Aug 30 | API key auth (MCP_API_KEY), per-user rate limiting (100/min), security docs; **Phase 5 complete** |

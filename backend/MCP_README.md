@@ -80,6 +80,42 @@ List all todos across all users (read-only, limited to 100 most recent).
 
 ---
 
+## Security
+
+### API Key Authentication
+
+All tool calls require an API key for authentication (optional in development, required in production).
+
+**Setup:**
+1. Generate a secure key: `openssl rand -hex 32`
+2. Set in `.env`: `MCP_API_KEY=your-generated-key`
+3. Include in all tool calls:
+   ```json
+   {
+     "text": "Buy groceries",
+     "userId": "...",
+     "apiKey": "your-generated-key"
+   }
+   ```
+
+**Behavior:**
+- **Development** (no `MCP_API_KEY` set): API key validation skipped
+- **Production** (`MCP_API_KEY` set): All requests must include matching `apiKey`
+- **Invalid/missing key**: Returns `401 Unauthorized` error
+
+### Rate Limiting
+
+Each user is limited to **100 tool calls per minute** to prevent abuse.
+
+**Implementation:**
+- In-memory counter per `userId`
+- Resets every 60 seconds
+- Returns `429 Rate Limit Exceeded` when limit hit
+
+**Why per-user**: Prevents one runaway agent from blocking others.
+
+---
+
 ## Audit Logging
 
 Every tool call is logged to stderr with:

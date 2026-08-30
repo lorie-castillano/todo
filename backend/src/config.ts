@@ -54,6 +54,9 @@ const envSchema = z.object({
   // When unset, the limiter falls back to per-process in-memory counters —
   // fine for single-instance local dev, wrong for multi-instance production.
   REDIS_URL: z.string().url().optional(),
+
+  // MCP API key for agent authentication. Required in production.
+  MCP_API_KEY: z.string().min(32).optional(),
 })
 
 // --- Parse & validate ---
@@ -87,6 +90,7 @@ export const config = Object.freeze({
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   refreshTokenTtlDays: parsed.data.REFRESH_TOKEN_TTL_DAYS,
   redisUrl: parsed.data.REDIS_URL,
+  mcpApiKey: parsed.data.MCP_API_KEY,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

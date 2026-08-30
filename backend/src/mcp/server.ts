@@ -15,21 +15,25 @@ import { config } from '../config.js';
 const CreateTodoInputSchema = z.object({
   text: z.string().min(1).max(200),
   userId: z.string().uuid(),
+  apiKey: z.string().optional(),
 });
 
 const ListTodosInputSchema = z.object({
   userId: z.string().uuid(),
   completed: z.boolean().optional(),
+  apiKey: z.string().optional(),
 });
 
 const ToggleTodoInputSchema = z.object({
   id: z.number().int().positive(),
   userId: z.string().uuid(),
+  apiKey: z.string().optional(),
 });
 
 const DeleteTodoInputSchema = z.object({
   id: z.number().int().positive(),
   userId: z.string().uuid(),
+  apiKey: z.string().optional(),
 });
 
 function logAuditEvent(action: string, userId: string, details: Record<string, any>) {
@@ -44,6 +48,41 @@ function logAuditEvent(action: string, userId: string, details: Record<string, a
   );
 }
 
+function validateApiKey(apiKey: string | undefined): boolean {
+  // In development, allow requests without API key
+  if (config.isDev && !config.mcpApiKey) {
+    return true;
+  }
+
+  // In production, require API key
+  if (!config.mcpApiKey) {
+    console.error('MCP_API_KEY not configured but required in production');
+    return false;
+  }
+
+  return apiKey === config.mcpApiKey;
+}
+
+// Simple in-memory rate limiter: 100 requests per user per minute
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now();
+  const limit = rateLimitMap.get(userId);
+
+  if (!limit || now > limit.resetAt) {
+    rateLimitMap.set(userId, { count: 1, resetAt: now + 60000 });
+    return true;
+  }
+
+  if (limit.count >= 100) {
+    return false;
+  }
+
+  limit.count++;
+  return true;
+}
+
 const TOOLS = [
   {
     name: 'create_todo',
@@ -53,6 +92,7 @@ const TOOLS = [
       properties: {
         text: { type: 'string', minLength: 1, maxLength: 200 },
         userId: { type: 'string', format: 'uuid' },
+        apiKey: { type: 'string' },
       },
       required: ['text', 'userId'],
     },
@@ -65,6 +105,7 @@ const TOOLS = [
       properties: {
         userId: { type: 'string', format: 'uuid' },
         completed: { type: 'boolean' },
+        apiKey: { type: 'string' },
       },
       required: ['userId'],
     },
@@ -77,6 +118,7 @@ const TOOLS = [
       properties: {
         id: { type: 'integer' },
         userId: { type: 'string', format: 'uuid' },
+        apiKey: { type: 'string' },
       },
       required: ['id', 'userId'],
     },
@@ -89,6 +131,7 @@ const TOOLS = [
       properties: {
         id: { type: 'integer' },
         userId: { type: 'string', format: 'uuid' },
+        apiKey: { type: 'string' },
       },
       required: ['id', 'userId'],
     },
@@ -158,6 +201,34 @@ export async function createMcpServer(prisma: PrismaClient) {
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
+
+    // Validate API key first
+    const apiKey = (args as any)?.apiKey;
+    if (!validateApiKey(apiKey)) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ error: 'Unauthorized: Invalid or missing API key' }),
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    // Check rate limit
+    const userId = (args as any)?.userId;
+    if (userId && !checkRateLimit(userId)) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify({ error: 'Rate limit exceeded: 100 requests per minute' }),
+          },
+        ],
+        isError: true,
+      };
+    }
 
     try {
       switch (name) {
