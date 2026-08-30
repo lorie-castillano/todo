@@ -280,18 +280,18 @@
 - [x] MCP SDK integration (`@anthropic-ai/mcp`)
 - [x] Define todo tools: `create_todo`, `list_todos`, `toggle_todo`, `delete_todo`
 - [x] Zod schemas for tool inputs (LLM-friendly validation)
-- [ ] Resource endpoints: `/resources/todos` for read-only access
-- [ ] Progress callbacks for batch operations
+- [x] Resource endpoints: `todo://todos` for read-only access
+- [x] Audit logging for all tool operations
 
-**Concepts**: MCP protocol, AI agent interfaces, tool-based APIs
+**Concepts**: MCP protocol, AI agent interfaces, tool-based APIs, resources vs tools
 
-*Progress: **Lesson 5.7 in progress.** MCP server implemented with 4 tools (create, list, toggle, delete), Zod validation, per-user ownership checks, and stdio transport. Tools are ready for Claude Desktop and MCP Inspector. Resource endpoints and progress callbacks deferred to 5.8.*
+*Progress: **Lesson 5.7 complete.** MCP server with 4 tools, resource endpoint (`todo://todos`), Zod validation, per-user ownership, stdio transport, and audit logging to stderr. Tested with MCP Inspector v2.4.0. Ready for Claude Desktop integration.*
 
 ### Lesson 5.8 — Agent Hardening & Production Readiness
 - [ ] API key authentication with middleware
-- [ ] Request/response audit logging
 - [ ] Circuit breakers for external calls
 - [ ] Resource quotas and abuse prevention
+- [ ] Progress callbacks for batch operations
 - [ ] Integration testing with MCP inspector
 
 **Concepts**: Agent security, production hardening, compliance logging
@@ -639,13 +639,13 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
-| Phase 5: Backend & MCP Integration | 🚧 In Progress | 6/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅ 5.6 ✅) |
+| Phase 5: Backend & MCP Integration | 🚧 In Progress | 7/8 (5.1 ✅ 5.2 ✅ 5.3 ✅ 5.4 ✅ 5.5 ✅ 5.6 ✅ 5.7 ✅) |
 | Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 5.7 — Model Context Protocol (MCP) Implementation**
+**Next up: Lesson 5.8 — Agent Hardening & Production Readiness**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -736,3 +736,4 @@ Days off target = (actual completion date) − (target date)
 | 5.4 — Full-Stack Integration | — | ✅ Jun 4 | Monorepo (frontend/ + backend/), Docker Compose, Playwright e2e, production checklist |
 | 5.5 — Authentication & Feature Flags | Jul 18 | ✅ Jul 24 | JWT + bcrypt, refresh-token rotation (httpOnly cookie), per-user todos, bulkActions + aiSuggestions flags, 96 tests |
 | 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | Scalability, DB design, monolith vs microservices, API design, CAP theorem; ADR-007 + Redis rate-limit store + per-route auth limits (5/min login, 10/hr register) |
+| 5.7 — MCP Implementation | Aug 29 | ✅ Aug 30 | MCP server with 4 tools (create, list, toggle, delete), resource endpoint (todo://todos), Zod validation, audit logging, tested with Inspector v2.4.0 |

@@ -3,6 +3,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import pg from 'pg';
@@ -29,6 +31,18 @@ const DeleteTodoInputSchema = z.object({
   id: z.number().int().positive(),
   userId: z.string().uuid(),
 });
+
+function logAuditEvent(action: string, userId: string, details: Record<string, any>) {
+  console.error(
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'audit',
+      action,
+      userId,
+      ...details,
+    })
+  );
+}
 
 const TOOLS = [
   {
@@ -90,6 +104,7 @@ export async function createMcpServer(prisma: PrismaClient) {
     {
       capabilities: {
         tools: {},
+        resources: {},
       },
     }
   );
@@ -97,6 +112,49 @@ export async function createMcpServer(prisma: PrismaClient) {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: TOOLS,
   }));
+
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+    resources: [
+      {
+        uri: 'todo://todos',
+        name: 'All Todos',
+        description: 'List all todos across all users (read-only)',
+        mimeType: 'application/json',
+      },
+    ],
+  }));
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const { uri } = request.params;
+
+    if (uri === 'todo://todos') {
+      const todos = await prisma.todo.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+        take: 100,
+      });
+
+      return {
+        contents: [
+          {
+            uri,
+            mimeType: 'application/json',
+            text: JSON.stringify(todos, null, 2),
+          },
+        ],
+      };
+    }
+
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: 'text/plain',
+          text: 'Resource not found',
+        },
+      ],
+    };
+  });
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
@@ -111,6 +169,7 @@ export async function createMcpServer(prisma: PrismaClient) {
               userId: input.userId,
             },
           });
+          logAuditEvent('create_todo', input.userId, { todoId: todo.id, text: todo.text });
           return {
             content: [
               {
@@ -131,6 +190,7 @@ export async function createMcpServer(prisma: PrismaClient) {
             },
             orderBy: { createdAt: 'desc' },
           });
+          logAuditEvent('list_todos', input.userId, { count: todos.length, filter: input.completed });
           return {
             content: [
               {
@@ -161,6 +221,7 @@ export async function createMcpServer(prisma: PrismaClient) {
             where: { id: input.id },
             data: { completed: !existing.completed },
           });
+          logAuditEvent('toggle_todo', input.userId, { todoId: input.id, completed: updated.completed });
           return {
             content: [
               {
@@ -191,6 +252,7 @@ export async function createMcpServer(prisma: PrismaClient) {
             where: { id: input.id },
             data: { deletedAt: new Date() },
           });
+          logAuditEvent('delete_todo', input.userId, { todoId: input.id });
           return {
             content: [
               {

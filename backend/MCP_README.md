@@ -64,6 +64,46 @@ Soft delete a todo.
 
 ---
 
+## Resources
+
+Resources provide read-only access to data without executing actions.
+
+### `todo://todos`
+List all todos across all users (read-only, limited to 100 most recent).
+
+**Access via MCP Inspector:**
+- Navigate to "Resources" tab
+- Select `todo://todos`
+- View JSON response with all active todos
+
+**Use case**: Let agents explore the data structure before deciding which tools to call.
+
+---
+
+## Audit Logging
+
+Every tool call is logged to stderr with:
+- **timestamp**: ISO 8601 format
+- **action**: Tool name (e.g., `create_todo`)
+- **userId**: Who performed the action
+- **details**: Action-specific metadata (todoId, text, count, etc.)
+
+**Example log entry:**
+```json
+{
+  "timestamp": "2026-08-30T10:15:30.123Z",
+  "level": "audit",
+  "action": "create_todo",
+  "userId": "550e8400-e29b-41d4-a716-446655440000",
+  "todoId": 123,
+  "text": "Buy groceries"
+}
+```
+
+Logs are written to **stderr** (not stdout) to avoid corrupting MCP's JSON-RPC protocol on stdout.
+
+---
+
 ## Running the MCP Server
 
 ### Development Mode
