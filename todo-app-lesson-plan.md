@@ -277,13 +277,15 @@
 *Progress: **Lesson 5.6 complete.** Studied the five system-design pillars grounded in this codebase — confirmed the app is already horizontally-scalable (stateless JWT + DB-backed state), relationally correct (FK cascades + `userId`-first composite index), and a deliberate modular monolith with clean extraction seams. Scaling posture and tradeoffs captured in ADR-007. Rate-limiter gap resolved: implemented shared Redis store (REDIS_URL, in-memory fallback) + per-route auth limits (login 5/min, register 10/hr). 26 tests passing.*
 
 ### Lesson 5.7 — Model Context Protocol (MCP) Implementation
-- [ ] MCP SDK integration (`@anthropic-ai/mcp`)
-- [ ] Define todo tools: `create_todo`, `list_todos`, `complete_todo`, `delete_todo`
-- [ ] Zod schemas for tool inputs (LLM-friendly validation)
+- [x] MCP SDK integration (`@anthropic-ai/mcp`)
+- [x] Define todo tools: `create_todo`, `list_todos`, `toggle_todo`, `delete_todo`
+- [x] Zod schemas for tool inputs (LLM-friendly validation)
 - [ ] Resource endpoints: `/resources/todos` for read-only access
 - [ ] Progress callbacks for batch operations
 
 **Concepts**: MCP protocol, AI agent interfaces, tool-based APIs
+
+*Progress: **Lesson 5.7 in progress.** MCP server implemented with 4 tools (create, list, toggle, delete), Zod validation, per-user ownership checks, and stdio transport. Tools are ready for Claude Desktop and MCP Inspector. Resource endpoints and progress callbacks deferred to 5.8.*
 
 ### Lesson 5.8 — Agent Hardening & Production Readiness
 - [ ] API key authentication with middleware

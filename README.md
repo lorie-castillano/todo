@@ -11,6 +11,7 @@ A production-grade Todo application built as a learning curriculum for full-stac
 - **Full CRUD** — create, edit, toggle, delete todos with optimistic updates
 - **Authentication** — register/login with bcrypt + JWT access tokens and rotating, revocable refresh tokens (httpOnly cookie)
 - **Per-user data** — todos are scoped to the authenticated user; no cross-user access
+- **MCP server** — AI agents can interact via Model Context Protocol tools (`create_todo`, `list_todos`, `toggle_todo`, `delete_todo`)
 - **Feature-flagged UI** — bulk-actions toolbar (percentage rollout) and AI suggestions panel (beta userList targeting)
 - **URL-driven filtering** — `/`, `/active`, `/completed` are bookmarkable and shareable
 - **Undo/redo** — command pattern with keyboard shortcuts (⌘Z / ⌘⇧Z)
@@ -46,10 +47,11 @@ A production-grade Todo application built as a learning curriculum for full-stac
 | Database | PostgreSQL + Prisma ORM |
 | Auth | JWT (access) + rotating refresh tokens, bcrypt password hashing |
 | Validation | Zod (request bodies, params, query, env) |
-| Security | Helmet, CORS (credentials), rate limiting |
+| Security | Helmet, CORS (credentials), rate limiting (Redis-backed) |
 | Logging | Pino (structured, correlation IDs) |
 | API docs | OpenAPI / Swagger UI at `/docs` |
-| Runtime | Docker Compose (db + backend + frontend + pgAdmin) |
+| MCP | Model Context Protocol server (stdio transport, 4 tools) |
+| Runtime | Docker Compose (db + redis + backend + frontend + pgAdmin) |
 
 ---
 
@@ -170,6 +172,51 @@ User session → logger (correlation ID) → Sentry breadcrumbs
 Web Vitals → sendToSentry() → Sentry performance dashboard
 Error boundary → reportBoundaryError(correlationId) → Sentry issue
 ```
+
+---
+
+## MCP Server (AI Agent Interface)
+
+The backend includes a **Model Context Protocol (MCP) server** that exposes todo operations as tools for AI agents.
+
+### Running the MCP Server
+
+```bash
+cd backend
+npm run mcp:dev
+```
+
+The server runs on **stdio transport** (not HTTP) and is designed to be connected by MCP clients like Claude Desktop or custom agents.
+
+### Available Tools
+
+- **`create_todo`** — Create a new todo for a user
+- **`list_todos`** — List todos (optionally filtered by completion status)
+- **`toggle_todo`** — Toggle completion status
+- **`delete_todo`** — Soft delete a todo
+
+All tools require `userId` and enforce per-user ownership checks.
+
+### Testing with MCP Inspector
+
+```bash
+cd backend
+npx @modelcontextprotocol/inspector npm run mcp:dev
+```
+
+Opens a web UI to test tool calls interactively.
+
+### Using with Claude Desktop
+
+1. Copy `backend/mcp-config.json` to:
+   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+2. Update the `cwd` path to match your local setup
+
+3. Restart Claude Desktop
+
+See [`backend/MCP_README.md`](./backend/MCP_README.md) for detailed documentation.
 
 ---
 

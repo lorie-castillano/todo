@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "todo": {
+      "command": "npm",
+      "args": ["run", "mcp:dev"],
+      "cwd": "/Users/loriecastillano/CascadeProjects/todo/backend",
+      "env": {
+        "DATABASE_URL": "postgresql://todo_user:todo_pass@localhost:5432/todo_db",
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}

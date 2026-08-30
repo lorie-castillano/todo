@@ -6,6 +6,7 @@
   "description": "Fastify backend for the Todo app — REST API + MCP server for AI agents",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "mcp:dev": "tsx watch src/mcp/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
@@ -20,6 +21,7 @@
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.6",
+    "@modelcontextprotocol/sdk": "^1.30.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "bcrypt": "^5.1.1",
