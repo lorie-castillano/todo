@@ -658,11 +658,11 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **2 hrs/day, weekdays only** (~10 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **October 21, 2026** (recalculated Aug 30 at 2 hrs/day)
-> **Phase 5 completed**: August 30, 2026 (Friday)
+> **Revised target graduation**: **October 18, 2026** (recalculated Aug 30 at 2 hrs/day)
+> **Phase 5 completed**: August 30, 2026 (Sunday)
 > **Next work session**: September 2, 2026 (Monday)
 
-*Note: Recalculated on August 30, 2026 (Sunday). Phase 5 complete (8/8 lessons). Remaining: 18 lessons across Phases 6-9. Starting Monday Sep 2, at 2 hrs/day weekdays only (~0.8 lessons/weekday = 4 lessons/week), estimated completion: October 21, 2026. This is 4.5 weeks for 18 lessons.*
+*Note: Recalculated on August 30, 2026 (Sunday). Phase 5 complete (8/8 lessons). Remaining: 18 lessons across Phases 6-9. Starting tomorrow (Monday Sep 2), at 2 hrs/day weekdays only (~0.8 lessons/weekday = 4 lessons/week), estimated completion: October 18, 2026. This is 34 weekdays for 18 lessons.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -671,12 +671,12 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
 | **Phase 5 complete** (Backend & MCP) | Aug 29, 2026 | Aug 30, 2026 | 🟢 On Time (1 day late) |
-| **Phase 6 complete** (A2A & Multi-Agent) | Sep 16, 2026 | _____ | 5 lessons, ~1.25 weeks |
-| **Phase 7 complete** (System Design) | Sep 26, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 8 complete** (AI Governance) | Oct 6, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Oct 21, 2026 | _____ | 5 lessons, ~1.25 weeks |
+| **Phase 6 complete** (A2A & Multi-Agent) | Sep 13, 2026 | _____ | 5 lessons, ~1.25 weeks |
+| **Phase 7 complete** (System Design) | Sep 23, 2026 | _____ | 4 lessons, ~1 week |
+| **Phase 8 complete** (AI Governance) | Oct 3, 2026 | _____ | 4 lessons, ~1 week |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Oct 18, 2026 | _____ | 5 lessons, ~1.25 weeks |
 
-**Buffer**: Sustainable pace at 2 hrs/day, weekdays only. Graduation target: **October 21, 2026**.
+**Buffer**: Sustainable pace at 2 hrs/day, weekdays only. Graduation target: **October 18, 2026**.
 
 ---
 
