@@ -26,6 +26,7 @@ import auth from './plugins/auth.js'
 import { healthRoutes } from './routes/health.js'
 import { todoRoutes } from './routes/todos.js'
 import { authRoutes } from './routes/auth.js'
+import { a2aRoutes } from './routes/a2a.js'
 
 // Return type is intentionally inferred. Passing a custom Pino
 // `loggerInstance` specializes the FastifyInstance's logger generic, so
@@ -128,6 +129,7 @@ export async function buildApp() {
   await app.register(healthRoutes)
   await app.register(authRoutes)
   await app.register(todoRoutes)
+  await app.register(a2aRoutes)
 
   // --- Root route: a friendly landing response ---
   app.get('/', async () => ({

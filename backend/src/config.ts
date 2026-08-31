@@ -57,6 +57,11 @@ const envSchema = z.object({
 
   // MCP API key for agent authentication. Required in production.
   MCP_API_KEY: z.string().min(32).optional(),
+
+  // Optional: public base URL advertised in the A2A agent card.
+  // Defaults to http://localhost:<PORT> for local dev. In production,
+  // set this to the HTTPS URL your reverse proxy / load balancer serves.
+  A2A_BASE_URL: z.string().url().optional(),
 })
 
 // --- Parse & validate ---
@@ -91,6 +96,7 @@ export const config = Object.freeze({
   refreshTokenTtlDays: parsed.data.REFRESH_TOKEN_TTL_DAYS,
   redisUrl: parsed.data.REDIS_URL,
   mcpApiKey: parsed.data.MCP_API_KEY,
+  a2aBaseUrl: parsed.data.A2A_BASE_URL ?? `http://localhost:${parsed.data.PORT}`,
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

@@ -318,14 +318,16 @@ By the end of Phase 5, you will have:
 
 *Build on your MCP knowledge to create cooperating agents using Google's Agent-to-Agent (A2A) protocol.*
 
-### Lesson 6.1 — A2A Protocol Fundamentals
-- [ ] Understand A2A vs MCP: when to use each
-- [ ] A2A discovery and capability negotiation
-- [ ] Task lifecycle: send, subscribe, update, complete
-- [ ] Artifact exchange between agents
-- [ ] Push notifications and streaming updates
+### Lesson 6.1 — A2A Protocol Fundamentals ✅
+- [x] Understand A2A vs MCP: when to use each → documented in `docs/ADR/008-a2a-vs-mcp.md` and `backend/A2A_README.md`
+- [x] A2A discovery and capability negotiation → `/.well-known/agent.json` served by `backend/src/routes/a2a.ts`
+- [x] Task lifecycle: send, subscribe, update, complete → `Task` state machine defined in `backend/src/a2a/types.ts`
+- [x] Artifact exchange between agents → `Artifact` and `Part` union types defined in `backend/src/a2a/types.ts`
+- [x] Push notifications and streaming updates → `PushNotificationConfig` and SSE event types in `backend/src/a2a/types.ts`
 
 **Concepts**: Agent-to-Agent protocol, multi-agent orchestration, distributed task management
+
+*Progress: **Lesson 6.1 complete.** A2A types/Zod schemas, agent card, discovery endpoint, ADR, and README are in place. Task lifecycle endpoints are stubbed and will be implemented in Lesson 6.2.*
 
 ### Lesson 6.2 — Building the Task Manager Agent
 - [ ] Fastify server with A2A endpoints (`/.well-known/agent.json`)
@@ -641,12 +643,12 @@ By the end of this plan, you will be able to:
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
 | Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
-| Phase 6: A2A Protocol & Multi-Agent | 🔲 Pending | 0/5 |
+| Phase 6: A2A Protocol & Multi-Agent | In Progress | 1/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Phase 6 — A2A Protocol & Multi-Agent Systems**
+**Next up: Lesson 6.2 — Building the Task Manager Agent**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -658,11 +660,11 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **2 hrs/day, weekdays only** (~10 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **October 18, 2026** (recalculated Aug 30 at 2 hrs/day)
+> **Revised target graduation**: **October 16, 2026** (recalculated Aug 30 at 2 hrs/day)
 > **Phase 5 completed**: August 30, 2026 (Sunday)
-> **Next work session**: September 2, 2026 (Monday)
+> **Next work session**: August 31, 2026 (Monday)
 
-*Note: Recalculated on August 30, 2026 (Sunday). Phase 5 complete (8/8 lessons). Remaining: 18 lessons across Phases 6-9. Starting tomorrow (Monday Sep 2), at 2 hrs/day weekdays only (~0.8 lessons/weekday = 4 lessons/week), estimated completion: October 18, 2026. This is 34 weekdays for 18 lessons.*
+*Note: Recalculated on August 30, 2026 (Sunday). Phase 5 complete (8/8 lessons). Remaining: 18 lessons across Phases 6-9. Starting tomorrow (Monday Aug 31), at 2 hrs/day weekdays only (~0.8 lessons/weekday = 4 lessons/week), estimated completion: October 16, 2026. This is 34 weekdays for 18 lessons.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -740,3 +742,4 @@ Days off target = (actual completion date) − (target date)
 | 5.6 — System Design Fundamentals | Jul 27 | ✅ Jul 24 | Scalability, DB design, monolith vs microservices, API design, CAP theorem; ADR-007 + Redis rate-limit store + per-route auth limits (5/min login, 10/hr register) |
 | 5.7 — MCP Implementation | Aug 29 | ✅ Aug 30 | MCP server with 4 tools (create, list, toggle, delete), resource endpoint (todo://todos), Zod validation, audit logging, tested with Inspector v2.4.0 |
 | 5.8 — Agent Hardening | Sep 1 | ✅ Aug 30 | API key auth (MCP_API_KEY), per-user rate limiting (100/min), security docs; **Phase 5 complete** |
+| 6.1 — A2A Protocol Fundamentals | — | ✅ Aug 31 | A2A types/Zod schemas, agent card, discovery endpoint (/.well-known/agent.json), ADR-008, A2A_README; stubs for task lifecycle endpoints |
