@@ -662,11 +662,12 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **2 hrs/day, weekdays only** (~10 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **October 16, 2026** (recalculated Aug 30 at 2 hrs/day)
+> **Revised target graduation**: **October 16, 2026** (recalculated Sep 2, 2026)
 > **Phase 5 completed**: August 30, 2026 (Sunday)
-> **Next work session**: August 31, 2026 (Monday)
+> **Lesson 6.2 completed & manually verified**: September 2, 2026 (Wednesday)
+> **Next work session**: September 3, 2026 (Thursday) — Lesson 6.3
 
-*Note: Recalculated on August 30, 2026 (Sunday). Phase 5 complete (8/8 lessons). Remaining: 18 lessons across Phases 6-9. Starting tomorrow (Monday Aug 31), at 2 hrs/day weekdays only (~0.8 lessons/weekday = 4 lessons/week), estimated completion: October 16, 2026. This is 34 weekdays for 18 lessons.*
+*Note: Recalculated on September 2, 2026 (Wednesday). Phase 6 is in progress (2/5 lessons complete; 6.2 manually verified against docker-compose). Remaining: 16 lessons across Phases 6-9. At 2 hrs/day weekdays only (~0.8 lessons/weekday), estimated completion: September 29, 2026. With buffer, graduation target remains October 18, 2026.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -745,4 +746,4 @@ Days off target = (actual completion date) − (target date)
 | 5.7 — MCP Implementation | Aug 29 | ✅ Aug 30 | MCP server with 4 tools (create, list, toggle, delete), resource endpoint (todo://todos), Zod validation, audit logging, tested with Inspector v2.4.0 |
 | 5.8 — Agent Hardening | Sep 1 | ✅ Aug 30 | API key auth (MCP_API_KEY), per-user rate limiting (100/min), security docs; **Phase 5 complete** |
 | 6.1 — A2A Protocol Fundamentals | — | ✅ Aug 31 | A2A types/Zod schemas, agent card, discovery endpoint (/.well-known/agent.json), ADR-008, A2A_README; stubs for task lifecycle endpoints |
-| 6.2 — Building the Task Manager Agent | — | ✅ Aug 31 | TaskStore + TaskManager, state machine, tasks/send/get/cancel endpoints, SSE subscribe, withRetry; 50 backend tests passing |
+| 6.2 — Building the Task Manager Agent | — | ✅ Sep 2 | TaskStore + TaskManager, state machine, tasks/send/get/cancel endpoints, SSE subscribe, withRetry; 50 backend tests passing; manually verified with curl against docker-compose backend |
