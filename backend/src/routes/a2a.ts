@@ -120,21 +120,43 @@ export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
       Connection: 'keep-alive',
     })
 
+    // Track whether we have already ended the stream so we don't write
+    // after the connection closes or double-close on terminal events.
+    let finished = false
+    let unsubscribe: (() => void) | undefined
+
+    const cleanup = (): void => {
+      if (finished) return
+      finished = true
+      if (unsubscribe) unsubscribe()
+      req.raw.removeListener('close', cleanup)
+      req.raw.removeListener('end', cleanup)
+      reply.raw.end()
+    }
+
     const writeEvent = (event: TaskEvent): void => {
+      if (finished) return
       reply.raw.write(`data: ${JSON.stringify(event)}\n\n`)
+
+      // A2A tasks are terminal once completed or canceled. End the SSE
+      // stream cleanly so clients (and curl) get an EOF instead of a
+      // truncated chunked transfer.
+      if (
+        event.type === 'task-status-update' &&
+        (event.status.state === 'completed' || event.status.state === 'canceled')
+      ) {
+        cleanup()
+      }
     }
 
     // Send the current state so the client doesn't have to poll first.
     writeEvent({ type: 'task-status-update', taskId: task.id, status: task.status })
 
-    const unsubscribe = fastify.taskManager.subscribe(task.id, writeEvent)
-
-    const cleanup = (): void => {
-      unsubscribe()
-      reply.raw.end()
+    // If the current state is already terminal, we already closed the stream.
+    if (!finished) {
+      unsubscribe = fastify.taskManager.subscribe(task.id, writeEvent)
+      req.raw.on('close', cleanup)
+      req.raw.on('end', cleanup)
     }
-
-    req.raw.on('close', cleanup)
-    req.raw.on('end', cleanup)
   })
 }
