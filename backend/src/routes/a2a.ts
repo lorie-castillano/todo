@@ -1,15 +1,40 @@
 // A2A (Agent-to-Agent) protocol routes.
 //
 // This file implements the public agent-facing HTTP surface:
-//   - GET /.well-known/agent.json  → agent capability advertisement
-//   - /a2a/tasks/*                 → task lifecycle endpoints (Lesson 6.2)
+//   - GET /.well-known/agent.json       → agent capability advertisement
+//   - POST /a2a/tasks/send             → create a task and start processing
+//   - GET  /a2a/tasks/:id              → get current task state
+//   - POST /a2a/tasks/:id/cancel       → cancel a task
+//   - GET  /a2a/tasks/:id/subscribe    → SSE stream of status/artifact updates
 //
-// A2A is a task-centric protocol, not a tool protocol. Other agents discover
-// us via the agent card, send a task, and poll or subscribe to updates.
+// A2A is task-centric, not tool-centric. Other agents discover us via the
+// agent card, send a task, and poll or subscribe to updates.
 
-import type { FastifyPluginAsync } from 'fastify'
+import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import { config } from '../config.js'
 import { buildTaskManagerCard } from '../a2a/agentCard.js'
+import { taskSendRequestSchema, taskGetRequestSchema } from '../a2a/types.js'
+import type { TaskEvent } from '../a2a/taskManager.js'
+import { validate } from '../schemas/validate.js'
+
+// Minimal API key auth for A2A task endpoints.
+// In dev/test, if no MCP_API_KEY is configured, requests are allowed.
+// In production, or when a key is configured, callers must send the
+// `X-API-Key` header. Lesson 6.5 will expand this into full agent auth.
+async function a2aAuthPreHandler(req: FastifyRequest, reply: FastifyReply): Promise<void> {
+  if ((config.isDev || config.isTest) && !config.mcpApiKey) return
+
+  const header = req.headers['x-api-key']
+  const apiKey = Array.isArray(header) ? header[0] : header
+
+  if (!apiKey || apiKey !== config.mcpApiKey) {
+    return reply.code(401).send({
+      error: 'Unauthorized',
+      message: 'Invalid or missing API key',
+      correlationId: req.correlationId,
+    })
+  }
+}
 
 export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
   // --- Agent discovery ---
@@ -20,32 +45,6 @@ export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
     return reply.code(200).send(card)
   })
 
-  // --- Task lifecycle endpoints (placeholders for Lesson 6.2) ---
-  // The actual implementations will live in the Task Manager service.
-  fastify.post('/a2a/tasks/send', async (_req, reply) => {
-    return reply.code(501).send({
-      error: 'Not Implemented',
-      message: 'A2A task dispatch is part of Lesson 6.2.',
-      correlationId: _req.correlationId,
-    })
-  })
-
-  fastify.get('/a2a/tasks/:id', async (_req, reply) => {
-    return reply.code(501).send({
-      error: 'Not Implemented',
-      message: 'A2A task retrieval is part of Lesson 6.2.',
-      correlationId: _req.correlationId,
-    })
-  })
-
-  fastify.post('/a2a/tasks/:id/cancel', async (_req, reply) => {
-    return reply.code(501).send({
-      error: 'Not Implemented',
-      message: 'A2A task cancellation is part of Lesson 6.2.',
-      correlationId: _req.correlationId,
-    })
-  })
-
   // --- Base A2A endpoint ---
   // Friendly metadata for humans/health checks hitting the advertised URL.
   fastify.get('/a2a', async () => ({
@@ -54,4 +53,88 @@ export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
     discovery: '/.well-known/agent.json',
     version: '0.1.0',
   }))
+
+  // --- Create a task ---
+  // Returns immediately with the task in `pending` state. Processing runs
+  // asynchronously; callers poll GET /a2a/tasks/:id or subscribe to SSE.
+  fastify.post('/a2a/tasks/send', { preHandler: a2aAuthPreHandler }, async (req, reply) => {
+    const body = await validate(taskSendRequestSchema, req.body, req, reply)
+    if (!body) return
+
+    const task = await fastify.taskManager.sendTask(body)
+    return reply.code(202).send(task)
+  })
+
+  // --- Get task state ---
+  fastify.get('/a2a/tasks/:id', { preHandler: a2aAuthPreHandler }, async (req, reply) => {
+    const params = await validate(taskGetRequestSchema, req.params, req, reply)
+    if (!params) return
+
+    const task = await fastify.taskManager.getTask(params.id)
+    if (!task) {
+      return reply.code(404).send({
+        error: 'Not Found',
+        message: `Task ${params.id} not found`,
+        correlationId: req.correlationId,
+      })
+    }
+    return reply.code(200).send(task)
+  })
+
+  // --- Cancel a task ---
+  fastify.post('/a2a/tasks/:id/cancel', { preHandler: a2aAuthPreHandler }, async (req, reply) => {
+    const params = await validate(taskGetRequestSchema, req.params, req, reply)
+    if (!params) return
+
+    const task = await fastify.taskManager.cancelTask(params.id)
+    if (!task) {
+      return reply.code(404).send({
+        error: 'Not Found',
+        message: `Task ${params.id} not found`,
+        correlationId: req.correlationId,
+      })
+    }
+    return reply.code(200).send(task)
+  })
+
+  // --- Subscribe to task updates (SSE) ---
+  // Sends a `task-status-update` with the current state immediately, then
+  // streams every subsequent status/artifact update until the client disconnects.
+  fastify.get('/a2a/tasks/:id/subscribe', { preHandler: a2aAuthPreHandler }, async (req, reply) => {
+    const params = await validate(taskGetRequestSchema, req.params, req, reply)
+    if (!params) return
+
+    const task = await fastify.taskManager.getTask(params.id)
+    if (!task) {
+      return reply.code(404).send({
+        error: 'Not Found',
+        message: `Task ${params.id} not found`,
+        correlationId: req.correlationId,
+      })
+    }
+
+    reply.hijack()
+    reply.raw.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    })
+
+    const writeEvent = (event: TaskEvent): void => {
+      reply.raw.write(`data: ${JSON.stringify(event)}\n\n`)
+    }
+
+    // Send the current state so the client doesn't have to poll first.
+    writeEvent({ type: 'task-status-update', taskId: task.id, status: task.status })
+
+    const unsubscribe = fastify.taskManager.subscribe(task.id, writeEvent)
+
+    const cleanup = (): void => {
+      unsubscribe()
+      reply.raw.end()
+    }
+
+    req.raw.on('close', cleanup)
+    req.raw.on('end', cleanup)
+  })
 }

@@ -37,16 +37,36 @@ Use **A2A** when one autonomous agent needs to delegate work to another and trac
 |--------|------|-------------|
 | `GET` | `/.well-known/agent.json` | Agent capability advertisement |
 | `GET` | `/a2a` | Human-readable A2A metadata |
-| `POST` | `/a2a/tasks/send` | Submit a new task *(Lesson 6.2)* |
-| `GET` | `/a2a/tasks/:id` | Get task status *(Lesson 6.2)* |
-| `POST` | `/a2a/tasks/:id/cancel` | Cancel a task *(Lesson 6.2)* |
+| `POST` | `/a2a/tasks/send` | Submit a new task |
+| `GET` | `/a2a/tasks/:id` | Get task status |
+| `POST` | `/a2a/tasks/:id/cancel` | Cancel a task |
+| `GET` | `/a2a/tasks/:id/subscribe` | SSE stream of status/artifact updates |
 
 ## Configuration
 
 | Env var | Purpose |
 |---------|---------|
 | `A2A_BASE_URL` | Public base URL advertised in the agent card. Defaults to `http://localhost:${PORT}`. |
-| `MCP_API_KEY` | Shared key used to authenticate A2A requests in production. |
+| `MCP_API_KEY` | Shared key used to authenticate A2A task requests. In `development` or `test`, if unset, requests are allowed. In `production`, it is required. |
+
+## Authentication
+
+Task endpoints require the `X-API-Key` header when `MCP_API_KEY` is configured or when `NODE_ENV=production`:
+
+```bash
+curl -H "X-API-Key: $MCP_API_KEY" \
+     -X POST http://localhost:3000/a2a/tasks/send \
+     -H "Content-Type: application/json" \
+     -d '{
+       "message": {
+         "role": "user",
+         "parts": [{ "type": "text", "text": "Create a todo to call mom" }]
+       },
+       "metadata": { "userId": "user-1" }
+     }'
+```
+
+Discovery endpoints (`/.well-known/agent.json`, `/a2a`) are public.
 
 ## Task lifecycle
 

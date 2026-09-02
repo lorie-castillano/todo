@@ -329,14 +329,16 @@ By the end of Phase 5, you will have:
 
 *Progress: **Lesson 6.1 complete.** A2A types/Zod schemas, agent card, discovery endpoint, ADR, and README are in place. Task lifecycle endpoints are stubbed and will be implemented in Lesson 6.2.*
 
-### Lesson 6.2 — Building the Task Manager Agent
-- [ ] Fastify server with A2A endpoints (`/.well-known/agent.json`)
-- [ ] Task storage and state machine (pending → working → complete)
-- [ ] Implement `tasks/send`, `tasks/get`, `tasks/cancel`
-- [ ] Streaming responses with Server-Sent Events
-- [ ] Error handling and retry logic for agent communication
+### Lesson 6.2 — Building the Task Manager Agent ✅
+- [x] Fastify server with A2A endpoints (`/.well-known/agent.json`) → `backend/src/routes/a2a.ts`
+- [x] Task storage and state machine (pending → working → complete) → `TaskManager` in `backend/src/a2a/taskManager.ts`
+- [x] Implement `tasks/send`, `tasks/get`, `tasks/cancel` → `backend/src/routes/a2a.ts`
+- [x] Streaming responses with Server-Sent Events → `GET /a2a/tasks/:id/subscribe`
+- [x] Error handling and retry logic for agent communication → `withRetry` in `backend/src/a2a/retry.ts`
 
 **Concepts**: A2A server implementation, task state management, streaming APIs
+
+*Progress: **Lesson 6.2 complete.** Task Manager is wired into the Fastify app. Task store is in-memory (swappable), state machine supports `pending → working → completed/input-required/canceled`, endpoints are implemented with SSE and API-key prehandler, and tests cover the state machine, retry utility, and route integration.*
 
 ### Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid)
 - [ ] Agent that exposes both MCP tools AND A2A capabilities
@@ -643,12 +645,12 @@ By the end of this plan, you will be able to:
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
 | Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
-| Phase 6: A2A Protocol & Multi-Agent | In Progress | 1/5 |
+| Phase 6: A2A Protocol & Multi-Agent | In Progress | 2/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 6.2 — Building the Task Manager Agent**
+**Next up: Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid)**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -743,3 +745,4 @@ Days off target = (actual completion date) − (target date)
 | 5.7 — MCP Implementation | Aug 29 | ✅ Aug 30 | MCP server with 4 tools (create, list, toggle, delete), resource endpoint (todo://todos), Zod validation, audit logging, tested with Inspector v2.4.0 |
 | 5.8 — Agent Hardening | Sep 1 | ✅ Aug 30 | API key auth (MCP_API_KEY), per-user rate limiting (100/min), security docs; **Phase 5 complete** |
 | 6.1 — A2A Protocol Fundamentals | — | ✅ Aug 31 | A2A types/Zod schemas, agent card, discovery endpoint (/.well-known/agent.json), ADR-008, A2A_README; stubs for task lifecycle endpoints |
+| 6.2 — Building the Task Manager Agent | — | ✅ Aug 31 | TaskStore + TaskManager, state machine, tasks/send/get/cancel endpoints, SSE subscribe, withRetry; 50 backend tests passing |

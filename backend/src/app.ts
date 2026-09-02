@@ -23,6 +23,8 @@ import { createRedisClient } from './redis.js'
 import correlationId from './plugins/correlationId.js'
 import prisma from './plugins/prisma.js'
 import auth from './plugins/auth.js'
+import taskStore from './a2a/taskStore.js'
+import taskManager from './plugins/taskManager.js'
 import { healthRoutes } from './routes/health.js'
 import { todoRoutes } from './routes/todos.js'
 import { authRoutes } from './routes/auth.js'
@@ -106,6 +108,9 @@ export async function buildApp() {
   await app.register(prisma)
   // Auth depends on prisma (for authService), so register it after.
   await app.register(auth)
+  // A2A task manager depends on prisma (todoService) and taskStore.
+  await app.register(taskStore)
+  await app.register(taskManager)
 
   // --- OpenAPI / Swagger ---
   // Generates an OpenAPI 3.0 spec from route schemas and serves an
