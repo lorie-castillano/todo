@@ -27,6 +27,14 @@ import type { NotificationWorkerAgent, ScheduledNotification } from './notificat
 import { createAgentMesh, type AgentDescriptor, type AgentMesh } from './agentMesh.js'
 import { withRetry, type RetryOptions } from './retry.js'
 
+export interface TaskContext {
+  correlationId: string | undefined
+  taskId: string | undefined
+  sourceAgentId: string | undefined
+  targetAgentId: string | undefined
+  capability: string | undefined
+}
+
 export interface TaskManagerDependencies {
   taskStore: TaskStore
   workerAgent: TodoWorkerAgent
@@ -61,8 +69,9 @@ export class TaskManager {
     this.retryOptions = deps.retryOptions ?? {
       maxAttempts: 3,
       delayMs: 200,
-      // Don't retry deterministic "not found" errors; they won't fix themselves.
-      shouldRetry: (err: unknown) => err instanceof Error && !err.message.includes('not found'),
+      // Don't retry deterministic "not found" errors or an open circuit breaker; they won't fix themselves.
+      shouldRetry: (err: unknown) =>
+        err instanceof Error && !err.message.includes('not found') && err.name !== 'CircuitBreakerOpenError',
     }
     this.autoProcess = deps.autoProcess ?? true
     // A2A allows many subscribers per task; disable the default listener leak warning.
@@ -85,7 +94,7 @@ export class TaskManager {
     return this.notificationWorker.listScheduled()
   }
 
-  async sendTask(request: TaskSendRequest): Promise<Task> {
+  async sendTask(request: TaskSendRequest, context?: TaskContext): Promise<Task> {
     const task = await this.taskStore.create({
       sessionId: request.sessionId,
       status: {
@@ -98,13 +107,14 @@ export class TaskManager {
     })
 
     this.emitStatusUpdate(task)
+    const taskContext = context ? { ...context, taskId: task.id } : undefined
 
     // Process asynchronously so the caller gets a pending task immediately.
     // setImmediate lets the HTTP response flush before work begins.
     if (this.autoProcess) {
       setImmediate(() => {
-        void this.processTask(task.id).catch((err: unknown) => {
-          this.logger.error({ err, taskId: task.id }, 'Unhandled task processing error')
+        void this.processTask(task.id, taskContext).catch((err: unknown) => {
+          this.logger.error({ err, ...taskContext }, 'Unhandled task processing error')
         })
       })
     }
@@ -135,15 +145,19 @@ export class TaskManager {
     }
   }
 
-  async processTask(id: string): Promise<void> {
+  async processTask(id: string, context?: TaskContext): Promise<void> {
+    const log = context
+      ? this.logger.child({ taskId: id, correlationId: context.correlationId, sourceAgentId: context.sourceAgentId, targetAgentId: context.targetAgentId, capability: context.capability })
+      : this.logger
+
     try {
       let task = await this.taskStore.get(id)
       if (!task) {
-        this.logger.warn({ taskId: id }, 'Task not found for processing')
+        log.warn('Task not found for processing')
         return
       }
       if (task.status.state !== 'pending') {
-        this.logger.debug({ taskId: id, state: task.status.state }, 'Task not pending, skipping')
+        log.debug({ state: task.status.state }, 'Task not pending, skipping')
         return
       }
 
@@ -157,7 +171,7 @@ export class TaskManager {
       })
 
       const { status, artifact } = await withRetry(
-        () => this.executeTask(task),
+        () => this.executeTask(task, context),
         this.retryOptions
       )
 
@@ -168,28 +182,23 @@ export class TaskManager {
         this.emitArtifactUpdate(updatedTask, artifact)
       }
     } catch (err) {
-      this.logger.error({ err, taskId: id }, 'Task processing failed after retries')
+      log.error({ err }, 'Task processing failed after retries')
       const task = await this.taskStore.get(id)
       if (task && task.status.state !== 'canceled') {
         await this.transitionStatus(task, {
-          state: 'completed',
+          state: 'failed',
           timestamp: new Date().toISOString(),
           message: {
             role: 'agent',
-            parts: [
-              {
-                type: 'text',
-                text: err instanceof Error ? err.message : 'Task processing failed',
-              },
-            ],
+            parts: [{ type: 'text', text: 'Task processing failed' }],
           },
         })
       }
     }
   }
 
-  private async executeTask(task: Task): Promise<{ status: TaskStatus; artifact?: Artifact }> {
-    const result = await this.agentMesh.executeTask(task)
+  private async executeTask(task: Task, context?: TaskContext): Promise<{ status: TaskStatus; artifact?: Artifact }> {
+    const result = await this.agentMesh.executeTask(task, context)
     const output: { status: TaskStatus; artifact?: Artifact } = {
       status: this.buildStatus(result.state, result.message),
     }

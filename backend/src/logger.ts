@@ -34,7 +34,7 @@ const options: LoggerOptions = {
 
   // Redact sensitive fields so secrets never leak into logs.
   redact: {
-    paths: ['req.headers.authorization', 'req.headers.cookie', '*.password'],
+    paths: ['req.headers.authorization', 'req.headers.cookie', 'req.headers["x-api-key"]', '*.password'],
     censor: '[REDACTED]',
   },
 }

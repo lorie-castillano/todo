@@ -27,7 +27,8 @@ export function buildTaskManagerCard(baseUrl: string): AgentCard {
     },
     authentication: {
       schemes: ['apiKey'],
-      credentials: 'Send the X-API-Key header with the value of MCP_API_KEY',
+      credentials:
+        'Send X-API-Key and X-Agent-ID headers. Configure valid agent identities via A2A_AGENT_CREDENTIALS.',
     },
     defaultInputModes: ['text'],
     defaultOutputModes: ['text', 'data'],

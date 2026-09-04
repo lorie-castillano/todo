@@ -1,6 +1,7 @@
 import type { Artifact, Task } from './types.js'
 import type { TodoWorkerAgent, WorkerExecutionResult } from './todoWorkerAgent.js'
 import type { NotificationWorkerAgent } from './notificationWorkerAgent.js'
+import type { TaskContext } from './taskManager.js'
 
 export interface AgentMeshDependencies {
   todoWorker: TodoWorkerAgent
@@ -28,13 +29,21 @@ export class AgentMesh {
     ]
   }
 
-  async executeTask(task: Task): Promise<WorkerExecutionResult> {
-    if (!this.isReminder(task)) return this.todoWorker.executeTask(task)
+  async executeTask(task: Task, context?: TaskContext): Promise<WorkerExecutionResult> {
+    if (!this.isReminder(task)) {
+      return this.todoWorker.executeTask(task, this.workerContext(context, 'todo-worker', 'manage-todos'))
+    }
 
     const todoTask = this.toTodoTask(task)
     const [todoResult, notificationResult] = await Promise.all([
-      this.todoWorker.executeTask(todoTask),
-      this.notificationWorker.executeTask(task),
+      this.todoWorker.executeTask(
+        todoTask,
+        this.workerContext(context, 'todo-worker', 'create-todo')
+      ),
+      this.notificationWorker.executeTask(
+        task,
+        this.workerContext(context, 'notification-worker', 'schedule-reminder')
+      ),
     ])
 
     if (todoResult.state === 'input-required' || notificationResult.state === 'input-required') {
@@ -49,6 +58,14 @@ export class AgentMesh {
       message: 'Created the todo and scheduled its reminder',
       artifact: this.combineArtifacts(todoResult.artifact, notificationResult.artifact),
     }
+  }
+
+  private workerContext(
+    context: TaskContext | undefined,
+    targetAgentId: string,
+    capability: string
+  ): TaskContext | undefined {
+    return context ? { ...context, targetAgentId, capability } : undefined
   }
 
   private isReminder(task: Task): boolean {

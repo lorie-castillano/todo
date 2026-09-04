@@ -53,7 +53,11 @@ export function createInMemoryTaskStore(): TaskStore {
     async cancel(id) {
       const existing = tasks.get(id)
       if (!existing) return null
-      if (existing.status.state === 'completed' || existing.status.state === 'canceled') {
+      if (
+        existing.status.state === 'completed' ||
+        existing.status.state === 'failed' ||
+        existing.status.state === 'canceled'
+      ) {
         return existing
       }
       const canceled: Task = {

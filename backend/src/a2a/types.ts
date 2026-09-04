@@ -103,7 +103,7 @@ export type Message = z.infer<typeof messageSchema>
 // State machine: pending → working → (input-required → working)* → completed/canceled
 
 export const taskStatusSchema = z.object({
-  state: z.enum(['pending', 'working', 'input-required', 'completed', 'canceled']),
+  state: z.enum(['pending', 'working', 'input-required', 'completed', 'failed', 'canceled']),
   message: messageSchema.optional(),
   timestamp: z.string().datetime().optional(),
 })

@@ -62,12 +62,38 @@ const envSchema = z.object({
   // Defaults to http://localhost:<PORT> for local dev. In production,
   // set this to the HTTPS URL your reverse proxy / load balancer serves.
   A2A_BASE_URL: z.string().url().optional(),
+
+  // Optional: JSON array of agent credentials and capabilities for A2A routes.
+  // Example: [{"id":"frontend-agent","key":"<32+ chars>","capabilities":["tasks/send","tasks/read"]}]
+  // In dev/test, when unset, requests are allowed with a fallback anonymous identity.
+  // In production, set this to enforce agent identity and capability checks.
+  A2A_AGENT_CREDENTIALS: z.string().optional(),
 })
 
 // --- Parse & validate ---
 //
 // safeParse returns a result object instead of throwing, so we can print
 // a friendly, actionable error and exit cleanly.
+
+const agentCredentialSchema = z.object({
+  id: z.string().min(1),
+  key: z.string().min(32),
+  capabilities: z.array(z.string()).min(1),
+})
+
+const agentCredentialsSchema = z.array(agentCredentialSchema)
+
+function parseAgentCredentials(raw: string | undefined): z.infer<typeof agentCredentialsSchema> {
+  if (!raw || raw.trim() === '') return []
+  try {
+    const parsedJson = JSON.parse(raw)
+    return agentCredentialsSchema.parse(parsedJson)
+  } catch (err) {
+    console.error('❌ Invalid A2A_AGENT_CREDENTIALS: must be a JSON array of { id, key, capabilities[] }')
+    if (err instanceof Error) console.error(err.message)
+    process.exit(1)
+  }
+}
 
 const parsed = envSchema.safeParse(process.env)
 
@@ -97,6 +123,7 @@ export const config = Object.freeze({
   redisUrl: parsed.data.REDIS_URL,
   mcpApiKey: parsed.data.MCP_API_KEY,
   a2aBaseUrl: parsed.data.A2A_BASE_URL ?? `http://localhost:${parsed.data.PORT}`,
+  a2aAgentCredentials: parseAgentCredentials(parsed.data.A2A_AGENT_CREDENTIALS),
   isDev: parsed.data.NODE_ENV === 'development',
   isProd: parsed.data.NODE_ENV === 'production',
   isTest: parsed.data.NODE_ENV === 'test',

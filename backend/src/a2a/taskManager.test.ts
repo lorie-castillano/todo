@@ -242,6 +242,27 @@ describe('TaskManager', () => {
     expect(todoService.create).toHaveBeenCalledTimes(2)
   })
 
+  it('stores a safe failed state without exposing internal errors', async () => {
+    vi.mocked(todoService.create).mockRejectedValue(new Error('database password leaked internally'))
+
+    const task = await taskStore.create({
+      sessionId: 'session-1',
+      status: { state: 'pending', timestamp: new Date().toISOString() },
+      history: [{ role: 'user', parts: [{ type: 'text', text: 'Create a todo to call mom' }] }],
+      artifacts: [],
+      metadata: { userId: 'user-1' },
+    })
+
+    await manager.processTask(task.id)
+
+    const updated = await taskStore.get(task.id)
+    expect(updated?.status.state).toBe('failed')
+    expect(updated?.status.message?.parts).toEqual([
+      { type: 'text', text: 'Task processing failed' },
+    ])
+    expect(JSON.stringify(updated)).not.toContain('database password')
+  })
+
   it('does not retry not-found errors', async () => {
     vi.mocked(todoService.toggleCompleted).mockResolvedValue(null)
 

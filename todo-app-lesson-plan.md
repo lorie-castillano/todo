@@ -361,14 +361,16 @@ By the end of Phase 5, you will have:
 
 *Progress: **Lesson 6.4 complete.** The Task Manager uses capability-based routing through a local `AgentMesh`. Reminder requests fan out concurrently to the Todo and Notification workers, then fan in to one combined artifact. `GET /a2a/agents` exposes worker capabilities, `GET /a2a/notifications` exposes scheduled prototype reminders, and the existing task subscription endpoint streams lifecycle updates over SSE.*
 
-### Lesson 6.5 — Production Multi-Agent Considerations
-- [ ] Agent authentication and trust boundaries
-- [ ] Rate limiting across agent boundaries
-- [ ] Circuit breakers for unreliable agents
-- [ ] Observability: tracing requests across agent calls
-- [ ] Security: validating agent identities, sandboxing tool execution
+### Lesson 6.5 — Production Multi-Agent Considerations ✅
+- [x] Agent authentication and trust boundaries — `A2A_AGENT_CREDENTIALS` env, per-agent API keys, timing-safe SHA-256 + `crypto.timingSafeEqual`, capability checks (401/403)
+- [x] Rate limiting across agent boundaries — per-capability `@fastify/rate-limit` overrides keyed by `agentIdentity.id`, with in-memory dev / Redis production store
+- [x] Circuit breakers for unreliable agents — `CircuitBreaker` with CLOSED/OPEN/HALF_OPEN states + `TimeoutError` wrapper, integrated per worker
+- [x] Observability: tracing requests across agent calls — `TaskContext` carries `correlationId`, `taskId`, `sourceAgentId`, `targetAgentId`, `capability` through `TaskManager -> AgentMesh -> workers` and structured logs
+- [x] Security: validating agent identities, safe error responses (no stack/secrets), `x-api-key` redaction in Pino logs
 
-**Concepts**: Production agent systems, trust and security, distributed tracing
+**Concepts**: Production agent systems, trust and security, distributed tracing, defensive coding
+
+*Progress: **Lesson 6.5 and Phase 6 complete.** A2A routes now authenticate named agents, authorize capabilities, and enforce identity-scoped limits. Typed execution context follows tasks into each worker, whose calls are protected by timeouts and independent circuit breakers. Failed work uses a terminal `failed` state with safe client messages while correlated server logs retain diagnostic detail.*
 
 ---
 
@@ -649,12 +651,12 @@ By the end of this plan, you will be able to:
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
 | Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
-| Phase 6: A2A Protocol & Multi-Agent | In Progress | 4/5 |
+| Phase 6: A2A Protocol & Multi-Agent | ✅ Complete | 5/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 6.5 — Production Multi-Agent Considerations**
+**Next up: Lesson 4.6 — Advanced TypeScript for Backend & Agents (Phase 4 Extended)**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -668,10 +670,10 @@ By the end of this plan, you will be able to:
 > **Original target graduation**: August 31, 2026
 > **Revised target graduation**: **October 16, 2026** (recalculated Sep 4, 2026)
 > **Phase 5 completed**: August 30, 2026 (Sunday)
-> **Lesson 6.4 completed**: September 4, 2026 (Friday)
-> **Next work session**: September 7, 2026 (Monday) — Lesson 6.5
+> **Phase 6 completed**: September 4, 2026 (Friday)
+> **Next work session**: September 7, 2026 (Monday) — Lesson 4.6
 
-*Note: Recalculated on September 4, 2026 (Friday). Phase 6 is in progress (4/5 lessons complete; automated tests cover the A2A reminder workflow, and docker-compose testing confirmed the missing-userId validation path). Remaining: 14 lessons across Phases 6-9. At 2 hrs/day weekdays only (~0.8 lessons/weekday), estimated core completion is September 30, 2026. The October 16, 2026 graduation target preserves roughly two weeks of buffer for review, debugging, and missed sessions.*
+*Note: Updated on September 4, 2026 (Friday). Phase 6 is complete (5/5 lessons); 87 backend tests cover agent identity, capability authorization, per-agent limits, tracing, timeouts, circuit breakers, and safe failure handling. The September 30, 2026 core target and October 16, 2026 buffered graduation target remain unchanged.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -680,7 +682,7 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
 | **Phase 5 complete** (Backend & MCP) | Aug 29, 2026 | Aug 30, 2026 | 🟢 On Time (1 day late) |
-| **Phase 6 complete** (A2A & Multi-Agent) | Sep 8, 2026 | _____ | 1 lesson remaining |
+| **Phase 6 complete** (A2A & Multi-Agent) | Sep 8, 2026 | Sep 4, 2026 | 🟢 Advanced (4 days early) |
 | **Phase 7 complete** (System Design) | Sep 14, 2026 | _____ | 4 lessons, ~1 week |
 | **Phase 8 complete** (AI Governance) | Sep 21, 2026 | _____ | 4 lessons, ~1 week |
 | **Phase 9 complete** (LLM & Production AI) 🎓 | Sep 30, 2026 | _____ | 5 lessons, ~1.25 weeks |
@@ -753,3 +755,4 @@ Days off target = (actual completion date) − (target date)
 | 6.2 — Building the Task Manager Agent | — | ✅ Sep 2 | TaskStore + TaskManager, state machine, tasks/send/get/cancel endpoints, SSE subscribe, withRetry; 50 backend tests passing; manually verified with curl against docker-compose backend |
 | 6.3 — Building the Worker Agent (MCP + A2A Hybrid) | — | ✅ Sep 2 | TodoWorkerAgent delegates todo CRUD; TaskManager now orchestrates; shared MCP tool definitions exposed via `GET /a2a/worker/tools`; 51 backend tests passing |
 | 6.4 — Multi-Agent Collaboration Prototype | — | ✅ Sep 4 | Local AgentMesh with capability routing; reminder fan-out to Todo + Notification workers; HTTP discovery/results + SSE lifecycle; 54 backend tests passing |
+| 6.5 — Production Multi-Agent Considerations | Sep 8 | ✅ Sep 4 | Per-agent auth (A2A_AGENT_CREDENTIALS), capability checks, identity-scoped limits, tracing, worker timeouts + circuit breakers, and safe failed-task responses; **Phase 6 complete; 87 backend tests passing** |

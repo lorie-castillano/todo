@@ -2,6 +2,9 @@ import { randomUUID } from 'node:crypto'
 import type { FastifyBaseLogger } from 'fastify'
 import type { Artifact, Task } from './types.js'
 import type { WorkerExecutionResult } from './todoWorkerAgent.js'
+import { CircuitBreaker } from './circuitBreaker.js'
+import { withTimeout } from './timeout.js'
+import type { TaskContext } from './taskManager.js'
 
 export interface ScheduledNotification {
   id: string
@@ -14,19 +17,30 @@ export interface ScheduledNotification {
 
 export interface NotificationWorkerAgentDependencies {
   logger: FastifyBaseLogger
+  timeoutMs?: number
+  circuitBreaker?: CircuitBreaker
 }
 
 export class NotificationWorkerAgent {
   readonly id = 'notification-worker'
   readonly capabilities = ['schedule-reminder'] as const
   private readonly logger: FastifyBaseLogger
+  private readonly timeoutMs: number
+  private readonly circuitBreaker: CircuitBreaker
   private readonly scheduled: ScheduledNotification[] = []
 
   constructor(deps: NotificationWorkerAgentDependencies) {
     this.logger = deps.logger
+    this.timeoutMs = deps.timeoutMs ?? 30000
+    this.circuitBreaker = deps.circuitBreaker ?? new CircuitBreaker()
   }
 
-  async executeTask(task: Task): Promise<WorkerExecutionResult> {
+  async executeTask(task: Task, context?: TaskContext): Promise<WorkerExecutionResult> {
+    const logContext = { taskId: task.id, ...context }
+    return this.circuitBreaker.execute(() => withTimeout(this.runTask(task, logContext), this.timeoutMs))
+  }
+
+  private async runTask(task: Task, context: Record<string, unknown>): Promise<WorkerExecutionResult> {
     const text = task.history[0]?.parts
       .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
       .map((part) => part.text)
@@ -52,7 +66,7 @@ export class NotificationWorkerAgent {
       status: 'scheduled',
     }
     this.scheduled.push(notification)
-    this.logger.info({ taskId: task.id, notificationId: notification.id }, 'Notification scheduled')
+    this.logger.info({ ...context, notificationId: notification.id }, 'Notification scheduled')
 
     return {
       state: 'completed',

@@ -12,6 +12,9 @@ import type { FastifyBaseLogger } from 'fastify'
 import type { Task, Artifact } from './types.js'
 import type { TodoService } from '../services/todoService.js'
 import { TODO_MCP_TOOLS, type McpToolDefinition } from '../mcp/toolDefinitions.js'
+import { CircuitBreaker } from './circuitBreaker.js'
+import { withTimeout } from './timeout.js'
+import type { TaskContext } from './taskManager.js'
 
 export type { McpToolDefinition }
 
@@ -24,15 +27,21 @@ export interface WorkerExecutionResult {
 export interface TodoWorkerAgentDependencies {
   todoService: TodoService
   logger: FastifyBaseLogger
+  timeoutMs?: number
+  circuitBreaker?: CircuitBreaker
 }
 
 export class TodoWorkerAgent {
   private readonly todoService: TodoService
   private readonly logger: FastifyBaseLogger
+  private readonly timeoutMs: number
+  private readonly circuitBreaker: CircuitBreaker
 
   constructor(deps: TodoWorkerAgentDependencies) {
     this.todoService = deps.todoService
     this.logger = deps.logger
+    this.timeoutMs = deps.timeoutMs ?? 30000
+    this.circuitBreaker = deps.circuitBreaker ?? new CircuitBreaker()
   }
 
   /**
@@ -49,8 +58,13 @@ export class TodoWorkerAgent {
    * todo operation. Returns a result that the Task Manager turns into a
    * task status update and optional artifact.
    */
-  async executeTask(task: Task): Promise<WorkerExecutionResult> {
-    this.logger.debug({ taskId: task.id }, 'TodoWorkerAgent executing task')
+  async executeTask(task: Task, context?: TaskContext): Promise<WorkerExecutionResult> {
+    const logContext = { taskId: task.id, ...context }
+    return this.circuitBreaker.execute(() => withTimeout(this.runTask(task, logContext), this.timeoutMs))
+  }
+
+  private async runTask(task: Task, context: Record<string, unknown>): Promise<WorkerExecutionResult> {
+    this.logger.debug(context, 'TodoWorkerAgent executing task')
 
     const userMessage = task.history[0]
     if (!userMessage) {
@@ -117,7 +131,7 @@ export class TodoWorkerAgent {
       return this.buildResult('completed', `Deleted todo: ${todo.text}`, { todo })
     }
 
-    this.logger.debug({ text }, 'Unknown worker command')
+    this.logger.debug({ text, ...context }, 'Unknown worker command')
     return this.buildResult(
       'input-required',
       'I can help with: list todos, create/add todo, toggle todo <id>, delete todo <id>. What would you like to do?'
