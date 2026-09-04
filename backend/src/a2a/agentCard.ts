@@ -53,5 +53,9 @@ export function buildTaskManagerCard(baseUrl: string): AgentCard {
         examples: ['Remind me to call mom tomorrow at 9am'],
       },
     ],
+    metadata: {
+      mcpToolsUrl: `${baseUrl}/a2a/worker/tools`,
+      workerAgent: 'todo-worker',
+    },
   }
 }

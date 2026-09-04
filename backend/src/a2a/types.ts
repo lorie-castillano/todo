@@ -46,6 +46,7 @@ export const agentCardSchema = z.object({
   defaultInputModes: z.array(z.string()).default(['text']),
   defaultOutputModes: z.array(z.string()).default(['text']),
   skills: z.array(skillSchema).default([]),
+  metadata: z.record(z.unknown()).optional(),
 })
 
 export type AgentCapabilities = z.infer<typeof agentCapabilitiesSchema>

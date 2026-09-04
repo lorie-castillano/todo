@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { pino } from 'pino'
 import { createInMemoryTaskStore, type TaskStore } from './taskStore.js'
 import { TaskManager, createTaskManager, type TaskEvent } from './taskManager.js'
+import { createTodoWorkerAgent, type TodoWorkerAgent } from './todoWorkerAgent.js'
+import { createNotificationWorkerAgent, type NotificationWorkerAgent } from './notificationWorkerAgent.js'
 import type { TodoService } from '../services/todoService.js'
 import type { TaskSendRequest } from './types.js'
 
@@ -26,14 +28,22 @@ function waitForImmediate(): Promise<void> {
 describe('TaskManager', () => {
   let taskStore: TaskStore
   let todoService: TodoService
+  let workerAgent: TodoWorkerAgent
+  let notificationWorker: NotificationWorkerAgent
   let manager: TaskManager
 
   beforeEach(() => {
     taskStore = createInMemoryTaskStore()
     todoService = makeMockTodoService()
+    workerAgent = createTodoWorkerAgent({
+      todoService,
+      logger: pino({ level: 'silent' }),
+    })
+    notificationWorker = createNotificationWorkerAgent({ logger: pino({ level: 'silent' }) })
     manager = createTaskManager({
       taskStore,
-      todoService,
+      workerAgent,
+      notificationWorker,
       logger: pino({ level: 'silent' }),
       retryOptions: { maxAttempts: 2, delayMs: 0 },
       autoProcess: false,
@@ -166,6 +176,34 @@ describe('TaskManager', () => {
     expect(todoService.softDelete).toHaveBeenCalledWith(7, 'user-1')
   })
 
+  it('decomposes a reminder across todo and notification workers', async () => {
+    const todo = { id: 2, text: 'call mom', completed: false, userId: 'user-1', deletedAt: null, createdAt: new Date(), updatedAt: new Date() }
+    vi.mocked(todoService.create).mockResolvedValue(todo)
+
+    const task = await taskStore.create({
+      sessionId: 'session-1',
+      status: { state: 'pending', timestamp: new Date().toISOString() },
+      history: [{ role: 'user', parts: [{ type: 'text', text: 'Remind me to call mom tomorrow' }] }],
+      artifacts: [],
+      metadata: { userId: 'user-1' },
+    })
+
+    await manager.processTask(task.id)
+
+    const updated = await taskStore.get(task.id)
+    expect(updated?.status.state).toBe('completed')
+    expect(todoService.create).toHaveBeenCalledWith({ text: 'call mom', userId: 'user-1' })
+    expect(notificationWorker.listScheduled()).toEqual([
+      expect.objectContaining({ message: 'call mom', schedule: 'tomorrow' }),
+    ])
+    expect(updated?.artifacts[0]?.parts[0]).toEqual(
+      expect.objectContaining({
+        type: 'data',
+        data: expect.objectContaining({ todo, notification: expect.any(Object) }),
+      })
+    )
+  })
+
   it('cancelTask transitions a pending task to canceled', async () => {
     const task = await manager.sendTask({
       message: { role: 'user', parts: [{ type: 'text', text: 'List todos' }] },
@@ -225,9 +263,14 @@ describe('TaskManager', () => {
   it('spawns background processing after sendTask returns', async () => {
     vi.mocked(todoService.create).mockResolvedValue({ id: 1, text: 'call mom', completed: false, userId: 'user-1', deletedAt: null, createdAt: new Date(), updatedAt: new Date() })
 
+    const autoWorker = createTodoWorkerAgent({
+      todoService,
+      logger: pino({ level: 'silent' }),
+    })
     const autoManager = createTaskManager({
       taskStore,
-      todoService,
+      workerAgent: autoWorker,
+      notificationWorker,
       logger: pino({ level: 'silent' }),
       retryOptions: { maxAttempts: 2, delayMs: 0 },
       autoProcess: true,

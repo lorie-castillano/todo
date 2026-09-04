@@ -100,6 +100,38 @@ describe('A2A discovery endpoint', () => {
 
     await app.close()
   })
+
+  it('discovers specialized workers in the local agent mesh', async () => {
+    const app = await buildTestApp()
+
+    const response = await app.inject({ method: 'GET', url: '/a2a/agents' })
+
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      agents: expect.arrayContaining([
+        expect.objectContaining({ id: 'todo-worker' }),
+        expect.objectContaining({ id: 'notification-worker' }),
+      ]),
+    })
+
+    await app.close()
+  })
+
+  it('exposes worker MCP tool definitions at /a2a/worker/tools', async () => {
+    const app = await buildTestApp()
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/a2a/worker/tools',
+    })
+
+    expect(response.statusCode).toBe(200)
+    const body = response.json()
+    expect(body.tools).toBeInstanceOf(Array)
+    expect(body.tools.some((tool: { name: string }) => tool.name === 'create_todo')).toBe(true)
+
+    await app.close()
+  })
 })
 
 describe('A2A task lifecycle endpoints', () => {
@@ -227,6 +259,29 @@ describe('A2A task lifecycle endpoints', () => {
     const updated = response.json() as Task
     expect(updated.status.state).toBe('completed')
     expect(updated.artifacts).toHaveLength(1)
+    expect(todoService.create).toHaveBeenCalledWith({ text: 'call mom', userId: 'user-1' })
+  })
+
+  it('end-to-end: reminder fans out to todo and notification workers', async () => {
+    const task = await app.taskStore.create(
+      makeTaskInput({
+        history: [
+          {
+            role: 'user',
+            parts: [{ type: 'text', text: 'Remind me to call mom tomorrow' }],
+          },
+        ],
+        metadata: { userId: 'user-1' },
+      })
+    )
+
+    await app.taskManager.processTask(task.id)
+
+    const response = await app.inject({ method: 'GET', url: '/a2a/notifications' })
+    expect(response.statusCode).toBe(200)
+    expect(response.json()).toEqual({
+      notifications: [expect.objectContaining({ message: 'call mom', schedule: 'tomorrow' })],
+    })
     expect(todoService.create).toHaveBeenCalledWith({ text: 'call mom', userId: 'user-1' })
   })
 

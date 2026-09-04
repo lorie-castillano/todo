@@ -2,13 +2,17 @@
 //
 // This file implements the public agent-facing HTTP surface:
 //   - GET /.well-known/agent.json       → agent capability advertisement
+//   - GET /a2a                         → friendly A2A metadata
+//   - GET /a2a/worker/tools            → MCP tool definitions for the Todo Worker
 //   - POST /a2a/tasks/send             → create a task and start processing
 //   - GET  /a2a/tasks/:id              → get current task state
 //   - POST /a2a/tasks/:id/cancel       → cancel a task
 //   - GET  /a2a/tasks/:id/subscribe    → SSE stream of status/artifact updates
 //
 // A2A is task-centric, not tool-centric. Other agents discover us via the
-// agent card, send a task, and poll or subscribe to updates.
+// agent card, send a task, and poll or subscribe to updates. The Task Manager
+// delegates the actual work to a TodoWorkerAgent, which is a hybrid MCP + A2A
+// worker: it receives A2A tasks and exposes the same tool definitions as MCP.
 
 import type { FastifyPluginAsync, FastifyRequest, FastifyReply } from 'fastify'
 import { config } from '../config.js'
@@ -53,6 +57,23 @@ export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
     discovery: '/.well-known/agent.json',
     version: '0.1.0',
   }))
+
+  fastify.get('/a2a/agents', async (_req, reply) => {
+    return reply.code(200).send({ agents: fastify.taskManager.agents })
+  })
+
+  fastify.get('/a2a/notifications', { preHandler: a2aAuthPreHandler }, async (_req, reply) => {
+    return reply.code(200).send({ notifications: fastify.taskManager.scheduledNotifications })
+  })
+
+  // --- Worker tool discovery ---
+  // The TodoWorkerAgent is an MCP + A2A hybrid. It exposes the same four
+  // todo tool definitions that the stdio MCP server does, but over HTTP so
+  // other A2A agents can discover and delegate to them.
+  fastify.get('/a2a/worker/tools', async (_req, reply) => {
+    const tools = fastify.taskManager.mcpTools
+    return reply.code(200).send({ tools })
+  })
 
   // --- Create a task ---
   // Returns immediately with the task in `pending` state. Processing runs

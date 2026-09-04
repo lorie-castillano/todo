@@ -11,6 +11,7 @@ import pg from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '../generated/prisma/client.js';
 import { config } from '../config.js';
+import { TODO_MCP_TOOLS } from './toolDefinitions.js';
 
 const CreateTodoInputSchema = z.object({
   text: z.string().min(1).max(200),
@@ -83,61 +84,6 @@ function checkRateLimit(userId: string): boolean {
   return true;
 }
 
-const TOOLS = [
-  {
-    name: 'create_todo',
-    description: 'Create a new todo item for a user',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        text: { type: 'string', minLength: 1, maxLength: 200 },
-        userId: { type: 'string', format: 'uuid' },
-        apiKey: { type: 'string' },
-      },
-      required: ['text', 'userId'],
-    },
-  },
-  {
-    name: 'list_todos',
-    description: 'List all todos for a user, optionally filtered by completion status',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        userId: { type: 'string', format: 'uuid' },
-        completed: { type: 'boolean' },
-        apiKey: { type: 'string' },
-      },
-      required: ['userId'],
-    },
-  },
-  {
-    name: 'toggle_todo',
-    description: 'Toggle the completion status of a todo',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'integer' },
-        userId: { type: 'string', format: 'uuid' },
-        apiKey: { type: 'string' },
-      },
-      required: ['id', 'userId'],
-    },
-  },
-  {
-    name: 'delete_todo',
-    description: 'Delete a todo (soft delete)',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        id: { type: 'integer' },
-        userId: { type: 'string', format: 'uuid' },
-        apiKey: { type: 'string' },
-      },
-      required: ['id', 'userId'],
-    },
-  },
-];
-
 export async function createMcpServer(prisma: PrismaClient) {
   const server = new Server(
     {
@@ -153,7 +99,7 @@ export async function createMcpServer(prisma: PrismaClient) {
   );
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: TOOLS,
+    tools: TODO_MCP_TOOLS,
   }));
 
   server.setRequestHandler(ListResourcesRequestSchema, async () => ({

@@ -340,22 +340,26 @@ By the end of Phase 5, you will have:
 
 *Progress: **Lesson 6.2 complete.** Task Manager is wired into the Fastify app. Task store is in-memory (swappable), state machine supports `pending → working → completed/input-required/canceled`, endpoints are implemented with SSE and API-key prehandler, and tests cover the state machine, retry utility, and route integration.*
 
-### Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid)
-- [ ] Agent that exposes both MCP tools AND A2A capabilities
-- [ ] Register as remote MCP server via A2A discovery
-- [ ] Handle complex tasks by delegating to MCP tools
-- [ ] Report progress back to Task Manager via A2A
+### Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid) ✅
+- [x] Agent that exposes both MCP tools AND A2A capabilities → `TodoWorkerAgent` in `backend/src/a2a/todoWorkerAgent.ts`
+- [x] Register as remote MCP server via A2A discovery → `GET /a2a/worker/tools` and `mcpToolsUrl` in agent card metadata
+- [x] Handle complex tasks by delegating to MCP tools → `TaskManager` now delegates execution to `TodoWorkerAgent`
+- [x] Report progress back to Task Manager via A2A → `WorkerExecutionResult` feeds status updates and artifacts
 
 **Concepts**: Hybrid agent architecture, capability composition, remote MCP
 
-### Lesson 6.4 — Multi-Agent Collaboration Prototype
-- [ ] **Agent 1: Task Manager** — receives user requests, breaks down into subtasks
-- [ ] **Agent 2: Todo Worker** — specialized in todo CRUD via MCP tools
-- [ ] **Agent 3: Notification Worker** — handles reminders and alerts
-- [ ] Set up local agent mesh with HTTP + SSE communication
-- [ ] Demonstrate: "Remind me to call mom tomorrow" → Task Manager → Todo Worker (create) + Notification Worker (schedule)
+*Progress: **Lesson 6.3 complete.** Task Manager is now an orchestrator that delegates todo CRUD to a hybrid `TodoWorkerAgent`. The worker exposes the same four MCP tool definitions over A2A, making the backend discoverable as both an A2A agent and an MCP-capable worker.*
+
+### Lesson 6.4 — Multi-Agent Collaboration Prototype ✅
+- [x] **Agent 1: Task Manager** — receives user requests and decomposes reminders through `AgentMesh`
+- [x] **Agent 2: Todo Worker** — specializes in todo CRUD via shared MCP tool contracts
+- [x] **Agent 3: Notification Worker** — schedules in-memory reminders and returns A2A artifacts
+- [x] Set up local agent mesh with HTTP discovery/results and SSE task updates
+- [x] Demonstrate: "Remind me to call mom tomorrow" → Task Manager → Todo Worker (create) + Notification Worker (schedule)
 
 **Concepts**: Agent mesh, task decomposition, multi-agent workflows, capability routing
+
+*Progress: **Lesson 6.4 complete.** The Task Manager uses capability-based routing through a local `AgentMesh`. Reminder requests fan out concurrently to the Todo and Notification workers, then fan in to one combined artifact. `GET /a2a/agents` exposes worker capabilities, `GET /a2a/notifications` exposes scheduled prototype reminders, and the existing task subscription endpoint streams lifecycle updates over SSE.*
 
 ### Lesson 6.5 — Production Multi-Agent Considerations
 - [ ] Agent authentication and trust boundaries
@@ -645,12 +649,12 @@ By the end of this plan, you will be able to:
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
 | Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
-| Phase 6: A2A Protocol & Multi-Agent | In Progress | 2/5 |
+| Phase 6: A2A Protocol & Multi-Agent | In Progress | 4/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 6.3 — Building the Worker Agent (MCP + A2A Hybrid)**
+**Next up: Lesson 6.5 — Production Multi-Agent Considerations**
 
 **Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
 
@@ -662,12 +666,12 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **2 hrs/day, weekdays only** (~10 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **October 16, 2026** (recalculated Sep 2, 2026)
+> **Revised target graduation**: **October 16, 2026** (recalculated Sep 4, 2026)
 > **Phase 5 completed**: August 30, 2026 (Sunday)
-> **Lesson 6.2 completed & manually verified**: September 2, 2026 (Wednesday)
-> **Next work session**: September 3, 2026 (Thursday) — Lesson 6.3
+> **Lesson 6.4 completed**: September 4, 2026 (Friday)
+> **Next work session**: September 7, 2026 (Monday) — Lesson 6.5
 
-*Note: Recalculated on September 2, 2026 (Wednesday). Phase 6 is in progress (2/5 lessons complete; 6.2 manually verified against docker-compose). Remaining: 16 lessons across Phases 6-9. At 2 hrs/day weekdays only (~0.8 lessons/weekday), estimated completion: September 29, 2026. With buffer, graduation target remains October 18, 2026.*
+*Note: Recalculated on September 4, 2026 (Friday). Phase 6 is in progress (4/5 lessons complete; automated tests cover the A2A reminder workflow, and docker-compose testing confirmed the missing-userId validation path). Remaining: 14 lessons across Phases 6-9. At 2 hrs/day weekdays only (~0.8 lessons/weekday), estimated core completion is September 30, 2026. The October 16, 2026 graduation target preserves roughly two weeks of buffer for review, debugging, and missed sessions.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -676,12 +680,12 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 | **Lesson 4.2 complete** (logging + feature flags) | Jun 2, 2026 | May 30, 2026 | 🟢 Advanced (3 days early) |
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
 | **Phase 5 complete** (Backend & MCP) | Aug 29, 2026 | Aug 30, 2026 | 🟢 On Time (1 day late) |
-| **Phase 6 complete** (A2A & Multi-Agent) | Sep 13, 2026 | _____ | 5 lessons, ~1.25 weeks |
-| **Phase 7 complete** (System Design) | Sep 23, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 8 complete** (AI Governance) | Oct 3, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Oct 18, 2026 | _____ | 5 lessons, ~1.25 weeks |
+| **Phase 6 complete** (A2A & Multi-Agent) | Sep 8, 2026 | _____ | 1 lesson remaining |
+| **Phase 7 complete** (System Design) | Sep 14, 2026 | _____ | 4 lessons, ~1 week |
+| **Phase 8 complete** (AI Governance) | Sep 21, 2026 | _____ | 4 lessons, ~1 week |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Sep 30, 2026 | _____ | 5 lessons, ~1.25 weeks |
 
-**Buffer**: Sustainable pace at 2 hrs/day, weekdays only. Graduation target: **October 18, 2026**.
+**Buffer**: Core lessons target September 30 at a sustainable weekday pace. Final review and catch-up buffer runs through **October 16, 2026**.
 
 ---
 
@@ -747,3 +751,5 @@ Days off target = (actual completion date) − (target date)
 | 5.8 — Agent Hardening | Sep 1 | ✅ Aug 30 | API key auth (MCP_API_KEY), per-user rate limiting (100/min), security docs; **Phase 5 complete** |
 | 6.1 — A2A Protocol Fundamentals | — | ✅ Aug 31 | A2A types/Zod schemas, agent card, discovery endpoint (/.well-known/agent.json), ADR-008, A2A_README; stubs for task lifecycle endpoints |
 | 6.2 — Building the Task Manager Agent | — | ✅ Sep 2 | TaskStore + TaskManager, state machine, tasks/send/get/cancel endpoints, SSE subscribe, withRetry; 50 backend tests passing; manually verified with curl against docker-compose backend |
+| 6.3 — Building the Worker Agent (MCP + A2A Hybrid) | — | ✅ Sep 2 | TodoWorkerAgent delegates todo CRUD; TaskManager now orchestrates; shared MCP tool definitions exposed via `GET /a2a/worker/tools`; 51 backend tests passing |
+| 6.4 — Multi-Agent Collaboration Prototype | — | ✅ Sep 4 | Local AgentMesh with capability routing; reminder fan-out to Todo + Notification workers; HTTP discovery/results + SSE lifecycle; 54 backend tests passing |

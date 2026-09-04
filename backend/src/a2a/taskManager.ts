@@ -5,8 +5,7 @@
 //   2. Stores it and emits a status update
 //   3. Runs `processTask` asynchronously through a state machine
 //      (pending → working → completed / input-required / canceled)
-//   4. Parses the user's intent, calls `todoService` when appropriate,
-//      and produces artifacts
+//   4. Delegates the actual work to a TodoWorkerAgent (MCP + A2A hybrid)
 //   5. Streams status and artifact updates to SSE subscribers
 //
 // The manager never blocks the HTTP response. `sendTask` returns the task
@@ -23,12 +22,15 @@ import type {
   Artifact,
 } from './types.js'
 import type { TaskStore } from './taskStore.js'
-import type { TodoService } from '../services/todoService.js'
+import type { TodoWorkerAgent, McpToolDefinition } from './todoWorkerAgent.js'
+import type { NotificationWorkerAgent, ScheduledNotification } from './notificationWorkerAgent.js'
+import { createAgentMesh, type AgentDescriptor, type AgentMesh } from './agentMesh.js'
 import { withRetry, type RetryOptions } from './retry.js'
 
 export interface TaskManagerDependencies {
   taskStore: TaskStore
-  todoService: TodoService
+  workerAgent: TodoWorkerAgent
+  notificationWorker: NotificationWorkerAgent
   logger: FastifyBaseLogger
   retryOptions?: RetryOptions
   autoProcess?: boolean
@@ -39,7 +41,9 @@ export type TaskEventListener = (event: TaskEvent) => void
 
 export class TaskManager {
   private readonly taskStore: TaskStore
-  private readonly todoService: TodoService
+  private readonly workerAgent: TodoWorkerAgent
+  private readonly notificationWorker: NotificationWorkerAgent
+  private readonly agentMesh: AgentMesh
   private readonly logger: FastifyBaseLogger
   private readonly retryOptions: RetryOptions
   private readonly autoProcess: boolean
@@ -47,7 +51,12 @@ export class TaskManager {
 
   constructor(deps: TaskManagerDependencies) {
     this.taskStore = deps.taskStore
-    this.todoService = deps.todoService
+    this.workerAgent = deps.workerAgent
+    this.notificationWorker = deps.notificationWorker
+    this.agentMesh = createAgentMesh({
+      todoWorker: deps.workerAgent,
+      notificationWorker: deps.notificationWorker,
+    })
     this.logger = deps.logger
     this.retryOptions = deps.retryOptions ?? {
       maxAttempts: 3,
@@ -58,6 +67,22 @@ export class TaskManager {
     this.autoProcess = deps.autoProcess ?? true
     // A2A allows many subscribers per task; disable the default listener leak warning.
     this.emitter.setMaxListeners(0)
+  }
+
+  /**
+   * Expose the worker's MCP tool definitions so A2A clients can discover
+   * which capabilities the Task Manager can delegate to.
+   */
+  get mcpTools(): McpToolDefinition[] {
+    return this.workerAgent.mcpTools
+  }
+
+  get agents(): AgentDescriptor[] {
+    return this.agentMesh.listAgents()
+  }
+
+  get scheduledNotifications(): ScheduledNotification[] {
+    return this.notificationWorker.listScheduled()
   }
 
   async sendTask(request: TaskSendRequest): Promise<Task> {
@@ -164,124 +189,24 @@ export class TaskManager {
   }
 
   private async executeTask(task: Task): Promise<{ status: TaskStatus; artifact?: Artifact }> {
-    const userMessage = task.history[0]
-    if (!userMessage) {
-      return this.buildStatus('input-required', 'No user message found')
+    const result = await this.agentMesh.executeTask(task)
+    const output: { status: TaskStatus; artifact?: Artifact } = {
+      status: this.buildStatus(result.state, result.message),
     }
-
-    const text = userMessage.parts
-      .filter((part): part is { type: 'text'; text: string } => part.type === 'text')
-      .map((part) => part.text)
-      .join(' ')
-      .trim()
-
-    if (!text) {
-      return this.buildStatus('input-required', 'Please provide a text request')
+    if (result.artifact) {
+      output.artifact = result.artifact
     }
-
-    const userId = this.getUserId(task)
-    if (!userId) {
-      return this.buildStatus('input-required', 'Please provide userId in metadata')
-    }
-
-    const lower = text.toLowerCase()
-
-    if (lower.includes('list') && lower.includes('todo')) {
-      const filter = lower.includes('completed')
-        ? { completed: true }
-        : lower.includes('pending')
-          ? { completed: false }
-          : undefined
-      const todos = await this.todoService.list(userId, filter)
-      return {
-        status: this.buildStatus('completed', `Found ${todos.length} todo(s)`).status,
-        artifact: this.buildDataArtifact({ todos }),
-      }
-    }
-
-    if (lower.includes('create') || lower.includes('add')) {
-      const todoText = this.extractTodoText(text)
-      if (!todoText) {
-        return this.buildStatus('input-required', 'Please specify the todo text')
-      }
-      const todo = await this.todoService.create({ text: todoText, userId })
-      return {
-        status: this.buildStatus('completed', `Created todo: ${todo.text}`).status,
-        artifact: this.buildDataArtifact({ todo }),
-      }
-    }
-
-    if (lower.includes('toggle')) {
-      const todoId = this.extractTodoId(text)
-      if (!todoId) {
-        return this.buildStatus('input-required', 'Please specify the todo id to toggle')
-      }
-      const todo = await this.todoService.toggleCompleted(todoId, userId)
-      if (!todo) {
-        return this.buildStatus('completed', `Todo ${todoId} not found or already deleted`)
-      }
-      return {
-        status: this.buildStatus('completed', `Toggled todo: ${todo.text}`).status,
-        artifact: this.buildDataArtifact({ todo }),
-      }
-    }
-
-    if (lower.includes('delete') || lower.includes('remove')) {
-      const todoId = this.extractTodoId(text)
-      if (!todoId) {
-        return this.buildStatus('input-required', 'Please specify the todo id to delete')
-      }
-      const todo = await this.todoService.softDelete(todoId, userId)
-      if (!todo) {
-        return this.buildStatus('completed', `Todo ${todoId} not found or already deleted`)
-      }
-      return {
-        status: this.buildStatus('completed', `Deleted todo: ${todo.text}`).status,
-        artifact: this.buildDataArtifact({ todo }),
-      }
-    }
-
-    return this.buildStatus(
-      'input-required',
-      'I can help with: list todos, create/add todo, toggle todo <id>, delete todo <id>. What would you like to do?'
-    )
+    return output
   }
 
-  private getUserId(task: Task): string | null {
-    const userId = task.metadata?.userId
-    return typeof userId === 'string' ? userId : null
-  }
-
-  private extractTodoText(text: string): string | null {
-    const match = text.match(/(?:create|add)\s+(?:a\s+)?(?:todo\s+)?(?:to\s+)?(.+)/i)
-    if (match?.[1]) return match[1].trim()
-    return text.trim() || null
-  }
-
-  private extractTodoId(text: string): number | null {
-    const match = text.match(/\d+/)
-    if (match) return Number.parseInt(match[0], 10)
-    return null
-  }
-
-  private buildStatus(state: TaskStatus['state'], text: string): { status: TaskStatus } {
+  private buildStatus(state: TaskStatus['state'], text: string): TaskStatus {
     return {
-      status: {
-        state,
-        timestamp: new Date().toISOString(),
-        message: {
-          role: 'agent',
-          parts: [{ type: 'text', text }],
-        },
+      state,
+      timestamp: new Date().toISOString(),
+      message: {
+        role: 'agent',
+        parts: [{ type: 'text', text }],
       },
-    }
-  }
-
-  private buildDataArtifact(data: Record<string, unknown>): Artifact {
-    return {
-      name: 'result',
-      parts: [{ type: 'data', data }],
-      index: 0,
     }
   }
 
