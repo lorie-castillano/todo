@@ -378,15 +378,17 @@ By the end of Phase 5, you will have:
 
 *Enhance your TypeScript skills with advanced patterns specifically for backend and agent integration.*
 
-### Lesson 4.6 — Advanced TypeScript for Backend & Agents
-- [ ] **Template literal types** for route paths and event names
-- [ ] **Conditional types** for API response shapes based on request
-- [ ] **Infer and mapped types** for deriving Zod schemas from TypeScript
-- [ ] **Branded types** for type-safe IDs (TodoId, UserId, AgentId)
-- [ ] **Function overloads** for flexible MCP tool signatures
-- [ ] **Declaration merging** for extending third-party types (MCP SDK)
-- [ ] **Type guards and assertions** for runtime validation narrowing
-- [ ] **Async generator types** for streaming A2A responses
+### Lesson 4.6 — Advanced TypeScript for Backend & Agents ✅
+- [x] **Template literal types** for A2A route paths and event names (`A2aCapability`, `A2aRoute`)
+- [x] **Conditional types** for A2A response shapes (`A2aResponseFor<C>`)
+- [x] **Infer and mapped types** for deriving TypeScript from Zod schemas (`InferredFromSchemas`, `DeepReadonly`)
+- [x] **Branded types** for type-safe IDs (`TodoId`, `UserId`, `AgentId`, `TaskId`, brand helpers)
+- [x] **Function overloads** for flexible validation (`validate` service + controller overloads)
+- [x] **Declaration merging** for `FastifyRequest` / `FastifyInstance` augmentations
+- [x] **Type guards and assertions** for runtime narrowing (`isTaskStatusUpdateEvent`, `assertAgentId`)
+- [x] **Async generator types** for streaming A2A responses (`TaskEventStream`, `subscribeAsync`)
+
+*Progress: **Lesson 4.6 complete.** `AgentId` is now a branded string used throughout A2A auth and `TaskContext`; A2A capabilities are template-literal typed; the SSE subscription endpoint now consumes a typed `TaskEventStream`; Zod inference and mapped types centralise runtime/compile-time sync.*
 
 **Concepts**: Type-level programming, type-safe APIs, runtime-type boundary
 
@@ -650,17 +652,18 @@ By the end of this plan, you will be able to:
 | Phase 2: Intermediate Patterns | ✅ Complete | 5/5 |
 | Phase 3: Advanced Practices | ✅ Complete | 5/5 |
 | Phase 4: Senior-Level & Production | ✅ Complete | 3/3 |
+| Phase 4 Extended: Deep TypeScript | 🟡 In Progress | 1/2 |
 | Phase 5: Backend & MCP Integration | ✅ Complete | 8/8 |
 | Phase 6: A2A Protocol & Multi-Agent | ✅ Complete | 5/5 |
 | Phase 7: System Design Mastery | 🔲 Pending | 0/4 |
 | Phase 8: AI Governance & Safety | 🔲 Pending | 0/4 |
 | Phase 9: LLM Fundamentals & Production | 🔲 Pending | 0/5 |
 
-**Next up: Lesson 4.6 — Advanced TypeScript for Backend & Agents (Phase 4 Extended)**
+**Next up: Lesson 4.7 — TypeScript Integration Patterns (Phase 4 Extended)**
 
-**Total Scope**: 9 phases, 33 lessons, estimated 10-11 weeks at 2 hrs/day
+**Remaining Scope**: 14 lessons, approximately 17.5 weekdays at 2 hrs/day
 
-**Lesson order**: 5.1–5.4 (backend + integration) → 5.5 (auth) → 5.6 (system design) → 5.7–5.8 (MCP + agent hardening)
+**Lesson order**: 4.7 (advanced TypeScript) → Phase 7 (system design) → Phase 8 (AI governance) → Phase 9 (LLM + production AI)
 
 ---
 
@@ -668,12 +671,13 @@ By the end of this plan, you will be able to:
 
 > **Commitment**: **2 hrs/day, weekdays only** (~10 hrs/week)
 > **Original target graduation**: August 31, 2026
-> **Revised target graduation**: **October 16, 2026** (recalculated Sep 4, 2026)
+> **Revised target graduation**: **October 16, 2026** (recalculated Sep 9, 2026)
 > **Phase 5 completed**: August 30, 2026 (Sunday)
 > **Phase 6 completed**: September 4, 2026 (Friday)
-> **Next work session**: September 7, 2026 (Monday) — Lesson 4.6
+> **Lesson 4.6 completed**: September 9, 2026 (Wednesday)
+> **Next work session**: September 10, 2026 (Thursday) — Lesson 4.7
 
-*Note: Updated on September 4, 2026 (Friday). Phase 6 is complete (5/5 lessons); 87 backend tests cover agent identity, capability authorization, per-agent limits, tracing, timeouts, circuit breakers, and safe failure handling. The September 30, 2026 core target and October 16, 2026 buffered graduation target remain unchanged.*
+*Note: Recalculated on September 9, 2026 (Wednesday). Lesson 4.6 is complete, leaving 14 lessons: 1 in Phase 4 Extended (4.7), 4 in Phase 7, 4 in Phase 8, and 5 in Phase 9. At approximately 0.8 lesson per weekday, that is ~17.5 weekdays from September 10, putting projected core completion at October 5, 2026 — four days later than the previous October 1 projection, because only one of Phase 4 Extended's two lessons landed by the September 9 checkpoint. The October 16, 2026 graduation target still holds, now with 9 weekdays of review and catch-up buffer instead of 11.*
 
 Each checkpoint has a **target date**. When you complete a phase, write the **actual date** next to it and check your status using the Progress Report Guide below.
 
@@ -683,11 +687,13 @@ Each checkpoint has a **target date**. When you complete a phase, write the **ac
 | **Lesson 4.3 complete** (Phase 4 done) | Jun 6, 2026 | May 31, 2026 | 🟢 Advanced (6 days early) |
 | **Phase 5 complete** (Backend & MCP) | Aug 29, 2026 | Aug 30, 2026 | 🟢 On Time (1 day late) |
 | **Phase 6 complete** (A2A & Multi-Agent) | Sep 8, 2026 | Sep 4, 2026 | 🟢 Advanced (4 days early) |
-| **Phase 7 complete** (System Design) | Sep 14, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 8 complete** (AI Governance) | Sep 21, 2026 | _____ | 4 lessons, ~1 week |
-| **Phase 9 complete** (LLM & Production AI) 🎓 | Sep 30, 2026 | _____ | 5 lessons, ~1.25 weeks |
+| **Lesson 4.6 complete** (Advanced TS for backend & agents) | Sep 8, 2026 | Sep 9, 2026 | 🟡 Slightly behind (1 day late) |
+| **Phase 4 Extended complete** (Lesson 4.7) | Sep 11, 2026 | _____ | 1 lesson, ~1.25 weekdays |
+| **Phase 7 complete** (System Design) | Sep 18, 2026 | _____ | 4 lessons, ~5 weekdays |
+| **Phase 8 complete** (AI Governance) | Sep 25, 2026 | _____ | 4 lessons, ~5 weekdays |
+| **Phase 9 complete** (LLM & Production AI) 🎓 | Oct 5, 2026 | _____ | 5 lessons, ~6.25 weekdays |
 
-**Buffer**: Core lessons target September 30 at a sustainable weekday pace. Final review and catch-up buffer runs through **October 16, 2026**.
+**Buffer**: Core lessons target October 5 at a sustainable weekday pace. Final review and catch-up buffer runs through **October 16, 2026** (9 weekdays).
 
 ---
 
@@ -756,3 +762,4 @@ Days off target = (actual completion date) − (target date)
 | 6.3 — Building the Worker Agent (MCP + A2A Hybrid) | — | ✅ Sep 2 | TodoWorkerAgent delegates todo CRUD; TaskManager now orchestrates; shared MCP tool definitions exposed via `GET /a2a/worker/tools`; 51 backend tests passing |
 | 6.4 — Multi-Agent Collaboration Prototype | — | ✅ Sep 4 | Local AgentMesh with capability routing; reminder fan-out to Todo + Notification workers; HTTP discovery/results + SSE lifecycle; 54 backend tests passing |
 | 6.5 — Production Multi-Agent Considerations | Sep 8 | ✅ Sep 4 | Per-agent auth (A2A_AGENT_CREDENTIALS), capability checks, identity-scoped limits, tracing, worker timeouts + circuit breakers, and safe failed-task responses; **Phase 6 complete; 87 backend tests passing** |
+| 4.6 — Advanced TypeScript for Backend & Agents | Sep 8 | ✅ Sep 9 | Branded `AgentId`/`TaskId` through A2A auth + `TaskContext`, template-literal `A2aCapability`/`A2aRoute`, conditional `A2aResponseFor<C>`, Zod-derived inference + `DeepReadonly`, `validate` overloads, Fastify declaration merging, type guards/assertions, typed `TaskEventStream` for SSE |
