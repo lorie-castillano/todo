@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { authorizeAgent, hasCapability, resolveAgentIdentity, timingSafeKeyCompare } from './agentAuth.js'
-import type { AgentCredential, AgentIdentity } from './agentAuth.js'
+import type { AgentCredential } from './agentAuth.js'
+import { brandAgentId } from './types.js'
 import type { FastifyRequest } from 'fastify'
 
 const credentials: AgentCredential[] = [
@@ -34,8 +35,8 @@ describe('timingSafeKeyCompare', () => {
 describe('authorizeAgent', () => {
   it('authenticates an agent by key and returns identity with capabilities', () => {
     const identity = authorizeAgent(credentials, 'frontend-key-at-least-32-characters-long', undefined)
-    expect(identity).toEqual<AgentIdentity>({
-      id: 'frontend-agent',
+    expect(identity).toEqual({
+      id: brandAgentId('frontend-agent'),
       capabilities: ['tasks/send', 'tasks/read'],
     })
   })

@@ -6,12 +6,18 @@ import type {
 } from 'fastify'
 import { config } from '../config.js'
 import { buildTaskManagerCard } from '../a2a/agentCard.js'
-import { taskSendRequestSchema, taskGetRequestSchema } from '../a2a/types.js'
-import type { TaskEvent, TaskContext } from '../a2a/taskManager.js'
+import {
+  taskSendRequestSchema,
+  taskGetRequestSchema,
+  type A2aCapability,
+  brandAgentId,
+  isTaskStatusUpdateEvent,
+} from '../a2a/types.js'
+import type { TaskContext } from '../a2a/taskManager.js'
 import { validate } from '../schemas/validate.js'
 import { resolveAgentIdentity, hasCapability } from '../a2a/agentAuth.js'
 
-const A2A_RATE_LIMITS: Record<string, { max: number; timeWindow: string }> = {
+const A2A_RATE_LIMITS: Record<A2aCapability, { max: number; timeWindow: string }> = {
   'tasks/send': { max: 30, timeWindow: '1 minute' },
   'tasks/read': { max: 100, timeWindow: '1 minute' },
   'tasks/cancel': { max: 20, timeWindow: '1 minute' },
@@ -19,7 +25,7 @@ const A2A_RATE_LIMITS: Record<string, { max: number; timeWindow: string }> = {
   'notifications/read': { max: 60, timeWindow: '1 minute' },
 }
 
-function a2aRateLimitConfig(requiredCapability: string) {
+function a2aRateLimitConfig(requiredCapability: A2aCapability) {
   const limit = A2A_RATE_LIMITS[requiredCapability] ?? { max: 100, timeWindow: '1 minute' }
   return {
     ...limit,
@@ -27,7 +33,7 @@ function a2aRateLimitConfig(requiredCapability: string) {
   }
 }
 
-function a2aAuthOnRequest(requiredCapability?: string): onRequestHookHandler {
+function a2aAuthOnRequest(requiredCapability?: A2aCapability): onRequestHookHandler {
   return async (req: FastifyRequest, reply: FastifyReply) => {
     const identity = resolveAgentIdentity(req)
     if (!identity) {
@@ -57,7 +63,7 @@ function buildTaskContext(req: FastifyRequest, capability: string): TaskContext 
     correlationId: req.correlationId,
     taskId: undefined,
     sourceAgentId: req.agentIdentity?.id,
-    targetAgentId: 'todo-task-manager',
+    targetAgentId: brandAgentId('todo-task-manager'),
     capability,
   }
 }
@@ -179,39 +185,38 @@ export const a2aRoutes: FastifyPluginAsync = async (fastify) => {
         Connection: 'keep-alive',
       })
 
-      let finished = false
-      let unsubscribe: (() => void) | undefined
+      const stream = fastify.taskManager.subscribeAsync(task.id)
 
-      const cleanup = (): void => {
-        if (finished) return
-        finished = true
-        if (unsubscribe) unsubscribe()
-        req.raw.removeListener('close', cleanup)
-        req.raw.removeListener('end', cleanup)
+      const initialEvent = JSON.stringify({
+        type: 'task-status-update',
+        taskId: task.id,
+        status: task.status,
+      })
+      reply.raw.write(`data: ${initialEvent}\n\n`)
+
+      req.raw.on('close', () => {
+        void stream.return()
         reply.raw.end()
-      }
+      })
+      req.raw.on('end', () => {
+        void stream.return()
+        reply.raw.end()
+      })
 
-      const writeEvent = (event: TaskEvent): void => {
-        if (finished) return
+      for await (const event of stream) {
         reply.raw.write(`data: ${JSON.stringify(event)}\n\n`)
 
         if (
-          event.type === 'task-status-update' &&
+          isTaskStatusUpdateEvent(event) &&
           (event.status.state === 'completed' ||
             event.status.state === 'failed' ||
             event.status.state === 'canceled')
         ) {
-          cleanup()
+          break
         }
       }
 
-      writeEvent({ type: 'task-status-update', taskId: task.id, status: task.status })
-
-      if (!finished) {
-        unsubscribe = fastify.taskManager.subscribe(task.id, writeEvent)
-        req.raw.on('close', cleanup)
-        req.raw.on('end', cleanup)
-      }
+      reply.raw.end()
     }
   )
 }

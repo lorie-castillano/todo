@@ -1,5 +1,6 @@
 import { createHash, timingSafeEqual } from 'node:crypto'
 import type { FastifyRequest } from 'fastify'
+import { brandAgentId, type AgentId } from './types.js'
 import { config } from '../config.js'
 
 export interface AgentCredential {
@@ -9,7 +10,7 @@ export interface AgentCredential {
 }
 
 export interface AgentIdentity {
-  id: string
+  id: AgentId
   capabilities: readonly string[]
 }
 
@@ -45,14 +46,14 @@ function lookupCredential(
   if (agentId) {
     const credential = credentials.find((c) => c.id === agentId)
     if (credential && timingSafeKeyCompare(apiKey, credential.key)) {
-      return { id: credential.id, capabilities: credential.capabilities }
+      return { id: brandAgentId(credential.id), capabilities: credential.capabilities }
     }
     return null
   }
 
   for (const credential of credentials) {
     if (timingSafeKeyCompare(apiKey, credential.key)) {
-      return { id: credential.id, capabilities: credential.capabilities }
+      return { id: brandAgentId(credential.id), capabilities: credential.capabilities }
     }
   }
   return null
@@ -65,7 +66,7 @@ export function authorizeAgent(
 ): AgentIdentity | null {
   if (credentials.length === 0) {
     if (config.isDev || config.isTest) {
-      return { id: agentId ?? 'anonymous', capabilities: ['*'] }
+      return { id: brandAgentId(agentId ?? 'anonymous'), capabilities: ['*'] }
     }
     return null
   }

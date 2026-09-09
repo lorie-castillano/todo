@@ -1,3 +1,4 @@
+import { brandAgentId } from './types.js'
 import type { Artifact, Task } from './types.js'
 import type { TodoWorkerAgent, WorkerExecutionResult } from './todoWorkerAgent.js'
 import type { NotificationWorkerAgent } from './notificationWorkerAgent.js'
@@ -65,7 +66,7 @@ export class AgentMesh {
     targetAgentId: string,
     capability: string
   ): TaskContext | undefined {
-    return context ? { ...context, targetAgentId, capability } : undefined
+    return context ? { ...context, targetAgentId: brandAgentId(targetAgentId), capability } : undefined
   }
 
   private isReminder(task: Task): boolean {

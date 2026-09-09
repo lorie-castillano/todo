@@ -20,6 +20,8 @@ import type {
   TaskArtifactUpdateEvent,
   TaskStatusUpdateEvent,
   Artifact,
+  AgentId,
+  TaskEventStream,
 } from './types.js'
 import type { TaskStore } from './taskStore.js'
 import type { TodoWorkerAgent, McpToolDefinition } from './todoWorkerAgent.js'
@@ -30,8 +32,8 @@ import { withRetry, type RetryOptions } from './retry.js'
 export interface TaskContext {
   correlationId: string | undefined
   taskId: string | undefined
-  sourceAgentId: string | undefined
-  targetAgentId: string | undefined
+  sourceAgentId: AgentId | undefined
+  targetAgentId: AgentId | undefined
   capability: string | undefined
 }
 
@@ -142,6 +144,33 @@ export class TaskManager {
     this.emitter.on(id, listener)
     return () => {
       this.emitter.off(id, listener)
+    }
+  }
+
+  /**
+   * Async generator of task events. Yields every status and artifact update
+   * until the underlying listener is removed. This is the typed streaming
+   * primitive for SSE endpoints and async consumers.
+   */
+  async *subscribeAsync(id: string): TaskEventStream {
+    const queue: TaskEvent[] = []
+    let notify: (() => void) | null = null
+    const listener = (event: TaskEvent): void => {
+      queue.push(event)
+      notify?.()
+    }
+    const unsubscribe = this.subscribe(id, listener)
+    try {
+      while (true) {
+        while (queue.length > 0) {
+          yield queue.shift()!
+        }
+        await new Promise<void>((resolve) => {
+          notify = resolve
+        })
+      }
+    } finally {
+      unsubscribe()
     }
   }
 

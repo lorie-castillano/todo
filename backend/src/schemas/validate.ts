@@ -13,12 +13,19 @@
 import type { ZodType, ZodTypeDef, ZodIssue } from 'zod'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 
-interface ValidationError {
+export class ValidationError extends Error {
+  constructor(public readonly issues: ValidationIssue[]) {
+    super('Validation failed')
+    this.name = 'ValidationError'
+  }
+}
+
+interface ValidationIssue {
   field: string
   message: string
 }
 
-function formatIssues(issues: ZodIssue[]): ValidationError[] {
+function formatIssues(issues: ZodIssue[]): ValidationIssue[] {
   return issues.map((issue) => ({
     field: issue.path.join('.'),
     message: issue.message,
@@ -26,8 +33,11 @@ function formatIssues(issues: ZodIssue[]): ValidationError[] {
 }
 
 /**
- * Validate data against a Zod schema. Returns the parsed data on success,
- * or sends a 400 response with field-level errors and returns null.
+ * Validate data against a Zod schema.
+ *
+ * Overload 1 (controller style): send a 400 response and return `null`.
+ * Overload 2 (service style): throw a typed `ValidationError` so the caller
+ * decides how to handle it.
  *
  * Usage in routes:
  * ```ts
@@ -36,11 +46,20 @@ function formatIssues(issues: ZodIssue[]): ValidationError[] {
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function validate<T>(
+export function validate<T>(schema: ZodType<T, ZodTypeDef, any>, data: unknown): Promise<T>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function validate<T>(
   schema: ZodType<T, ZodTypeDef, any>,
   data: unknown,
   req: FastifyRequest,
   reply: FastifyReply,
+): Promise<T | null>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function validate<T>(
+  schema: ZodType<T, ZodTypeDef, any>,
+  data: unknown,
+  req?: FastifyRequest,
+  reply?: FastifyReply,
 ): Promise<T | null> {
   const result = schema.safeParse(data)
 
@@ -48,12 +67,18 @@ export async function validate<T>(
     return result.data
   }
 
-  req.log.warn({ issues: result.error.issues }, 'Validation failed')
+  const issues = formatIssues(result.error.issues)
+
+  if (!req || !reply) {
+    throw new ValidationError(issues)
+  }
+
+  req.log.warn({ issues }, 'Validation failed')
 
   await reply.code(400).send({
     error: 'Validation Error',
     message: 'Request validation failed',
-    details: formatIssues(result.error.issues),
+    details: issues,
     correlationId: req.correlationId,
   })
 
