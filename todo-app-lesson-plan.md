@@ -129,12 +129,12 @@
 ### Lesson 3.4 — Routing & Navigation ✅
 - [x] Add React Router: routes for all todos, active, completed
 - [x] URL-driven filtering (bookmarkable states)
-- [ ] Protected routes concept (auth simulation) — *deferred to auth lesson*
+- [x] Protected routes concept — `ProtectedRoute` + `GuestRoute` guards in `frontend/src/components/ProtectedRoute.tsx`
 - [x] 404 handling
 
 **Concepts**: Client-side routing, URL as state, history API, route guards, NavLink
 
-*Note: Protected routes deferred — will implement when we add authentication.*
+*Note: Protected routes were deferred to Lesson 5.5 (real auth instead of a simulation) and audited/hardened on Sep 9. The guards now wait on session restore before deciding, redirect with `replace`, round-trip the full destination (path + query + hash), bounce signed-in users off `/login`, and log out on an unrecoverable 401 via the `sessionEvents` channel. Covered by 12 unit tests + 8 Playwright e2e tests; each fix was verified by injecting the regression and watching the test fail.*
 
 ### Lesson 3.5 — Accessibility Mastery ✅
 - [x] Full keyboard navigation (Tab, Enter, Escape, Arrow keys)
