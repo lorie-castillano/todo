@@ -1,9 +1,10 @@
 // Router configuration for the Todo app
 //
 // Routes:
-// /          → All todos
-// /active    → Active (incomplete) todos
-// /completed → Completed todos
+// /          → All todos       (auth required)
+// /active    → Active todos    (auth required)
+// /completed → Completed todos (auth required)
+// /login     → Sign in         (guests only — signed-in users are redirected)
 // /*         → 404 Not Found
 //
 // Note: This file intentionally exports both components and the `router`
@@ -17,7 +18,7 @@ import { Suspense } from 'react'
 import { NotFound } from './pages/NotFound'
 import { LoginPage } from './pages/LoginPage'
 import { ErrorBoundary } from './components/ErrorBoundary'
-import { ProtectedRoute } from './components/ProtectedRoute'
+import { ProtectedRoute, GuestRoute } from './components/ProtectedRoute'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { queryClient } from './lib/queryClient'
@@ -73,7 +74,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: 'login',
-        element: <LoginPage />,
+        element: (
+          <GuestRoute>
+            <LoginPage />
+          </GuestRoute>
+        ),
       },
       {
         index: true,

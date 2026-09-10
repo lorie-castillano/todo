@@ -7,8 +7,10 @@
 //   server returns 401; we call /api/auth/refresh (using the httpOnly refresh
 //   cookie), store the new access token, and retry the original request ONCE.
 //   The user never sees a spurious logout.
-// - Central failure handling: if refresh also fails, we clear the token so the
-//   next render of a protected route redirects to /login.
+// - Central failure handling: if refresh also fails, we clear the token AND
+//   announce the expiry so AuthContext drops its `user` state, which re-renders
+//   the protected route and redirects to /login. Clearing storage alone is not
+//   enough — nothing would tell React to re-render.
 //
 // Concurrency: many requests can 401 at the same moment. We share a single
 // in-flight refresh promise so we only rotate the refresh token once — issuing
@@ -19,6 +21,7 @@
 
 import { getToken, setToken, clearToken } from './authToken'
 import { refreshSession } from './authApi'
+import { emitSessionExpired } from './sessionEvents'
 
 // Build the request with the current token attached.
 function withAuth(input: string, init: RequestInit): Promise<Response> {
@@ -66,9 +69,11 @@ export async function apiFetch(
       // Retry the original request once with the fresh access token.
       response = await withAuth(input, init)
     } else {
-      // Refresh failed — session is truly gone. Clear local token; the next
-      // protected-route render redirects to /login.
+      // Refresh failed — the session is truly gone. Clear the local token and
+      // notify React so AuthContext resets `user`; that re-render is what
+      // actually sends the user to /login.
       clearToken()
+      emitSessionExpired()
     }
   }
 

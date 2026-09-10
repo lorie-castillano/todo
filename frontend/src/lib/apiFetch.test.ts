@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { apiFetch } from './apiFetch'
 import { getToken, setToken, clearToken } from './authToken'
+import { onSessionExpired } from './sessionEvents'
 import * as authApi from './authApi'
 
 // Tests for apiFetch's silent-refresh behavior (Lesson 5.5).
@@ -79,5 +80,42 @@ describe('apiFetch', () => {
 
     expect(response.status).toBe(401)
     expect(getToken()).toBeNull()
+  })
+
+  it('announces session expiry when refresh fails so React can react', async () => {
+    setToken('expired')
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(res(401))
+    mockedRefresh.mockResolvedValue(null)
+
+    const listener = vi.fn()
+    const unsubscribe = onSessionExpired(listener)
+
+    await apiFetch('/api/todos')
+
+    // Clearing localStorage alone would leave AuthContext holding a stale user,
+    // so the protected route would never re-render and never redirect.
+    expect(listener).toHaveBeenCalledOnce()
+    unsubscribe()
+  })
+
+  it('does not announce expiry when the refresh succeeds', async () => {
+    setToken('expired')
+    vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(res(401))
+      .mockResolvedValueOnce(res(200))
+    mockedRefresh.mockResolvedValue({
+      user: { id: 'u1', email: 'a@b.com' },
+      accessToken: 'fresh-token',
+    })
+
+    const listener = vi.fn()
+    const unsubscribe = onSessionExpired(listener)
+
+    await apiFetch('/api/todos')
+
+    // A silent refresh must stay silent — logging the user out here would
+    // defeat the whole point of short-lived access tokens.
+    expect(listener).not.toHaveBeenCalled()
+    unsubscribe()
   })
 })

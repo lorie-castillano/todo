@@ -31,6 +31,7 @@ import {
   type Credentials,
 } from '../lib/authApi'
 import { setToken, clearToken } from '../lib/authToken'
+import { onSessionExpired } from '../lib/sessionEvents'
 import { logger } from '../lib/logger'
 
 interface AuthContextValue {
@@ -82,6 +83,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
+  }, [])
+
+  // When apiFetch exhausts its refresh attempt, the session is unrecoverable.
+  // Drop the user so `isAuthenticated` flips false and ProtectedRoute redirects.
+  // Without this, expired sessions leave the app rendered but non-functional
+  // until a manual reload.
+  useEffect(() => {
+    return onSessionExpired(() => {
+      setUser(null)
+      logger.info('Session expired — cleared local auth state')
+    })
   }, [])
 
   const login = useCallback(async (creds: Credentials) => {
