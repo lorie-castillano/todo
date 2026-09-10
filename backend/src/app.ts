@@ -78,7 +78,10 @@ export async function buildApp() {
   })
 
   // Rate limiter: prevents a single client from flooding the API.
-  // 100 requests per minute per IP is generous for a todo app.
+  // Defaults to 100 requests per minute per IP, which is generous for a todo
+  // app. Overridable via RATE_LIMIT_MAX so a full e2e run — every request of
+  // which shares one docker-network IP — is not throttled mid-suite. The
+  // per-route auth limits in routes/auth.ts are unaffected.
   //
   // Store selection:
   // - REDIS_URL set   → SHARED Redis store: all instances share one counter,
@@ -90,7 +93,7 @@ export async function buildApp() {
   // an infra dependency. Availability > strict limiting for this tradeoff.
   const redis = config.redisUrl ? createRedisClient(config.redisUrl, logger) : undefined
   await app.register(rateLimit, {
-    max: 100,
+    max: config.rateLimitMax,
     timeWindow: '1 minute',
     ...(redis ? { redis } : {}),
   })

@@ -65,6 +65,11 @@ services:
       DATABASE_URL: postgresql://todo_user:todo_pass@db:5432/todo_dev?schema=public
       CORS_ORIGIN: http://localhost:5173
       REDIS_URL: redis://redis:6379
+      # Local/e2e only. Every request in this stack — browser page loads and
+      # Playwright API calls alike — arrives from one docker-network IP, so the
+      # 100/min production default throttles the tail of a full e2e run.
+      # Production must keep the default; the per-route auth limits still apply.
+      RATE_LIMIT_MAX: 2000
     volumes:
       - ./backend/src:/app/src
       - ./backend/prisma:/app/prisma

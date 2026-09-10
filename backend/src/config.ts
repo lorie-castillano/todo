@@ -49,6 +49,19 @@ const envSchema = z.object({
   // every use, so a leaked token has a short practical window.
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(7),
 
+  // Global rate limit: requests per IP per minute across the whole API.
+  //
+  // The 100/min default is the production posture and should stay that way.
+  // It is configurable because a full e2e run drives ~100+ requests from a
+  // SINGLE IP (browser page loads plus API calls all share the docker network
+  // address), which trips the limiter and fails the tail of the suite. Raising
+  // it belongs in the local/CI compose environment, never in production.
+  //
+  // Note this only moves the global ceiling. The per-route auth limits
+  // (login 5/min, register 10/hour in routes/auth.ts) are the brute-force
+  // defenses and are deliberately NOT configurable here.
+  RATE_LIMIT_MAX: z.coerce.number().int().positive().default(100),
+
   // Optional Redis connection for a SHARED rate-limit store. When set, all
   // backend instances share one counter (correct under horizontal scaling).
   // When unset, the limiter falls back to per-process in-memory counters —
@@ -120,6 +133,7 @@ export const config = Object.freeze({
   jwtSecret: parsed.data.JWT_SECRET,
   jwtExpiresIn: parsed.data.JWT_EXPIRES_IN,
   refreshTokenTtlDays: parsed.data.REFRESH_TOKEN_TTL_DAYS,
+  rateLimitMax: parsed.data.RATE_LIMIT_MAX,
   redisUrl: parsed.data.REDIS_URL,
   mcpApiKey: parsed.data.MCP_API_KEY,
   a2aBaseUrl: parsed.data.A2A_BASE_URL ?? `http://localhost:${parsed.data.PORT}`,
