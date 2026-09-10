@@ -1,4 +1,11 @@
 import { test, expect } from '@playwright/test'
+import {
+  createE2eUser,
+  seedSignedInSession,
+  authHeaders,
+  deleteAllTodos,
+  type E2eUser,
+} from './support/session'
 
 // E2E tests for the full-stack todo app.
 //
@@ -7,15 +14,22 @@ import { test, expect } from '@playwright/test'
 //
 // These tests run against the REAL backend + PostgreSQL — not MSW mocks.
 // Data persists across page reloads, which we verify.
+//
+// Auth: /api/todos requires a JWT and scopes rows per owner (Lesson 5.5), so
+// this spec runs as its own throwaway user. That also isolates it — the
+// cleanup below can only ever delete this user's todos.
+
+let user: E2eUser
 
 test.describe('Todo App — Full-Stack E2E', () => {
+  test.beforeAll(async ({ request }) => {
+    user = await createE2eUser(request, 'todos')
+  })
+
   test.beforeEach(async ({ page }) => {
-    // Clean up: delete all existing todos via API
-    const res = await page.request.get('/api/todos')
-    const todos = await res.json()
-    for (const todo of todos) {
-      await page.request.delete(`/api/todos/${todo.id}`)
-    }
+    // Sign in before app code runs, then clear this user's todos via the API.
+    await seedSignedInSession(page, user.accessToken)
+    await deleteAllTodos(page.request, user.accessToken)
     await page.goto('/')
   })
 
@@ -125,8 +139,10 @@ test.describe('Todo App — Full-Stack E2E', () => {
   })
 
   test('API returns proper validation errors', async ({ page }) => {
-    // POST with empty text should return 400
+    // POST with empty text should return 400. The request must be authenticated,
+    // otherwise the auth guard returns 401 first and we never reach validation.
     const res = await page.request.post('/api/todos', {
+      headers: authHeaders(user.accessToken),
       data: { text: '' },
     })
     expect(res.status()).toBe(400)
